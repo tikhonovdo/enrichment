@@ -47,10 +47,10 @@ cardNumber;financePmAccountId
 ;666
 ```
 
-Для ускорения создания файла можно выполнить программу с ключом `--init-mappings`,
+Для ускорения создания файла можно выполнить программу с профилем `init-mapping`,
 который выведет данные из data-файла в формате, готовом для редактирования:
 ```
-./gradlew bootRun --args='financePM_test.data --init-mappings'
+./gradlew bootRun --args='--spring.profiles.active=init-mapping financePM_test.data'
 ```
 
 ### 3. Подготовить маппинг категорий
@@ -77,10 +77,10 @@ cardNumber;financePmAccountId
     Если `tinkoffDescriptionPart` не указан, будет попытка подбора по `mcc`, в противном сулчае транзакция
 будет отнесена к категории **Другое**.
 
-Для ускорения создания файла можно выполнить программу с ключом `--init-mappings`,
+Для ускорения создания файла можно выполнить программу с профилем `init-mapping`,
 который выведет данные из data-файла в формате, готовом для редактирования:
 ```
-./gradlew bootRun --args='financePM_test.data --init-mappings'
+./gradlew bootRun --args='--spring.profiles.active=init-mapping financePM_test.data'
 ```
 
 ### 4. Экспорт из FinancePM

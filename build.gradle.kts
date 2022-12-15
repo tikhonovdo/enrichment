@@ -45,3 +45,7 @@ tasks.test {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
+
+tasks.bootRun.configure {
+    systemProperty("file.encoding", "UTF-8")
+}

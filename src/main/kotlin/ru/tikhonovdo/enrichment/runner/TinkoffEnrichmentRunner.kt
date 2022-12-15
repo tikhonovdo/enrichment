@@ -2,14 +2,17 @@ package ru.tikhonovdo.enrichment.runner
 
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
+import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.financepm.FinancePmDataExporter
 import ru.tikhonovdo.enrichment.processor.TinkoffRecordProcessor
+import ru.tikhonovdo.enrichment.runner.InitMappingRunner.Companion.initMappingProfile
 import ru.tikhonovdo.enrichment.tinkoff.TinkoffImporter
 
 @Component
-@Order(4)
+@Order(3)
+@Profile("!$initMappingProfile")
 class TinkoffEnrichmentRunner(
     private val tinkoffImporter: TinkoffImporter,
     private val tinkoffRecordProcessor: TinkoffRecordProcessor,
@@ -17,7 +20,7 @@ class TinkoffEnrichmentRunner(
 ): ApplicationRunner {
 
     override fun run(appArgs: ApplicationArguments) {
-        if (appArgs.containsOption(InitMappingRunner.initMappingOption)) {
+        if (appArgs.containsOption(initMappingProfile)) {
             return
         }
 

@@ -1,13 +1,16 @@
 package ru.tikhonovdo.enrichment.financepm
 
 import com.beust.klaxon.Klaxon
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.config.OutputFileConfig
+import ru.tikhonovdo.enrichment.runner.TinkoffEnrichmentRunner
 import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Component
+@ConditionalOnBean(TinkoffEnrichmentRunner::class)
 class FinancePmDataExporter(
     private val klaxon: Klaxon,
     private val outputFileConfig: OutputFileConfig,

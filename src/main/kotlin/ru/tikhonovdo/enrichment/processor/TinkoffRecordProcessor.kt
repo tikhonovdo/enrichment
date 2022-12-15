@@ -1,9 +1,7 @@
 package ru.tikhonovdo.enrichment.processor
 
-import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.tinkoff.TinkoffRecord
 
-@Component
 class TinkoffRecordProcessor(
     private val transactionProcessor: TransactionProcessor,
     private val transfersProcessor: TransferProcessor

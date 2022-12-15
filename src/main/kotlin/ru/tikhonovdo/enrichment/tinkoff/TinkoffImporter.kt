@@ -3,7 +3,9 @@ package ru.tikhonovdo.enrichment.tinkoff
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
+import ru.tikhonovdo.enrichment.runner.TinkoffEnrichmentRunner
 import ru.tikhonovdo.enrichment.util.datePattern
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -12,6 +14,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.io.path.bufferedReader
 
 @Component
+@ConditionalOnBean(TinkoffEnrichmentRunner::class)
 class TinkoffImporter(private val csvFormat: CSVFormat) {
 
     fun getRecords(operationsPaths: List<String>): List<TinkoffRecord> {

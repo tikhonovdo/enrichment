@@ -4,6 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
+import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.config.MappingConfig
@@ -11,7 +12,9 @@ import ru.tikhonovdo.enrichment.financepm.AccountRecord
 import ru.tikhonovdo.enrichment.financepm.CategoryRecord
 import ru.tikhonovdo.enrichment.financepm.FinancePmData
 import ru.tikhonovdo.enrichment.financepm.FinancePmDataHolder
+import ru.tikhonovdo.enrichment.runner.InitMappingRunner.Companion.initMappingProfile
 import java.io.BufferedWriter
+import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.bufferedWriter
 import kotlin.io.path.createFile
@@ -19,15 +22,14 @@ import kotlin.io.path.exists
 
 @Component
 @Order(3)
+@Profile(initMappingProfile)
 class InitMappingRunner(
     private val financePmDataHolder: FinancePmDataHolder,
     private val mappingConfig: MappingConfig
 ): ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        if (args.containsOption(initMappingOption)) {
-            createMappings(financePmDataHolder.data)
-        }
+        createMappings(financePmDataHolder.data)
     }
 
     private fun createMappings(data: FinancePmData) {
@@ -49,7 +51,8 @@ class InitMappingRunner(
             null
         } else {
             log.info("$path not exists. Creating initial mapping...")
-            path.createFile().bufferedWriter()
+            Files.createDirectories(path.parent)
+            path.createFile().bufferedWriter(Charsets.UTF_8)
         }
     }
 
@@ -64,7 +67,7 @@ class InitMappingRunner(
     }
 
     companion object {
-        const val initMappingOption = "init-mapping"
+        const val initMappingProfile = "init-mapping"
 
         private val log: Logger = LoggerFactory.getLogger(InitMappingRunner::class.java)
     }
