@@ -8,7 +8,6 @@ import ru.tikhonovdo.enrichment.financepm.TransactionRecord
 import ru.tikhonovdo.enrichment.mapping.CategoryMapper
 import ru.tikhonovdo.enrichment.mapping.TransactionMapper
 import ru.tikhonovdo.enrichment.tinkoff.TinkoffRecord
-import ru.tikhonovdo.enrichment.util.datePattern
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -81,7 +80,7 @@ class TransactionProcessor(
         }
     }
 
-    private val sdt: SimpleDateFormat = SimpleDateFormat(datePattern)
+    private val sdt: SimpleDateFormat = SimpleDateFormat("dd.MM.yyyy")
     private fun Date.formatted(): String = sdt.format(this)
 
     companion object {

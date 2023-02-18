@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.runner.TinkoffEnrichmentRunner
-import ru.tikhonovdo.enrichment.util.datePattern
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -53,7 +52,7 @@ class TinkoffImporter(private val csvFormat: CSVFormat) {
     }
 
     private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy[ HH:mm[:ss]]")
-    private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(datePattern)
+    private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     private fun String.parseAsDouble() = this.ifEmpty { "0" }.replace(',','.').toDouble()
     private fun String.toLocalDate(): LocalDate = dateFormatter.parse(this, LocalDate::from)
 

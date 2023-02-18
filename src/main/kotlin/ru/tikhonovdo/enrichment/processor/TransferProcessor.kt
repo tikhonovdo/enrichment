@@ -4,10 +4,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.tikhonovdo.enrichment.financepm.FinancePmDataHolder
 import ru.tikhonovdo.enrichment.financepm.TransferRecord
+import ru.tikhonovdo.enrichment.financepm.getNextId
 
 import ru.tikhonovdo.enrichment.mapping.TransactionMapper
 import ru.tikhonovdo.enrichment.tinkoff.TinkoffRecord
-import ru.tikhonovdo.enrichment.util.initLastId
 import java.time.format.DateTimeFormatter
 import kotlin.math.sign
 
@@ -31,7 +31,7 @@ class TransferProcessor(
     private var lastTransferId: Int
         get() {
             if (_lastTransferId == null) {
-                _lastTransferId = initLastId(financePmDataHolder.data.transfers)
+                _lastTransferId = financePmDataHolder.data.transfers.getNextId()
             }
             return _lastTransferId ?: throw AssertionError("Set to null by another thread")
         }

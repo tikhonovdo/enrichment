@@ -2,8 +2,8 @@ package ru.tikhonovdo.enrichment.mapping
 
 import ru.tikhonovdo.enrichment.financepm.FinancePmDataHolder
 import ru.tikhonovdo.enrichment.financepm.TransactionRecord
+import ru.tikhonovdo.enrichment.financepm.getNextId
 import ru.tikhonovdo.enrichment.tinkoff.TinkoffRecord
-import ru.tikhonovdo.enrichment.util.initLastId
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.absoluteValue
@@ -23,7 +23,7 @@ class TransactionMapper(
     private var lastTransactionId: Int
         get() {
             if (_lastTransactionId == null) {
-                _lastTransactionId = initLastId(financePmDataHolder.data.transactions)
+                _lastTransactionId = financePmDataHolder.data.transactions.getNextId()
             }
             return _lastTransactionId ?: throw AssertionError("Set to null by another thread")
         }
