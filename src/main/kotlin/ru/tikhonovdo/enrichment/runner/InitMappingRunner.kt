@@ -20,8 +20,6 @@ import kotlin.io.path.bufferedWriter
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
 
-@Component
-@Order(3)
 @Profile(initMappingProfile)
 class InitMappingRunner(
     private val financePmDataHolder: FinancePmDataHolder,

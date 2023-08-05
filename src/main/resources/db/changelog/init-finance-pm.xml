@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="FinancePM_tables_init" author="chitzkoy">
+        <createTable tableName="type" remarks="Типы операций">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="source" remarks="Операции-источники операций">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="currency" remarks="Валюты">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="shortname" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="point" type="int" remarks="Точность (сколько знаков после запятой)"/>
+            <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
+        </createTable>
+
+        <createTable tableName="account" remarks="Счёт">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)" remarks="Имя счёта">
+                <constraints nullable="false"/>
+            </column>
+            <column name="icon" type="integer" defaultValue="1"  remarks="Идентификатор иконки в приложении"/>
+            <column name="balance" type="numeric(16,6)" defaultValue="0.0" remarks="Текущий баланс счёта"/>
+            <column name="currency_id" type="bigint" remarks="Идентификатор валюты счета">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="boolean" remarks="Признак отображения в списке счетов">
+                <constraints nullable="false"/>
+            </column>
+            <column name="default" type="boolean" remarks="Признак использования счета по умолчанию" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_id" type="int" remarks="Порядок отображения в списке счетов"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="account"
+                                 baseColumnNames="currency_id"
+                                 constraintName="fk_account_currency_id"
+                                 referencedTableName="currency"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="category" remarks="Категория транзакции">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="bigint" remarks="Тип категории (доход/расход)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
+            <column name="order_id" type="int" remarks="Порядок отображения в списке категорий"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="category"
+                                 baseColumnNames="parent_id"
+                                 constraintName="fk_category_parent_id"
+                                 referencedTableName="category"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="category"
+                                 baseColumnNames="type"
+                                 constraintName="fk_category_type"
+                                 referencedTableName="type"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="transaction" remarks="Транзакция">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="bigint" remarks="Тип категории (доход/расход)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="bigint" remarks="Категория транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="timestamp" remarks="Дата транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="numeric(16,6)" defaultValue="0.0" remarks="Сумма транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="bigint" remarks="Идентификатор счета, к котрому привязана транзакция транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_id" type="bigint" remarks="Операция-источник транзакции"/>
+            <column name="available" type="boolean" remarks="Признак отображения в списке транзакций" defaultValue="true"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseColumnNames="type"
+                                 constraintName="fk_transaction_type"
+                                 referencedTableName="type"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseColumnNames="category_id"
+                                 constraintName="fk_transaction_category_id"
+                                 referencedTableName="category"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseColumnNames="account_id"
+                                 constraintName="fk_transaction_account_id"
+                                 referencedTableName="account"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseColumnNames="source_id"
+                                 constraintName="fk_transaction_source_id"
+                                 referencedTableName="source"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="transfer" remarks="Переводы между счетами">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_id_from" type="bigint" remarks="Идентификатор транзакции источника">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_id_to" type="bigint" remarks="Идентификатор транзакции получателя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="transfer"
+                                 baseColumnNames="transaction_id_from"
+                                 constraintName="fk_transfer_transaction_id_from"
+                                 referencedTableName="transaction"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transfer"
+                                 baseColumnNames="transaction_id_to"
+                                 constraintName="fk_transfer_transaction_id_to"
+                                 referencedTableName="transaction"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="FinancePM_data_init" author="chitzkoy">
+        <insert tableName="type">
+            <column name="id">1</column>
+            <column name="name">Доход</column>
+        </insert>
+        <insert tableName="type">
+            <column name="id">2</column>
+            <column name="name">Расход</column>
+        </insert>
+
+        <insert tableName="source">
+            <column name="id">1</column>
+            <column name="name">Перевод</column>
+        </insert>
+        <insert tableName="source">
+            <column name="id">2</column>
+            <column name="name">Создание долга</column>
+        </insert>
+        <insert tableName="source">
+            <column name="id">3</column>
+            <column name="name">Погашение долга</column>
+        </insert>
+        <insert tableName="source">
+            <column name="id">4</column>
+            <column name="name">Увеличение долга</column>
+        </insert>
+        <insert tableName="source">
+            <column name="id">5</column>
+            <column name="name">Правка баланса</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

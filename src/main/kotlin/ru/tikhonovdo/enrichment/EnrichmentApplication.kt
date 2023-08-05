@@ -6,8 +6,11 @@ import org.springframework.boot.runApplication
 
 @SpringBootApplication
 @EnableConfigurationProperties
-class FinanceDataEnricherApplication
-
-fun main(vararg args: String) {
-    runApplication<FinanceDataEnricherApplication>(*args)
+class FinanceDataEnricherApplication {
+    companion object {
+        @JvmStatic
+        fun main(vararg args: String) {
+            runApplication<FinanceDataEnricherApplication>(*args)
+        }
+    }
 }

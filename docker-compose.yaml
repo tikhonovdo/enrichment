@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "enrichment"
+      POSTGRES_USER: "enrichment"
+      POSTGRES_PASSWORD: "enrichment"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - .:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

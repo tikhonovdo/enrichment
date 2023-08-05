@@ -11,8 +11,6 @@ import java.nio.file.Paths
 import kotlin.io.path.exists
 import kotlin.io.path.notExists
 
-@Component
-@Order(1)
 @Profile("!$initMappingProfile")
 class ValidationRunner(
     private val mappingConfig: MappingConfig

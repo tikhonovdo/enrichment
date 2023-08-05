@@ -2,6 +2,23 @@ spring:
   main:
     web-application-type: NONE
     banner-mode: OFF
+  datasource:
+    url: jdbc:postgresql://localhost:5432/enrichment
+    username: enrichment
+    password: enrichment
+    hikari:
+      connection-timeout: 5000
+      leak-detection-threshold: 300000
+      maximum-pool-size: 5
+      pool-name: PrimaryPool
+  liquibase:
+    change-log: classpath:db/changelog/master-changelog.xml
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    liquibase: INFO
 
 mapping:
   accounts: configs/account-mapping.csv

@@ -12,8 +12,6 @@ import ru.tikhonovdo.enrichment.processor.TinkoffRecordProcessor
 import ru.tikhonovdo.enrichment.runner.InitMappingRunner.Companion.initMappingProfile
 import ru.tikhonovdo.enrichment.tinkoff.TinkoffImporter
 
-@Component
-@Order(3)
 @Profile("!$initMappingProfile")
 class TinkoffEnrichmentRunner(
     private val tinkoffImporter: TinkoffImporter,
