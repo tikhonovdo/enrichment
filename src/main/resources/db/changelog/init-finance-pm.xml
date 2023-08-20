@@ -14,7 +14,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="source" remarks="Операции-источники операций">
+        <createTable tableName="event" remarks="События приложения FinancePM">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -30,7 +30,7 @@
             <column name="name" type="varchar(128)">
                 <constraints nullable="false"/>
             </column>
-            <column name="shortname" type="varchar(128)">
+            <column name="short_name" type="varchar(128)">
                 <constraints nullable="false"/>
             </column>
             <column name="point" type="int" remarks="Точность (сколько знаков после запятой)"/>
@@ -44,7 +44,7 @@
             <column name="name" type="varchar(128)" remarks="Имя счёта">
                 <constraints nullable="false"/>
             </column>
-            <column name="icon" type="integer" defaultValue="1"  remarks="Идентификатор иконки в приложении"/>
+            <column name="icon" type="int" defaultValue="1" remarks="Идентификатор иконки в приложении"/>
             <column name="balance" type="numeric(16,6)" defaultValue="0.0" remarks="Текущий баланс счёта"/>
             <column name="currency_id" type="bigint" remarks="Идентификатор валюты счета">
                 <constraints nullable="false"/>
@@ -52,7 +52,7 @@
             <column name="active" type="boolean" remarks="Признак отображения в списке счетов">
                 <constraints nullable="false"/>
             </column>
-            <column name="default" type="boolean" remarks="Признак использования счета по умолчанию" defaultValue="false">
+            <column name="is_default" type="boolean" remarks="Признак использования счета по умолчанию" defaultValue="false">
                 <constraints nullable="false"/>
             </column>
             <column name="order_id" type="int" remarks="Порядок отображения в списке счетов"/>
@@ -70,9 +70,7 @@
             <column name="name" type="varchar(128)">
                 <constraints nullable="false"/>
             </column>
-            <column name="parent_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
+            <column name="parent_id" type="bigint"/>
             <column name="type" type="bigint" remarks="Тип категории (доход/расход)">
                 <constraints nullable="false"/>
             </column>
@@ -101,7 +99,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="category_id" type="bigint" remarks="Категория транзакции">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="date" type="timestamp" remarks="Дата транзакции">
                 <constraints nullable="false"/>
@@ -109,13 +107,13 @@
             <column name="sum" type="numeric(16,6)" defaultValue="0.0" remarks="Сумма транзакции">
                 <constraints nullable="false"/>
             </column>
-            <column name="account_id" type="bigint" remarks="Идентификатор счета, к котрому привязана транзакция транзакции">
+            <column name="account_id" type="bigint" remarks="Идентификатор счета, к которому привязана транзакция">
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="source_id" type="bigint" remarks="Операция-источник транзакции"/>
+            <column name="event_id" type="bigint" remarks="Ссылка на идентификатор события в приложении, которое породило транзакцию"/>
             <column name="available" type="boolean" remarks="Признак отображения в списке транзакций" defaultValue="true"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="transaction"
@@ -134,9 +132,9 @@
                                  referencedTableName="account"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="transaction"
-                                 baseColumnNames="source_id"
-                                 constraintName="fk_transaction_source_id"
-                                 referencedTableName="source"
+                                 baseColumnNames="event_id"
+                                 constraintName="fk_transaction_event_id"
+                                 referencedTableName="event"
                                  referencedColumnNames="id"/>
 
         <createTable tableName="transfer" remarks="Переводы между счетами">
@@ -164,6 +162,55 @@
                                  constraintName="fk_transfer_transaction_id_to"
                                  referencedTableName="transaction"
                                  referencedColumnNames="id"/>
+
+        <createTable tableName="arrear" remarks="Долги">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="timestamp" remarks="Дата изменения долга">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balance" type="numeric(16,6)" defaultValue="0.0" remarks="Текущая сумма долга?">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="bigint" remarks="Идентификатор счета, к котрому привязан долг">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="arrear"
+                                 baseColumnNames="account_id"
+                                 constraintName="fk_arrear_account_id"
+                                 referencedTableName="account"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="arrear_transaction" remarks="Таблица связи Долг-Транзакция">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="arrear_id" type="bigint" remarks="Идентификатор долга">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_id" type="bigint" remarks="Идентификатор транзакции">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="arrear_transaction"
+                                 baseColumnNames="arrear_id"
+                                 constraintName="fk_arrear_transaction_arrear_id"
+                                 referencedTableName="arrear"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="arrear_transaction"
+                                 baseColumnNames="transaction_id"
+                                 constraintName="fk_arrear_transaction_transaction_id"
+                                 referencedTableName="transaction"
+                                 referencedColumnNames="id"/>
     </changeSet>
 
     <changeSet id="FinancePM_data_init" author="chitzkoy">
@@ -176,23 +223,23 @@
             <column name="name">Расход</column>
         </insert>
 
-        <insert tableName="source">
+        <insert tableName="event">
             <column name="id">1</column>
             <column name="name">Перевод</column>
         </insert>
-        <insert tableName="source">
+        <insert tableName="event">
             <column name="id">2</column>
             <column name="name">Создание долга</column>
         </insert>
-        <insert tableName="source">
+        <insert tableName="event">
             <column name="id">3</column>
             <column name="name">Погашение долга</column>
         </insert>
-        <insert tableName="source">
+        <insert tableName="event">
             <column name="id">4</column>
             <column name="name">Увеличение долга</column>
         </insert>
-        <insert tableName="source">
+        <insert tableName="event">
             <column name="id">5</column>
             <column name="name">Правка баланса</column>
         </insert>

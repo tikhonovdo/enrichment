@@ -19,10 +19,8 @@
         </insert>
 
         <createTable tableName="currency_matching" remarks="Матчинг кодов валют Банк-FinancePM">
-            <column name="currency_id" type="bigint" remarks="Идентификатор валюты FinancePM">
-                <constraints nullable="false"/>
-            </column>
-            <column name="currency_code" type="varchar(8)" remarks="Код валюты банка">
+            <column name="currency_id" type="bigint" remarks="Идентификатор валюты FinancePM"/>
+            <column name="bank_currency_code" type="varchar(8)" remarks="Код валюты банка">
                 <constraints nullable="false"/>
             </column>
             <column name="bank_id" type="bigint" remarks="Идентификатор банка">
@@ -39,16 +37,14 @@
                                  constraintName="fk_currency_matching_bank_id"
                                  referencedTableName="bank"
                                  referencedColumnNames="id"/>
-        <createIndex tableName="currency_matching" indexName="idx_currency_matching_currency_id_currency_code">
+        <createIndex tableName="currency_matching" indexName="idx_currency_matching_currency_id_bank_currency_code">
             <column name="currency_id"/>
-            <column name="currency_code"/>
+            <column name="bank_currency_code"/>
         </createIndex>
 
         <createTable tableName="account_matching" remarks="Сопоставление счетов Банк-FinancePM">
-            <column name="account_id" type="bigint" remarks="Идентификатор счета FinancePM">
-                <constraints nullable="false"/>
-            </column>
-            <column name="account_code" type="varchar(32)" remarks="Код счета банка">
+            <column name="account_id" type="bigint" remarks="Идентификатор счета FinancePM"/>
+            <column name="bank_account_code" type="varchar(128)" remarks="Код счета банка">
                 <constraints nullable="false"/>
             </column>
             <column name="bank_id" type="bigint" remarks="Идентификатор банка">
@@ -65,16 +61,14 @@
                                  constraintName="fk_account_matching_bank_id"
                                  referencedTableName="bank"
                                  referencedColumnNames="id"/>
-        <createIndex tableName="account_matching" indexName="idx_account_matching_account_id_account_code">
+        <createIndex tableName="account_matching" indexName="idx_account_matching_account_id_bank_account_code">
             <column name="account_id"/>
-            <column name="account_code"/>
+            <column name="bank_account_code"/>
         </createIndex>
 
         <createTable tableName="category_matching" remarks="Сопоставление категорий Банк-FinancePM">
-            <column name="category_id" type="bigint" remarks="Идентификатор категории FinancePM">
-                <constraints nullable="false"/>
-            </column>
-            <column name="category_name" type="varchar(32)" remarks="Название категории у банка">
+            <column name="category_id" type="bigint" remarks="Идентификатор категории FinancePM"/>
+            <column name="bank_category_name" type="varchar(32)" remarks="Название категории у банка">
                 <constraints nullable="false"/>
             </column>
             <column name="bank_id" type="bigint" remarks="Идентификатор банка">
@@ -82,9 +76,6 @@
             </column>
             <column name="mcc" type="varchar(4)" remarks="MCC-код категории"/>
             <column name="pattern" type="varchar(128)" remarks="Подстрока описания операции в банке"/>
-            <column name="validated"  type="boolean" remarks="Статус проверенности данного сопоставления" defaultValue="false">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
         <addForeignKeyConstraint baseTableName="category_matching"
                                  baseColumnNames="category_id"
@@ -96,9 +87,9 @@
                                  constraintName="fk_category_matching_bank_id"
                                  referencedTableName="bank"
                                  referencedColumnNames="id"/>
-        <createIndex tableName="category_matching" indexName="idx_category_matching_category_id_category_name">
+        <createIndex tableName="category_matching" indexName="idx_category_matching_category_id_bank_category_name">
             <column name="category_id"/>
-            <column name="category_name"/>
+            <column name="bank_category_name"/>
         </createIndex>
 
         <createTable tableName="draft_transaction" remarks="RAW транзакции банка">
@@ -108,13 +99,10 @@
             <column name="bank_id" type="bigint" remarks="Идентификатор банка">
                 <constraints nullable="false"/>
             </column>
-            <column name="date_from" type="timestamp" remarks="Минимальная дата в данных">
+            <column name="filename" type="varchar(255)" remarks="Имя файла">
                 <constraints nullable="false"/>
             </column>
-            <column name="date_to" type="timestamp" remarks="Максимальная дата в данных">
-                <constraints nullable="false"/>
-            </column>
-            <column name="data" type="blob" remarks="Сырые данные от банка">
+            <column name="data" type="bytea" remarks="Сырые данные от банка">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -123,6 +111,21 @@
                                  constraintName="fk_draft_transaction_bank_id"
                                  referencedTableName="bank"
                                  referencedColumnNames="id"/>
+
+        <addColumn tableName="transaction">
+            <column name="bank_id" type="bigint" remarks="Ссылка на источник записи: непустое значение обновляет
+            значения name и description при совпадении по type, category_id, date, sum, account_id" />
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseColumnNames="bank_id"
+                                 constraintName="fk_transaction_bank_id"
+                                 referencedTableName="bank"
+                                 referencedColumnNames="id"/>
+
+        <addColumn tableName="transfer">
+            <column name="validated" type="boolean" remarks="Признак проверенного и готовой к экспорту записи о переводе"
+                    defaultValue="false"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

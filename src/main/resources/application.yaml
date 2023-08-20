@@ -1,8 +1,8 @@
 spring:
-  main:
-    web-application-type: NONE
-    banner-mode: OFF
+  application.name: enrichment
+  main.banner-mode: OFF
   datasource:
+    type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://localhost:5432/enrichment
     username: enrichment
     password: enrichment
@@ -11,9 +11,16 @@ spring:
       leak-detection-threshold: 300000
       maximum-pool-size: 5
       pool-name: PrimaryPool
+      auto-commit: true
   liquibase:
     change-log: classpath:db/changelog/master-changelog.xml
     enabled: true
+  batch:
+    job.enabled: true
+    jdbc.initialize-schema: always
+  servlet:
+    multipart:
+      max-file-size: 10MB
 
 logging:
   level:
