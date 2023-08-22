@@ -5,7 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.tikhonovdo.enrichment.domain.enitity.Category
 import ru.tikhonovdo.enrichment.domain.financepm.FinancePmDataHolder
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import kotlin.math.sign
 
 /**

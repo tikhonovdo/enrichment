@@ -1,14 +1,5 @@
 package ru.tikhonovdo.enrichment.config
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.databind.util.StdDateFormat
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.csv.CSVFormat
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.annotation.Bean
@@ -34,9 +25,6 @@ class EnrichmentConfig {
     @Bean
     fun categoryMapper(mappingConfig: MappingConfig, csvFormat: CSVFormat, financePmDataHolder: FinancePmDataHolder) =
         CategoryMapper(mappingConfig.categories, csvFormat, financePmDataHolder)
-
-    @Bean
-    fun mappingService() = MappingService()
 
     @Bean
     fun transactionProcessor(

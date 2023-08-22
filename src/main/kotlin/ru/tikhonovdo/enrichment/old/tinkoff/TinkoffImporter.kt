@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.old.runner.TinkoffEnrichmentRunner
 import java.nio.file.Paths
 import java.time.LocalDate

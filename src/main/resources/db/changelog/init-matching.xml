@@ -99,10 +99,10 @@
             <column name="bank_id" type="bigint" remarks="Идентификатор банка">
                 <constraints nullable="false"/>
             </column>
-            <column name="filename" type="varchar(255)" remarks="Имя файла">
+            <column name="upload_date" type="timestamp" remarks="Дата загрузки данных">
                 <constraints nullable="false"/>
             </column>
-            <column name="data" type="bytea" remarks="Сырые данные от банка">
+            <column name="data" type="jsonb" remarks="Сырые данные от банка, конвертированные в JSON">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -124,6 +124,11 @@
 
         <addColumn tableName="transfer">
             <column name="validated" type="boolean" remarks="Признак проверенного и готовой к экспорту записи о переводе"
+                    defaultValue="false"/>
+        </addColumn>
+
+        <addColumn tableName="transaction">
+            <column name="validated" type="boolean" remarks="Признак проверенной и готовой к экспорту транзакции"
                     defaultValue="false"/>
         </addColumn>
     </changeSet>

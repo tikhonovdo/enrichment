@@ -1,12 +1,13 @@
 package ru.tikhonovdo.enrichment.service
 
+import org.springframework.stereotype.Service
 import ru.tikhonovdo.enrichment.domain.enitity.Transaction
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import java.math.BigDecimal
 import kotlin.math.absoluteValue
 import kotlin.math.sign
 
-
+@Service
 class MappingService {
 
     companion object {

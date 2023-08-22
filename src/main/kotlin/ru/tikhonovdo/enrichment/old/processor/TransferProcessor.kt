@@ -4,7 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.tikhonovdo.enrichment.domain.enitity.Transfer
 import ru.tikhonovdo.enrichment.domain.financepm.FinancePmDataHolder
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.service.MappingService
 import java.time.format.DateTimeFormatter
 import kotlin.math.sign

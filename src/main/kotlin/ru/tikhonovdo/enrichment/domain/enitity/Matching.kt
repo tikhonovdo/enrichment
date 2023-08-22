@@ -1,6 +1,7 @@
 package ru.tikhonovdo.enrichment.domain.enitity
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @IdClass(CurrencyMatching.CurrencyMatchingId::class)
@@ -72,8 +73,7 @@ class DraftTransaction(
 
     var bankId: Long,
 
-    var filename: String,
+    var uploadDate: LocalDateTime,
 
-    @Lob
-    var data: ByteArray
+    var data: String
 )

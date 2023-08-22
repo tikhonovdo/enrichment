@@ -16,8 +16,8 @@ spring:
     change-log: classpath:db/changelog/master-changelog.xml
     enabled: true
   batch:
-    job.enabled: true
-    jdbc.initialize-schema: always
+    job.enabled: false
+    jdbc.initialize-schema: never
   servlet:
     multipart:
       max-file-size: 10MB

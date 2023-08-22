@@ -8,11 +8,7 @@ import java.time.ZoneId
 
 class NullAsZeroSerializer: JsonSerializer<Long?>() {
     override fun serialize(value: Long?, generator: JsonGenerator, provider: SerializerProvider) {
-        if (value == null) {
-            generator.writeNumber(0L)
-        } else {
-            generator.writeNumber(value)
-        }
+        generator.writeNumber(value ?: 0L)
     }
 }
 

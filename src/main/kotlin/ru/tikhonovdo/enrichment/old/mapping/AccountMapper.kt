@@ -1,7 +1,7 @@
 package ru.tikhonovdo.enrichment.old.mapping
 
 import org.apache.commons.csv.CSVFormat
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 
 /**
  * Содержит сопоставление идентифекаторов кошельков FinancePM с TinkoffRecord

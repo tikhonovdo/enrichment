@@ -30,8 +30,8 @@ class AppController(
     }
 
     @PostMapping("/upload", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun uploadData(@RequestParam("file") file: MultipartFile, @RequestParam bankId: Long?) {
-        fileService.store(file, bankId)
+    fun uploadData(@RequestParam("file") file: MultipartFile) {
+        fileService.store(file)
     }
 
     @PostMapping("/performMatching")

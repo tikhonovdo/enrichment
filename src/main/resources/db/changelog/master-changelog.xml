@@ -7,5 +7,6 @@
 
     <include file="./init-finance-pm.xml" relativeToChangelogFile="true"/>
     <include file="./init-matching.xml" relativeToChangelogFile="true"/>
+    <include file="classpath:org/springframework/batch/core/schema-postgresql.sql" />
 
 </databaseChangeLog>

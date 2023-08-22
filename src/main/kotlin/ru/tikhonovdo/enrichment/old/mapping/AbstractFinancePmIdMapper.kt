@@ -2,7 +2,7 @@ package ru.tikhonovdo.enrichment.old.mapping
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import java.nio.file.Paths
 import kotlin.io.path.bufferedReader
 

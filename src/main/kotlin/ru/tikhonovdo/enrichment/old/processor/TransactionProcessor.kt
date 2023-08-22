@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import ru.tikhonovdo.enrichment.domain.enitity.Category
 import ru.tikhonovdo.enrichment.domain.enitity.Transaction
 import ru.tikhonovdo.enrichment.domain.financepm.FinancePmDataHolder
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.repository.financepm.CategoryRepository
 import ru.tikhonovdo.enrichment.service.MappingService
 import java.text.SimpleDateFormat

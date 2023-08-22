@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.old.tinkoff
+package ru.tikhonovdo.enrichment.domain.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,6 +20,25 @@ data class TinkoffRecord(
     val roundingForInvestKopilka: Double,        // Округление на инвесткопилку
     val sumWithRoundingForInvestKopilka: Double  // Сумма операции с округлением
 ) {
+
+    class Raw(
+        var operationDate: String? = null,
+        var paymentDate: String? = null,
+        var cardNumber: String? = null,
+        var status: String? = null,
+        var operationSum: Double? = null,
+        var operationCurrency: String? = null,
+        var paymentSum: Double? = null,
+        var paymentCurrency: String? = null,
+        var cashback: Double? = null,
+        var category: String? = null,
+        var mcc: Int? = null,
+        var description: String? = null,
+        var totalBonuses: Double? = null,
+        var roundingForInvestKopilka: Double? = null,
+        var sumWithRoundingForInvestKopilka: Double? = null,
+    )
+
     fun toCashTransfer(): TinkoffRecord {
         return TinkoffRecord(
             operationDate,

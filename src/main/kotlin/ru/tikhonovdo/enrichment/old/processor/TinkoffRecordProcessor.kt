@@ -1,6 +1,6 @@
 package ru.tikhonovdo.enrichment.old.processor
 
-import ru.tikhonovdo.enrichment.old.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 
 class TinkoffRecordProcessor(
     private val transactionProcessor: TransactionProcessor,
