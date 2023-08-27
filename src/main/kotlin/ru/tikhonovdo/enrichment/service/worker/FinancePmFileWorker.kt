@@ -1,7 +1,7 @@
 package ru.tikhonovdo.enrichment.service.worker
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -13,7 +13,7 @@ interface FinancePmFileWorker: FileServiceWorker {
     fun retrieveData(): ByteArray
 }
 
-@Service
+@Component
 class FinancePmFileWorkerImpl (
     val currencyRepository: CurrencyRepository,
     val accountRepository: AccountRepository,

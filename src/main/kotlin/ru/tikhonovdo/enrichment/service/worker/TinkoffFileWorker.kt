@@ -3,7 +3,7 @@ package ru.tikhonovdo.enrichment.service.worker
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Workbook
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
@@ -13,14 +13,11 @@ import ru.tikhonovdo.enrichment.service.FileServiceWorker
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 
-
-interface TinkoffFileWorker: FileServiceWorker
-
-@Service
-class TinkoffFileServiceWorker(
+@Component
+class TinkoffFileWorker(
     private val objectMapper: ObjectMapper,
     private val draftTransactionRepository: DraftTransactionRepository,
-): TinkoffFileWorker {
+): FileServiceWorker {
 
     override fun saveData(file: MultipartFile) {
         var rawRecords: List<TinkoffRecord.Raw>? = null
