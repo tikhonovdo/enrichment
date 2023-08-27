@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.service
+package ru.tikhonovdo.enrichment.service.worker
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
@@ -9,19 +9,18 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
+import ru.tikhonovdo.enrichment.service.FileServiceWorker
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
 
 
-interface TinkoffService {
-    fun saveData(file: MultipartFile)
-}
+interface TinkoffFileWorker: FileServiceWorker
 
 @Service
-class TinkoffServiceImpl(
+class TinkoffFileServiceWorker(
     private val objectMapper: ObjectMapper,
     private val draftTransactionRepository: DraftTransactionRepository,
-): TinkoffService {
+): TinkoffFileWorker {
 
     override fun saveData(file: MultipartFile) {
         var rawRecords: List<TinkoffRecord.Raw>? = null

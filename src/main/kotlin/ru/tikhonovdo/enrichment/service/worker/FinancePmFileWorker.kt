@@ -1,19 +1,20 @@
-package ru.tikhonovdo.enrichment.service
+package ru.tikhonovdo.enrichment.service.worker
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData
 import ru.tikhonovdo.enrichment.repository.financepm.*
+import ru.tikhonovdo.enrichment.service.FileServiceWorker
 
-interface FinancePmService {
-    fun saveData(contentAsByteArray: ByteArray)
+interface FinancePmFileWorker: FileServiceWorker {
     fun retrieveData(): ByteArray
 }
 
 @Service
-class FinancePmServiceImpl(
+class FinancePmFileWorkerImpl (
     val currencyRepository: CurrencyRepository,
     val accountRepository: AccountRepository,
     val categoryRepository: CategoryRepository,
@@ -22,11 +23,11 @@ class FinancePmServiceImpl(
     val arrearRepository: ArrearRepository,
     val arrearTransactionRepository: ArrearTransactionRepository,
     val enrichmentJsonMapper: ObjectMapper
-): FinancePmService {
+): FinancePmFileWorker {
 
     @Transactional
-    override fun saveData(contentAsByteArray: ByteArray) {
-        enrichmentJsonMapper.readValue(contentAsByteArray, FinancePmData::class.java).let { data ->
+    override fun saveData(file: MultipartFile) {
+        enrichmentJsonMapper.readValue(file.resource.contentAsByteArray, FinancePmData::class.java).let { data ->
             resetFinancePmTables()
             save(data)
         }
