@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @IdClass(CurrencyMatching.CurrencyMatchingId::class)
 data class CurrencyMatching(
     @Id
-    var currencyId: Long?,
+    var currencyId: Long? = null,
     @Id
     var bankId: Long,
 
@@ -25,7 +25,7 @@ data class CurrencyMatching(
 @IdClass(AccountMatching.AccountMatchingId::class)
 data class AccountMatching(
     @Id
-    var accountId: Long?,
+    var accountId: Long? = null,
     @Id
     var bankId: Long,
 
@@ -44,18 +44,18 @@ data class AccountMatching(
 @IdClass(CategoryMatching.CategoryMatchingId::class)
 data class CategoryMatching(
     @Id
-    var categoryId: Long?,
+    var categoryId: Long? = null,
     @Id
     var bankId: Long,
 
     var bankCategoryName: String,
 
-    var mcc: String,
+    var mcc: String?,
 
-    var pattern: String
+    var pattern: String?,
+
+    var validated: Boolean = false
 ) {
-    fun isValid(): Boolean = categoryId != null
-
     data class CategoryMatchingId(
         var categoryId: Long? = null,
         var bankId: Long? = null

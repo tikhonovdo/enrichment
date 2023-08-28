@@ -33,9 +33,13 @@ class AppController(
     }
 
     @PostMapping("/performMatching")
-    fun performMatching(): Boolean {
+    fun performMatching(@RequestParam(required = false) requestParam: Map<String, String>?): Boolean {
         val params = JobParametersBuilder()
-        params.addLocalDateTime(START_DATE_TIME, LocalDateTime.now())
+        requestParam?.let {
+            requestParam["steps"]?.let {
+                params.addString("steps", it)
+            }
+        }
         jobLauncher.run(matchingJob, params.toJobParameters())
         return true
     }
