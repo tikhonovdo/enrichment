@@ -1,11 +1,11 @@
-package ru.tikhonovdo.enrichment.batch.matching
+package ru.tikhonovdo.enrichment.batch.matching.account
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import javax.sql.DataSource
 
-class TinkoffAccountMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<AccountMatching>() {
+class TinkoffDirectAccountMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<AccountMatching>() {
     init {
         this.dataSource = dataSource
         this.sql = """

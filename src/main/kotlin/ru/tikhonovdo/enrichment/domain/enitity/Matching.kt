@@ -29,10 +29,12 @@ data class AccountMatching(
     @Id
     var bankId: Long,
 
-    var bankAccountCode: String
-) {
-    fun isValid(): Boolean = accountId != null
+    var bankAccountCode: String? = null,
 
+    var bankCurrencyCode: String? = null,
+
+    var pattern: String? = null
+) {
     data class AccountMatchingId(
         var accountId: Long? = null,
         var bankId: Long? = null

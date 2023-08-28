@@ -18,5 +18,6 @@ class CustomAccountMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParam
     CustomAccountMatchingRepository,
     AbstractBatchRepository<AccountMatching>(
         namedParameterJdbcTemplate,
-        "INSERT INTO account_matching (account_id, bank_id, bank_account_code) VALUES (:accountId, :bankId, :bankAccountCode)",
+        "INSERT INTO account_matching (account_id, bank_id, bank_account_code, bank_currency_code, pattern) " +
+                "VALUES (:accountId, :bankId, :bankAccountCode, :bankCurrencyCode, :pattern)",
     )

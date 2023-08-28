@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching
+package ru.tikhonovdo.enrichment.batch.matching.account
 
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.data.domain.Example
@@ -13,11 +13,15 @@ class AccountMatchingStepProcessor(private val accountMatchingRepository: Accoun
     override fun process(item: AccountMatching): AccountMatching? {
         val probe = AccountMatching(
             bankId = item.bankId,
-            bankAccountCode = item.bankAccountCode
+            bankAccountCode = item.bankAccountCode,
+            pattern = item.pattern,
+            bankCurrencyCode = item.bankCurrencyCode
         )
         val matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase()
             .withMatcher("bankId", ExampleMatcher.GenericPropertyMatchers.exact())
             .withMatcher("bankAccountCode", ExampleMatcher.GenericPropertyMatchers.exact())
+            .withMatcher("pattern", ExampleMatcher.GenericPropertyMatchers.exact())
+            .withMatcher("bankCurrencyCode", ExampleMatcher.GenericPropertyMatchers.exact())
         val query = accountMatchingRepository.findAll(Example.of(probe, matcher), Pageable.unpaged())
 
         return if (query.isEmpty) {

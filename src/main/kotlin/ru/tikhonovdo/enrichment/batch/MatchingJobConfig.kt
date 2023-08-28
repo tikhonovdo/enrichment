@@ -5,6 +5,7 @@ import org.springframework.batch.core.Step
 import org.springframework.batch.core.job.builder.JobBuilder
 import org.springframework.batch.core.job.flow.Flow
 import org.springframework.batch.core.repository.JobRepository
+import org.springframework.batch.core.step.builder.FlowStepBuilder
 import org.springframework.batch.core.step.builder.StepBuilder
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
@@ -13,6 +14,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
 import ru.tikhonovdo.enrichment.batch.matching.*
+import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProcessor
+import ru.tikhonovdo.enrichment.batch.matching.account.TinkoffDirectAccountMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.account.TinkoffImplicitAccountMatchingStepReader
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
@@ -43,13 +47,15 @@ import javax.sql.DataSource
     fun matchingFlow(
         tinkoffCategoryMatchingStep: Step,
         tinkoffCurrencyMatchingStep: Step,
-        tinkoffAccountMatchingStep: Step,
+        tinkoffAccountMatchingFlow: Flow,
 //        transactionMatchingStep: Step,
 //        transferMatchingStep: Step
     ): Flow = CustomFlowBuilder("matchingFlow")
             .addStep(tinkoffCategoryMatchingStep)
             .addStep(tinkoffCurrencyMatchingStep)
-            .addStep(tinkoffAccountMatchingStep)
+            .addStep(FlowStepBuilder(step("tinkoffAccountMatchingStep"))
+                .flow(tinkoffAccountMatchingFlow)
+                .build())
 //            .addStep(transactionMatchingStep)
 //            .addStep(transferMatchingStep)
             .build()
@@ -99,21 +105,51 @@ import javax.sql.DataSource
         CurrencyMatchingStepProcessor(currencyMatchingRepository)
 
     @Bean
-    fun tinkoffAccountMatchingStep(
-        tinkoffAccountMatchingStepReader: ItemReader<AccountMatching>,
+    fun tinkoffDirectAccountMatchingStep(
+        tinkoffDirectAccountMatchingStepReader: ItemReader<AccountMatching>,
         accountMatchingStepProcessor: ItemProcessor<AccountMatching, AccountMatching>
     ): Step {
-        return step("tinkoffAccountMatchingStep")
+        return step("tinkoffDirectAccountMatchingStep")
             .chunk<AccountMatching, AccountMatching>(10, transactionManager)
-            .reader(tinkoffAccountMatchingStepReader)
+            .reader(tinkoffDirectAccountMatchingStepReader)
             .processor(accountMatchingStepProcessor)
             .writer { accountMatchingRepository.insertBatch(it.items) }
             .build()
     }
 
     @Bean
-    fun tinkoffAccountMatchingStepReader(): ItemReader<AccountMatching> {
-        return TinkoffAccountMatchingStepReader(dataSource)
+    fun tinkoffImplicitAccountMatchingStep(
+        tinkoffImplicitAccountMatchingStepReader: ItemReader<AccountMatching>,
+        accountMatchingStepProcessor: ItemProcessor<AccountMatching, AccountMatching>
+    ): Step {
+        return step("tinkoffImplicitAccountMatchingStep")
+            .chunk<AccountMatching, AccountMatching>(10, transactionManager)
+            .reader(tinkoffImplicitAccountMatchingStepReader)
+            .processor(accountMatchingStepProcessor)
+            .writer { accountMatchingRepository.insertBatch(it.items) }
+            .build()
+    }
+
+    @Bean
+    fun tinkoffAccountMatchingFlow(
+        tinkoffDirectAccountMatchingStep: Step,
+        tinkoffImplicitAccountMatchingStep: Step
+    ): Flow {
+        return CustomFlowBuilder("tinkoffAccountMatchingFlow")
+            .addStep(tinkoffDirectAccountMatchingStep)
+            .addStep(tinkoffImplicitAccountMatchingStep)
+            .build()
+    }
+
+
+    @Bean
+    fun tinkoffDirectAccountMatchingStepReader(): ItemReader<AccountMatching> {
+        return TinkoffDirectAccountMatchingStepReader(dataSource)
+    }
+
+    @Bean
+    fun tinkoffImplicitAccountMatchingStepReader(): ItemReader<AccountMatching> {
+        return TinkoffImplicitAccountMatchingStepReader(dataSource)
     }
 
     @Bean

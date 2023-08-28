@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet id="additional_fileds_to_category_matching" author="chitzkoy">
+    <changeSet id="additional_fields_to_category_matching" author="chitzkoy">
         <addColumn tableName="category_matching">
             <column name="validated" type="boolean"
                     remarks="Признак проверенной и готовой к использованию записи о матчинге"
