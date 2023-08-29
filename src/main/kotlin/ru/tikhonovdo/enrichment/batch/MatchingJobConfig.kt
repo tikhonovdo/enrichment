@@ -13,10 +13,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
-import ru.tikhonovdo.enrichment.batch.matching.*
 import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.account.TinkoffDirectAccountMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.account.TinkoffImplicitAccountMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepProcessor
+import ru.tikhonovdo.enrichment.batch.matching.category.TinkoffCategoryMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepProcessor
+import ru.tikhonovdo.enrichment.batch.matching.currency.TinkoffCurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
@@ -141,7 +144,6 @@ import javax.sql.DataSource
             .build()
     }
 
-
     @Bean
     fun tinkoffDirectAccountMatchingStepReader(): ItemReader<AccountMatching> {
         return TinkoffDirectAccountMatchingStepReader(dataSource)
@@ -177,7 +179,11 @@ import javax.sql.DataSource
 //            .build()
 //    }
 //
-    private fun step(name: String): StepBuilder = StepBuilder(name, jobRepository).allowStartIfComplete(true)
+    private fun step(name: String): StepBuilder =
+        StepBuilder(name, jobRepository)
+            .allowStartIfComplete(true)
+//            .listener(StepExecutionListener)
+
     private fun job(name: String): JobBuilder = JobBuilder(name, jobRepository)
 
 }

@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching
+package ru.tikhonovdo.enrichment.batch.matching.category
 
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.data.domain.Example

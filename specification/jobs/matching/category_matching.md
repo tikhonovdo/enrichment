@@ -1,5 +1,9 @@
 ## categoryMatchingStep
 
+На этом шаге таблица <u>category_matching</u> в первую очередь наполняется полями:
+* `bank_category_name`
+* `bank_id`
+
 По умолчанию, при прогоне шага для конкретного Банка происходит матчинг исключительно по связке
 `bank_category_name` <-> `category_id`.
 

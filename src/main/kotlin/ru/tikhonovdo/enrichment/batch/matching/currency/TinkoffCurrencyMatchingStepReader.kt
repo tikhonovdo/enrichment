@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching
+package ru.tikhonovdo.enrichment.batch.matching.currency
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
