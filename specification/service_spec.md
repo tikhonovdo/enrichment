@@ -14,17 +14,17 @@
     * arrear_transaction
   - парсинг записей в сущности
   - сохранение по таблицам
-  - подготовка к следующим шагам (`UPDATE transfer SET validated = true;`)
+  - подготовка к следующим шагам (`UPDATE transfer SET validated = true WHERE bank_id IS NULL;`)
 
 
-2. Загрузка данных от Банка - `POST /data?bankId=`
+2. Загрузка данных от Банка - `POST /data?bankId=` - **ВЫПОЛНЕНО**
    - сохранение файла 
 
 
 3. matchingJob - `POST /performMatching`
-   * categoryMatchingStep
-   * currencyMatchingStep
-   * accountMatchingStep
+   * categoryMatchingStep - **ВЫПОЛНЕНО**
+   * currencyMatchingStep - **ВЫПОЛНЕНО**
+   * accountMatchingStep - **ВЫПОЛНЕНО**
    * transactionMatchingStep
    * transferMatchingStep
 
