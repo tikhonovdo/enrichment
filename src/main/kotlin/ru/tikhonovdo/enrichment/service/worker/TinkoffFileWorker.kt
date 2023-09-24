@@ -1,38 +1,37 @@
 package ru.tikhonovdo.enrichment.service.worker
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Workbook
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.service.FileServiceWorker
+import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 import java.io.ByteArrayInputStream
-import java.time.LocalDateTime
 
 @Component
-class TinkoffFileWorker(
-    private val objectMapper: ObjectMapper,
-    private val draftTransactionRepository: DraftTransactionRepository,
-): FileServiceWorker {
+class TinkoffFileWorker(private val draftTransactionRepository: DraftTransactionRepository): FileServiceWorker {
 
-    override fun saveData(file: MultipartFile) {
-        var rawRecords: List<TinkoffRecord.Raw>? = null
-        if (file.contentType == "application/vnd.ms-excel") {
-            rawRecords = readExcelFile(file.resource.contentAsByteArray)
-        }
+    private val log = LoggerFactory.getLogger(TinkoffFileWorker::class.java)
 
-        if (rawRecords != null) {
-            draftTransactionRepository.save(DraftTransaction(
-                bankId = Bank.TINKOFF.id,
-                uploadDate = LocalDateTime.now(),
-                data = objectMapper.writeValueAsString(rawRecords)
-            ))
-        } else {
-            throw IllegalStateException("Records was not created")
+    @Transactional
+    override fun saveData(file: MultipartFile, fullReset: Boolean) {
+        val rawRecords = readExcelFile(file.resource.contentAsByteArray)
+        val tinkoffDrafts = draftTransactionRepository.findAllByBankId(Bank.TINKOFF.id)
+
+        rawRecords.map { toDraftTransaction(it) }.filter {
+            !tinkoffDrafts.contains(it)
+        }.let {
+            var inserted = 0
+            if (it.isNotEmpty()) {
+                inserted = draftTransactionRepository.insertBatch(it)
+            }
+            log.info("Upload success. $inserted records was inserted")
         }
     }
 
@@ -71,5 +70,12 @@ class TinkoffFileWorker(
         }
         return records
     }
+
+    private fun toDraftTransaction(record: TinkoffRecord.Raw) = DraftTransaction(
+        bankId = Bank.TINKOFF.id,
+        date = TinkoffRecord.parseOperationDate(record.operationDate!!),
+        sum = record.paymentSum.toString(),
+        data = JSON_MAPPER.writeValueAsString(record)
+    )
 }
 

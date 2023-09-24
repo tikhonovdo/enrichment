@@ -9,28 +9,23 @@ import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import java.time.LocalDateTime
 
-interface DraftTransactionRepository : JpaRepository<DraftTransaction, Long>, CustomDraftTransactionRepository
-
-interface CustomDraftTransactionRepository {
-    fun save(draftTransaction: DraftTransaction)
-    fun findAllCategoryMatchingCandidates(bank: Bank): List<CategoryMatching>
+interface DraftTransactionRepository : JpaRepository<DraftTransaction, Long>,
+    BatchRepository<DraftTransaction>, CustomDraftTransactionRepository {
+    fun findAllByBankIdAndDate(bankId: Long, date: LocalDateTime): List<DraftTransaction>
 }
 
+interface CustomDraftTransactionRepository {
+    fun findAllCategoryMatchingCandidates(bank: Bank): List<CategoryMatching>
+
+    fun findAllByBankId(bankId: Long): List<DraftTransaction>
+}
 @Repository
 class DraftTransactionRepositoryImpl(
-    private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
-): CustomDraftTransactionRepository {
-    override fun save(draftTransaction: DraftTransaction) {
-        namedParameterJdbcTemplate.update(
-            "INSERT INTO draft_transaction (bank_id, upload_date, data) VALUES (:bankId, :uploadDate, :data::json)",
-            MapSqlParameterSource(mapOf(
-                "bankId" to draftTransaction.bankId,
-                "uploadDate" to LocalDateTime.now(),
-                "data" to draftTransaction.data
-            ))
-        )
-    }
-
+    namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+): CustomDraftTransactionRepository, AbstractBatchRepository<DraftTransaction>(
+    namedParameterJdbcTemplate,
+    "INSERT INTO matching.draft_transaction (bank_id, date, sum, data) VALUES (:bankId, :date, :sum, :data::json)"
+) {
     override fun findAllCategoryMatchingCandidates(bank: Bank): List<CategoryMatching> {
         return namedParameterJdbcTemplate.query("""
             SELECT DISTINCT ON (items.item->>'category', items.item->>'mcc')
@@ -39,8 +34,8 @@ class DraftTransactionRepositoryImpl(
                 items.item->>'description' as pattern
             FROM
                  (SELECT jsonb_array_elements(data) item
-                  FROM draft_transaction
-                  WHERE bank_id = 1) items;
+                  FROM matching.draft_transaction
+                  WHERE bank_id = :bankId) items;
             """.trimIndent(),
             MapSqlParameterSource(mapOf("bankId" to bank.id))
         ) { rs, _ ->
@@ -53,4 +48,22 @@ class DraftTransactionRepositoryImpl(
                 )
         }
     }
+
+    override fun findAllByBankId(bankId: Long): List<DraftTransaction> {
+        return namedParameterJdbcTemplate.query(
+            """
+                SELECT date, sum, data
+                FROM matching.draft_transaction
+                WHERE bank_id = :bankId""".trimIndent(),
+            MapSqlParameterSource(mapOf("bankId" to bankId))
+        ) { rs, _ ->
+            DraftTransaction(
+                bankId = bankId,
+                date = rs.getTimestamp("date").toLocalDateTime(),
+                sum = rs.getString("sum"),
+                data = rs.getString("data")
+            )
+        }
+    }
+
 }

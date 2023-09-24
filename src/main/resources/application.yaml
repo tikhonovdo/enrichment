@@ -8,13 +8,14 @@ spring:
     password: enrichment
     hikari:
       connection-timeout: 5000
-      leak-detection-threshold: 300000
+      leak-detection-threshold: 30000
+      max-lifetime: 900000
       maximum-pool-size: 5
       pool-name: PrimaryPool
       auto-commit: true
   liquibase:
     change-log: classpath:db/changelog/master-changelog.xml
-    enabled: true
+    enabled: false
   batch:
     job.enabled: false
     jdbc.initialize-schema: never

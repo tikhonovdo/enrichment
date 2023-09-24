@@ -11,12 +11,12 @@ import ru.tikhonovdo.enrichment.service.worker.FinancePmFileWorker
 import ru.tikhonovdo.enrichment.service.worker.TinkoffFileWorker
 
 interface FileService {
-    fun store(file: MultipartFile)
+    fun store(file: MultipartFile, fullReset: Boolean)
     fun load() : Resource
 }
 
 interface FileServiceWorker {
-    fun saveData(file: MultipartFile)
+    fun saveData(file: MultipartFile, fullReset: Boolean)
 }
 
 @Service
@@ -33,23 +33,24 @@ class FileServiceImpl(
         workers[TINKOFF] = tinkoffFileWorker
     }
 
-    override fun store(file: MultipartFile) {
+    override fun store(file: MultipartFile, fullReset: Boolean) {
         val fileType = detectFileType(file)
 
         workers[fileType]?.let {
-            it.saveData(file)
+            log.info("Recognized as $fileType data file")
+            it.saveData(file, fullReset)
             log.info("$fileType data file was successfully saved")
         }
     }
 
-    override fun load() = ByteArrayResource(financePmFileWorker.retrieveData())
+    override fun load() =
+        ByteArrayResource(financePmFileWorker.retrieveData())
 
     private fun detectFileType(file: MultipartFile): FileType {
         if (file.originalFilename?.matches(Regex("finance(.*).data")) == true) {
             return FINANCE_PM
         }
-        if ((file.contentType == "application/vnd.ms-excel" || file.contentType == "text/csv") &&
-            file.originalFilename?.matches(Regex("operations(.*)")) == true) {
+        if (file.originalFilename?.matches(Regex("operations(.*)")) == true) {
             return TINKOFF
         }
         throw IllegalStateException("unknown file type")

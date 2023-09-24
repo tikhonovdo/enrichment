@@ -9,15 +9,19 @@ import ru.tikhonovdo.enrichment.repository.BatchRepository
 
 interface AccountMatchingRepository:
     JpaRepository<AccountMatching, AccountMatching.AccountMatchingId>,
-    CustomAccountMatchingRepository
+    CustomAccountMatchingRepository {
+    fun findByBankAccountCodeAndBankId(bankAccountCode: String, bankId: Long): AccountMatching
+}
 
-interface CustomAccountMatchingRepository: BatchRepository<AccountMatching>
+interface CustomAccountMatchingRepository: BatchRepository<AccountMatching> {
+}
 
 @Repository
 class CustomAccountMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParameterJdbcTemplate):
     CustomAccountMatchingRepository,
     AbstractBatchRepository<AccountMatching>(
         namedParameterJdbcTemplate,
-        "INSERT INTO account_matching (account_id, bank_id, bank_account_code, bank_currency_code, pattern) " +
-                "VALUES (:accountId, :bankId, :bankAccountCode, :bankCurrencyCode, :pattern)",
-    )
+        "INSERT INTO matching.account (account_id, bank_id, bank_account_code) " +
+                "VALUES (:accountId, :bankId, :bankAccountCode)",
+    ) {
+}

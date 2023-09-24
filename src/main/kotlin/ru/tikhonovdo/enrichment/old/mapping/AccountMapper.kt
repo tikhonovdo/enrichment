@@ -7,6 +7,7 @@ import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
  * Содержит сопоставление идентифекаторов кошельков FinancePM с TinkoffRecord
  * @see TinkoffRecord
  */
+@Deprecated(message = "")
 class AccountMapper(fileName: String, csvFormat: CSVFormat) : AbstractFinancePmIdMapper(fileName, csvFormat) {
     private val cardNumberToAccountIdMap = mutableMapOf<String, Int>()
 

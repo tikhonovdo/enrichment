@@ -20,7 +20,6 @@ class CategoryMatchingStepProcessor(private val categoryMatchingRepository: Cate
         var matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase()
             .withMatcher("bankId", ExampleMatcher.GenericPropertyMatchers.exact())
             .withMatcher("bankCategoryName", ExampleMatcher.GenericPropertyMatchers.exact())
-            .withIgnorePaths("validated")
         item.mcc?.let {
             matcher = matcher
                 .withMatcher("mcc", ExampleMatcher.GenericPropertyMatchers.exact())

@@ -4,8 +4,13 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="FinancePM-create-schema" author="chitzkoy">
+        <sqlFile path="./createSchema.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
     <changeSet id="FinancePM_tables_init" author="chitzkoy">
-        <createTable tableName="type" remarks="Типы операций">
+        <createTable schemaName="financepm" tableName="type" remarks="Типы операций">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -14,7 +19,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="event" remarks="События приложения FinancePM">
+        <createTable schemaName="financepm" tableName="event" remarks="События приложения FinancePM">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -23,7 +28,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="currency" remarks="Валюты">
+        <createTable schemaName="financepm" tableName="currency" remarks="Валюты">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -37,7 +42,7 @@
             <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
         </createTable>
 
-        <createTable tableName="account" remarks="Счёт">
+        <createTable schemaName="financepm" tableName="account" remarks="Счёт">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -58,12 +63,14 @@
             <column name="order_id" type="int" remarks="Порядок отображения в списке счетов"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="account"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="currency_id"
                                  constraintName="fk_account_currency_id"
                                  referencedTableName="currency"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
 
-        <createTable tableName="category" remarks="Категория транзакции">
+        <createTable schemaName="financepm" tableName="category" remarks="Категория транзакции">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -78,17 +85,21 @@
             <column name="order_id" type="int" remarks="Порядок отображения в списке категорий"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="category"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="parent_id"
                                  constraintName="fk_category_parent_id"
                                  referencedTableName="category"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="category"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="type"
                                  constraintName="fk_category_type"
                                  referencedTableName="type"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
 
-        <createTable tableName="transaction" remarks="Транзакция">
+        <createTable schemaName="financepm" tableName="transaction" remarks="Транзакция">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -107,9 +118,7 @@
             <column name="sum" type="numeric(16,6)" defaultValue="0.0" remarks="Сумма транзакции">
                 <constraints nullable="false"/>
             </column>
-            <column name="account_id" type="bigint" remarks="Идентификатор счета, к которому привязана транзакция">
-                <constraints nullable="false"/>
-            </column>
+            <column name="account_id" type="bigint" remarks="Идентификатор счета, к которому привязана транзакция"/>
             <column name="description" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -117,27 +126,35 @@
             <column name="available" type="boolean" remarks="Признак отображения в списке транзакций" defaultValue="true"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="type"
-                                 constraintName="fk_transaction_type"
+                                 constraintName="fk_financepm_transaction_type"
                                  referencedTableName="type"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="category_id"
-                                 constraintName="fk_transaction_category_id"
+                                 constraintName="fk_financepm_transaction_category_id"
                                  referencedTableName="category"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="account_id"
-                                 constraintName="fk_transaction_account_id"
+                                 constraintName="fk_financepm_transaction_account_id"
                                  referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="event_id"
-                                 constraintName="fk_transaction_event_id"
+                                 constraintName="fk_financepm_transaction_event_id"
                                  referencedTableName="event"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
 
-        <createTable tableName="transfer" remarks="Переводы между счетами">
+        <createTable schemaName="financepm" tableName="transfer" remarks="Переводы между счетами">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -153,17 +170,21 @@
             <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="transfer"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="transaction_id_from"
                                  constraintName="fk_transfer_transaction_id_from"
                                  referencedTableName="transaction"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="transfer"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="transaction_id_to"
                                  constraintName="fk_transfer_transaction_id_to"
                                  referencedTableName="transaction"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
 
-        <createTable tableName="arrear" remarks="Долги">
+        <createTable schemaName="financepm" tableName="arrear" remarks="Долги">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -185,12 +206,14 @@
             <column name="available" type="boolean" remarks="Признак отображения в списке приложения" defaultValue="true"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="arrear"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="account_id"
                                  constraintName="fk_arrear_account_id"
                                  referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
 
-        <createTable tableName="arrear_transaction" remarks="Таблица связи Долг-Транзакция">
+        <createTable schemaName="financepm" tableName="arrear_transaction" remarks="Таблица связи Долг-Транзакция">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -202,44 +225,48 @@
             </column>
         </createTable>
         <addForeignKeyConstraint baseTableName="arrear_transaction"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="arrear_id"
                                  constraintName="fk_arrear_transaction_arrear_id"
+                                 referencedTableSchemaName="financepm"
                                  referencedTableName="arrear"
                                  referencedColumnNames="id"/>
         <addForeignKeyConstraint baseTableName="arrear_transaction"
+                                 baseTableSchemaName="financepm"
                                  baseColumnNames="transaction_id"
                                  constraintName="fk_arrear_transaction_transaction_id"
                                  referencedTableName="transaction"
+                                 referencedTableSchemaName="financepm"
                                  referencedColumnNames="id"/>
     </changeSet>
 
     <changeSet id="FinancePM_data_init" author="chitzkoy">
-        <insert tableName="type">
+        <insert schemaName="financepm" tableName="type">
             <column name="id">1</column>
             <column name="name">Доход</column>
         </insert>
-        <insert tableName="type">
+        <insert schemaName="financepm" tableName="type">
             <column name="id">2</column>
             <column name="name">Расход</column>
         </insert>
 
-        <insert tableName="event">
+        <insert schemaName="financepm" tableName="event">
             <column name="id">1</column>
             <column name="name">Перевод</column>
         </insert>
-        <insert tableName="event">
+        <insert schemaName="financepm" tableName="event">
             <column name="id">2</column>
             <column name="name">Создание долга</column>
         </insert>
-        <insert tableName="event">
+        <insert schemaName="financepm" tableName="event">
             <column name="id">3</column>
             <column name="name">Погашение долга</column>
         </insert>
-        <insert tableName="event">
+        <insert schemaName="financepm" tableName="event">
             <column name="id">4</column>
             <column name="name">Увеличение долга</column>
         </insert>
-        <insert tableName="event">
+        <insert schemaName="financepm" tableName="event">
             <column name="id">5</column>
             <column name="name">Правка баланса</column>
         </insert>

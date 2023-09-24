@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
+@Deprecated(message = "since json mapper become static")
 class JsonMappingConfig {
 
     @Bean

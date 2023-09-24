@@ -1,8 +1,5 @@
 package ru.tikhonovdo.enrichment.controller
 
-import org.springframework.batch.core.Job
-import org.springframework.batch.core.JobParametersBuilder
-import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -14,33 +11,14 @@ import ru.tikhonovdo.enrichment.service.FileService
 import java.time.LocalDate
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/file")
 @Controller
-class AppController(
-    private val fileService: FileService,
-    private val jobLauncher: JobLauncher,
-    private val matchingJob: Job
-) {
-
-    companion object {
-        const val START_DATE_TIME = "dateTime"
-    }
+class FileController(private val fileService: FileService) {
 
     @PostMapping("/upload", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun uploadData(@RequestParam("file") file: MultipartFile) {
-        fileService.store(file)
-    }
-
-    @PostMapping("/performMatching")
-    fun performMatching(@RequestParam(required = false) requestParam: Map<String, String>?): Boolean {
-        val params = JobParametersBuilder()
-        requestParam?.let {
-            requestParam["steps"]?.let {
-                params.addString("steps", it)
-            }
-        }
-        jobLauncher.run(matchingJob, params.toJobParameters())
-        return true
+    fun uploadData(@RequestParam("file") file: MultipartFile,
+                   @RequestParam("reset") fullReset: Boolean?) {
+        fileService.store(file, fullReset ?: false)
     }
 
     @GetMapping("/download")

@@ -31,6 +31,7 @@ class TinkoffImporter(private val csvFormat: CSVFormat) {
             val operationDate = csvRecord[0]
             val paymentDate = csvRecord.get("paymentDate").ifBlank { operationDate.split(" ")[0] }
             val row = TinkoffRecord(
+                null,
                 dateTimeFormatter.parse(operationDate, LocalDateTime::from),
                 paymentDate.toLocalDate(),
                 csvRecord.get("cardNumber"),
@@ -39,7 +40,7 @@ class TinkoffImporter(private val csvFormat: CSVFormat) {
                 csvRecord.get("operationCurrency"),
                 csvRecord.get("paymentSum").parseAsDouble(),
                 csvRecord.get("paymentCurrency"),
-                csvRecord.get("cashback").ifBlank { "0" }.toInt(),
+                csvRecord.get("cashback").ifBlank { "0" }.toDouble(),
                 csvRecord.get("category"),
                 csvRecord.get("mcc"),
                 csvRecord.get("description"),

@@ -9,7 +9,10 @@ import ru.tikhonovdo.enrichment.repository.BatchRepository
 
 interface CurrencyMatchingRepository:
     JpaRepository<CurrencyMatching, CurrencyMatching.CurrencyMatchingId>,
-    CustomCurrencyMatchingRepository
+    CustomCurrencyMatchingRepository {
+
+    fun findCurrencyIdByBankCurrencyCodeAndBankId(bankCurrencyCode: String, bankId: Long): Long?
+}
 
 interface CustomCurrencyMatchingRepository: BatchRepository<CurrencyMatching>
 
@@ -18,5 +21,5 @@ class CustomCurrencyMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedPara
     CustomCurrencyMatchingRepository,
     AbstractBatchRepository<CurrencyMatching> (
         namedParameterJdbcTemplate,
-        "INSERT INTO currency_matching (currency_id, bank_id, bank_currency_code) VALUES (:currencyId, :bankId, :bankCurrencyCode)",
+        "INSERT INTO matching.currency (currency_id, bank_id, bank_currency_code) VALUES (:currencyId, :bankId, :bankCurrencyCode)",
     )

@@ -9,12 +9,10 @@ class TinkoffCurrencyMatchingStepReader(dataSource: DataSource): JdbcCursorItemR
     init {
         this.dataSource = dataSource
         sql = """
-            SELECT DISTINCT ON (items.item->>'paymentCurrency')
-                items.item->>'paymentCurrency' as currency
-            FROM
-                 (SELECT jsonb_array_elements(data) item
-                  FROM draft_transaction
-                  WHERE bank_id = ${Bank.TINKOFF.id}) items;
+            SELECT DISTINCT ON (data->>'paymentCurrency') 
+                data->>'paymentCurrency' as currency
+            FROM matching.draft_transaction
+            WHERE bank_id = ${Bank.TINKOFF.id};
         """.trimIndent()
         setRowMapper { rs, _ ->
             CurrencyMatching(

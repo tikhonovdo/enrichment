@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="matching-create-schema" author="chitzkoy">
+        <sqlFile path="./createSchema.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+
+    <changeSet id="matching_tables_init" author="chitzkoy">
+        <createTable schemaName="matching" tableName="bank" remarks="Банк">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)" remarks="Название банка">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <insert schemaName="matching" tableName="bank">
+            <column name="id">1</column>
+            <column name="name">Тинькофф</column>
+        </insert>
+
+        <createTable schemaName="matching" tableName="currency" remarks="Матчинг кодов валют Банк-FinancePM">
+            <column name="currency_id" type="bigint" remarks="Идентификатор валюты FinancePM"/>
+            <column name="bank_id" type="bigint" remarks="Идентификатор банка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_currency_code" type="varchar(8)" remarks="Код валюты банка">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="currency"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="currency_id"
+                                 constraintName="fk_matching_currency_currency_id"
+                                 referencedTableName="currency"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="currency"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="bank_id"
+                                 constraintName="fk_matching_currency_bank_id"
+                                 referencedTableName="bank"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+        <createIndex schemaName="matching" tableName="currency" indexName="idx_matching_currency_currency_id_bank_currency_code">
+            <column name="currency_id"/>
+            <column name="bank_currency_code"/>
+        </createIndex>
+
+        <createTable schemaName="matching" tableName="account" remarks="Сопоставление счетов Банк-FinancePM">
+            <column name="account_id" type="bigint" remarks="Идентификатор счета FinancePM"/>
+            <column name="bank_id" type="bigint" remarks="Идентификатор банка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_account_code" type="varchar(128)" remarks="Код счета банка"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="account"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="account_id"
+                                 constraintName="fk_matching_account_account_id"
+                                 referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="account"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="bank_id"
+                                 constraintName="fk_matching_account_bank_id"
+                                 referencedTableName="bank"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+
+        <createTable schemaName="matching" tableName="account_tinkoff" remarks="Таблица матчинга счетов в Тинькофф по параметрам транзакции">
+            <column name="bank_account_code" type="varchar(128)" remarks="Код счета банка"/>
+            <column name="bank_currency_code" type="varchar(8)" remarks="Код валюты банка"/>
+            <column name="pattern" type="varchar(128)" remarks="Подстрока описания операции в банке"/>
+        </createTable>
+        <createIndex schemaName="matching" tableName="account_tinkoff" indexName="idx_matching_account_tinkoff"
+                     unique="true">
+            <column name="bank_account_code"/>
+            <column name="bank_currency_code"/>
+            <column name="pattern" />
+        </createIndex>
+
+
+        <createTable schemaName="matching" tableName="category" remarks="Сопоставление категорий Банк-FinancePM">
+            <column name="category_id" type="bigint" remarks="Идентификатор категории FinancePM"/>
+            <column name="bank_id" type="bigint" remarks="Идентификатор банка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_category_name" type="varchar(32)" remarks="Название категории у банка"/>
+            <column name="mcc" type="varchar(4)" remarks="MCC-код категории"/>
+            <column name="pattern" type="varchar(128)" remarks="Подстрока описания операции в банке"/>
+            <column name="sum" type="numeric(16,6)" remarks="Сумма транзакции"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="category"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="category_id"
+                                 constraintName="fk_matching_category_category_id"
+                                 referencedTableName="category"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="category"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="bank_id"
+                                 constraintName="fk_matching_category_bank_id"
+                                 referencedTableName="bank"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+
+        <createTable schemaName="matching" tableName="draft_transaction" remarks="Транзакции банка в JSON формате">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="bank_id" type="bigint" remarks="Идентификатор банка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="timestamp" remarks="Дата транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="varchar(12)" remarks="Сумма транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="jsonb" remarks="Сырые данные от банка, конвертированные в JSON">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="draft_transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="bank_id"
+                                 constraintName="fk_matching_draft_transaction_bank_id"
+                                 referencedTableName="bank"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+        <createIndex schemaName="matching" tableName="draft_transaction"
+                     unique="true"
+                     indexName="idx_matching_draft_transaction_bank_id_date_sum">
+            <column name="bank_id" />
+            <column name="date" />
+            <column name="sum" />
+        </createIndex>
+
+        <createTable schemaName="matching" tableName="transaction" remarks="Транзакции для матчинга">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="draft_transaction_id" type="bigint" remarks="Ссылка на источник записи из выписки банка"/>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="bigint" remarks="Тип категории (доход/расход)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="bigint" remarks="Категория транзакции">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date" type="timestamp" remarks="Дата транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sum" type="numeric(16,6)" defaultValue="0.0" remarks="Сумма транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="bigint" remarks="Идентификатор счета, к которому привязана транзакция"/>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id" type="bigint" remarks="Ссылка на идентификатор события в приложении, которое породило транзакцию"/>
+            <column name="validated" type="boolean" remarks="Признак проверенного и готовой к экспорту записи" />
+        </createTable>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="draft_transaction_id"
+                                 constraintName="fk_matching_transaction_draft_transaction_id"
+                                 referencedTableName="draft_transaction"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="type"
+                                 constraintName="fk_matching_transaction_type"
+                                 referencedTableName="type"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="category_id"
+                                 constraintName="fk_matching_transaction_category_id"
+                                 referencedTableName="category"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="account_id"
+                                 constraintName="fk_matching_transaction_account_id"
+                                 referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="event_id"
+                                 constraintName="fk_matching_transaction_event_id"
+                                 referencedTableName="event"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id"/>
+
+
+        <createTable schemaName="matching" tableName="transfer" remarks="Драфты переводов">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="matching_transaction_id_from" type="bigint" remarks="Идентификатор транзакции источника">
+                <constraints nullable="false"/>
+            </column>
+            <column name="matching_transaction_id_to" type="bigint" remarks="Идентификатор транзакции получателя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validated" type="boolean" remarks="Признак готовой к экспорту записи" />
+        </createTable>
+        <addForeignKeyConstraint baseTableName="transfer"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="matching_transaction_id_from"
+                                 constraintName="fk_matching_transfer_matching_transaction_id_from"
+                                 referencedTableName="transaction"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="transfer"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="matching_transaction_id_to"
+                                 constraintName="fk_matching_transfer_matching_transaction_id_to"
+                                 referencedTableName="transaction"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+        <createIndex schemaName="matching" tableName="transfer" unique="true"
+                     indexName="idx_matching_transfer_matching_transaction_id_from_matching_transaction_id_to">
+            <column name="matching_transaction_id_from" />
+            <column name="matching_transaction_id_to" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="financepm-schema-update" author="chitzkoy">
+        <addColumn schemaName="financepm" tableName="transaction">
+            <column name="matching_transaction_id" type="bigint" remarks="Ссылка на источник записи из выписки банка" />
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="financepm"
+                                 baseColumnNames="matching_transaction_id"
+                                 constraintName="fk_financepm_transaction_matching_transaction_id"
+                                 referencedTableName="transaction"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

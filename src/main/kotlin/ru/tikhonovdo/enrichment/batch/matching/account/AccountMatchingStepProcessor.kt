@@ -1,30 +1,28 @@
 package ru.tikhonovdo.enrichment.batch.matching.account
 
+import org.springframework.batch.core.StepExecution
+import org.springframework.batch.core.StepExecutionListener
 import org.springframework.batch.item.ItemProcessor
-import org.springframework.data.domain.Example
-import org.springframework.data.domain.ExampleMatcher
-import org.springframework.data.domain.Pageable
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 
-class AccountMatchingStepProcessor(private val accountMatchingRepository: AccountMatchingRepository):
-    ItemProcessor<AccountMatching, AccountMatching> {
+class AccountMatchingStepProcessor(
+    private val accountMatchingRepository: AccountMatchingRepository
+): ItemProcessor<AccountMatching, AccountMatching>, StepExecutionListener {
+
+    private var accountMatchingCandidates = listOf<AccountMatching>()
+
+    override fun beforeStep(stepExecution: StepExecution) {
+        accountMatchingCandidates = accountMatchingRepository.findAll()
+    }
 
     override fun process(item: AccountMatching): AccountMatching? {
         val probe = AccountMatching(
             bankId = item.bankId,
-            bankAccountCode = item.bankAccountCode,
-            pattern = item.pattern,
-            bankCurrencyCode = item.bankCurrencyCode
+            bankAccountCode = item.bankAccountCode
         )
-        val matcher = ExampleMatcher.matching().withIgnoreNullValues().withIgnoreCase()
-            .withMatcher("bankId", ExampleMatcher.GenericPropertyMatchers.exact())
-            .withMatcher("bankAccountCode", ExampleMatcher.GenericPropertyMatchers.exact())
-            .withMatcher("pattern", ExampleMatcher.GenericPropertyMatchers.exact())
-            .withMatcher("bankCurrencyCode", ExampleMatcher.GenericPropertyMatchers.exact())
-        val query = accountMatchingRepository.findAll(Example.of(probe, matcher), Pageable.unpaged())
 
-        return if (query.isEmpty) {
+        return if (accountMatchingCandidates.contains(probe)) {
             item
         } else {
             null

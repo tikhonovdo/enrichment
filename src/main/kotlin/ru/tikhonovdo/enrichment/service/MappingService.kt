@@ -25,7 +25,6 @@ class MappingService {
             accountId = 1L,// accountMapper.getFinancePmId(record),
             description = "",
             eventId = null, // if (transfer) 1 else 0,
-            bankId = 1L
         )
     }
 
