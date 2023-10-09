@@ -28,9 +28,7 @@ class TinkoffTransactionStepProcessor(
     private val tinkoffAccountMatchingRepository: TinkoffAccountMatchingRepository
 ) : ItemProcessor<TinkoffRecord, TransactionMatching>, StepExecutionListener {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(TinkoffTransactionStepProcessor::class.java)
-    }
+    private val log = LoggerFactory.getLogger(TinkoffTransactionStepProcessor::class.java)
 
     private val bank = Bank.TINKOFF
     private var matchingCategories = listOf<CategoryMatching>()
@@ -121,10 +119,6 @@ class TinkoffTransactionStepProcessor(
         } else {
             null
         }
-    }
-
-    private fun isTransferCandidate(tinkoffRecord: TinkoffRecord): Boolean {
-        return tinkoffRecord.category.contains("Перевод") || tinkoffRecord.category.contains("Пополнение")
     }
 
 }

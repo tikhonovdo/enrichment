@@ -2,6 +2,7 @@ version: "3.9"
 services:
   postgres:
     image: postgres:13.3
+    restart: always
     environment:
       POSTGRES_DB: "enrichment"
       POSTGRES_USER: "enrichment"

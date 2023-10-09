@@ -21,6 +21,9 @@ class TinkoffFileWorker(private val draftTransactionRepository: DraftTransaction
 
     @Transactional
     override fun saveData(file: MultipartFile, fullReset: Boolean) {
+        val deleted = draftTransactionRepository.deleteObsoleteDraft()
+        log.info("$deleted drafts are obsolete and has been deleted")
+
         val rawRecords = readExcelFile(file.resource.contentAsByteArray)
         val tinkoffDrafts = draftTransactionRepository.findAllByBankId(Bank.TINKOFF.id)
 

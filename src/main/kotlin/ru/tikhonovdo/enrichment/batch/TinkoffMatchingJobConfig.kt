@@ -147,7 +147,6 @@ class TinkoffMatchingJobConfig(
 
 
     @Bean
-
     fun tinkoffTransactionMatchingStep(
         tinkoffTransactionMatchingStepReader: ItemReader<TinkoffRecord>,
         tinkoffTransactionMatchingStepProcessor: ItemProcessor<TinkoffRecord, TransactionMatching>

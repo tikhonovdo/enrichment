@@ -7,14 +7,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import jakarta.persistence.*
-import lombok.EqualsAndHashCode
 import lombok.NoArgsConstructor
-import lombok.ToString
-import ru.tikhonovdo.enrichment.domain.dto.IdRecord
-import ru.tikhonovdo.enrichment.util.MillisToLocalDateTimeDeserializer
 import ru.tikhonovdo.enrichment.util.LocalDateTimeToMillisSerializer
-import ru.tikhonovdo.enrichment.util.ZeroAsNullDeserializer
+import ru.tikhonovdo.enrichment.util.MillisToLocalDateTimeDeserializer
 import ru.tikhonovdo.enrichment.util.NullAsZeroSerializer
+import ru.tikhonovdo.enrichment.util.ZeroAsNullDeserializer
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -65,7 +62,7 @@ data class Category(
     var typeId: Long,
 
     @Column(name = "parent_id", nullable = true)
-    @JsonSerialize(using = NullAsZeroSerializer::class)
+    @JsonSerialize(nullsUsing = NullAsZeroSerializer::class)
     @JsonDeserialize(using = ZeroAsNullDeserializer::class)
     var parentId: Long?,
 
@@ -140,7 +137,6 @@ data class Account(
 
 @Entity
 @Table(schema = "financepm")
-@JsonIgnoreProperties(value = ["event", "bankId", "operationType", "category", "account"])
 @NoArgsConstructor
 data class Transaction(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transaction_id_seq")
@@ -158,7 +154,7 @@ data class Transaction(
     var typeId: Long,
 
     @Column(name = "category_id")
-    @JsonSerialize(using = NullAsZeroSerializer::class)
+    @JsonSerialize(nullsUsing = NullAsZeroSerializer::class)
     @JsonDeserialize(using = ZeroAsNullDeserializer::class)
     @JsonProperty("categoryId")
     var categoryId: Long?,
@@ -179,33 +175,18 @@ data class Transaction(
     @JsonProperty("description")
     var description: String,
 
-    @JsonSerialize(using = NullAsZeroSerializer::class)
+    @JsonSerialize(nullsUsing = NullAsZeroSerializer::class)
     @JsonDeserialize(using = ZeroAsNullDeserializer::class)
     @Column(name = "event_id")
     @JsonProperty("source")
     var eventId: Long? = null,
 
-    @ManyToOne(targetEntity = Event::class)
-    @JoinColumn(name = "event_id", nullable = true, insertable = false, updatable = false)
-    var event: Event? = null,
-
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     @JsonProperty("available")
     var available: Boolean = true,
 
-    var matchingTransactionId: Long? = null,
-
-    @ManyToOne(targetEntity = Type::class)
-    @JoinColumn(name = "type", nullable = false, insertable = false, updatable = false)
-    var operationType: Type? = null,
-
-    @ManyToOne(targetEntity = Category::class)
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
-    var category: Category? = null,
-
-    @ManyToOne(targetEntity = Account::class)
-    @JoinColumn(name = "account_id", insertable = false, updatable = false)
-    var account: Account? = null
+    @JsonIgnore
+    var matchingTransactionId: Long? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

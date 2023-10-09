@@ -18,6 +18,8 @@ interface CustomDraftTransactionRepository {
     fun findAllCategoryMatchingCandidates(bank: Bank): List<CategoryMatching>
 
     fun findAllByBankId(bankId: Long): List<DraftTransaction>
+
+    fun deleteObsoleteDraft(): Int
 }
 @Repository
 class DraftTransactionRepositoryImpl(
@@ -66,4 +68,12 @@ class DraftTransactionRepositoryImpl(
         }
     }
 
+    override fun deleteObsoleteDraft(): Int {
+        val deleted = jdbcTemplate.update("""
+            DELETE FROM matching.draft_transaction 
+            WHERE bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK')
+            """.trimIndent())
+        jdbcTemplate.execute("SELECT setval('matching.draft_transaction_id_seq', (SELECT MAX(id) FROM matching.draft_transaction))")
+        return deleted
+    }
 }

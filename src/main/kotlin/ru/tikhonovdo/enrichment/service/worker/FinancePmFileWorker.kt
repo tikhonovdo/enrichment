@@ -1,5 +1,6 @@
 package ru.tikhonovdo.enrichment.service.worker
 
+import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -21,7 +22,8 @@ class FinancePmFileWorkerImpl (
     val transactionRepository: TransactionRepository,
     val transferRepository: TransferRepository,
     val arrearRepository: ArrearRepository,
-    val arrearTransactionRepository: ArrearTransactionRepository
+    val arrearTransactionRepository: ArrearTransactionRepository,
+    val entityManager: EntityManager
 ): FinancePmFileWorker {
 
     private val log = LoggerFactory.getLogger(FinancePmFileWorkerImpl::class.java)
@@ -50,18 +52,22 @@ class FinancePmFileWorkerImpl (
         saveData("currency", currencies, currencyRepository, fullReset)
         saveData("account", accounts, accountRepository, fullReset)
         saveData("category", categories, categoryRepository, fullReset)
-        saveData("transaction", transactions, transactionRepository, fullReset)
+        saveData("transaction", transactions, transactionRepository, fullReset) { it.also { it.matchingTransactionId = null } }
         saveData("transfer", transfers, transferRepository, fullReset)
         saveData("arrear", arrears, arrearRepository, fullReset)
         saveData("arrearTransaction", arrearTransaction, arrearTransactionRepository, fullReset)
     }
 
-    fun <T: Any> saveData(type: String, entities: Collection<T>, repository: FinancePmRepository<T>, fullReset: Boolean) {
+    private fun <T: Any> saveData(type: String, entities: Collection<T>, repository: FinancePmRepository<T>, fullReset: Boolean,
+                                  clearingFunction: java.util.function.Function<T, T> = java.util.function.Function.identity()) {
         var savedCount = 0
         if (fullReset) {
             savedCount = repository.saveDataFromScratch(entities)
         } else {
-            val existedEntities = repository.findAll()
+            val existedEntities = repository.findAll().map {
+                entityManager.detach(it)
+                clearingFunction.apply(it)
+            }
             entities.filter {
                 !existedEntities.contains(it)
             }.let {

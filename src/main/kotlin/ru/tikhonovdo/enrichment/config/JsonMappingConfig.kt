@@ -26,7 +26,7 @@ class JsonMappingConfig {
         .build()
         .registerKotlinModule()
         .registerModule(JavaTimeModule())
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .setSerializationInclusion(JsonInclude.Include.ALWAYS)
         .setDateFormat(StdDateFormat())
 
 }

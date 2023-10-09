@@ -16,11 +16,15 @@ import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
     @Bean
     fun matchingJob(tinkoffMatchingFlow: Flow,
                     matchedTransactionsExportStep: Step,
+                    linkWithMatchedTransactionsStep: Step,
+                    actualizeMatchedTransactionsStep: Step,
                     matchedTransfersExportStep: Step
     ): Job {
         return job("matchingJob")
             .start(tinkoffMatchingFlow)
             .next(matchedTransactionsExportStep)
+            .next(linkWithMatchedTransactionsStep)
+            .next(actualizeMatchedTransactionsStep)
             .next(matchedTransfersExportStep)
             .end()
             .build()

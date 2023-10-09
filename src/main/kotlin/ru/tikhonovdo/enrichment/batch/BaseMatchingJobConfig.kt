@@ -3,7 +3,6 @@ package ru.tikhonovdo.enrichment.batch
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.ItemProcessor
-import org.springframework.batch.item.ItemReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
@@ -12,26 +11,26 @@ import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.MatchedTransactionsExportStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.MatchedTransactionsExportStepReader
+import ru.tikhonovdo.enrichment.batch.matching.transaction.base.ActualizeMatchedTransactionsTasklet
+import ru.tikhonovdo.enrichment.batch.matching.transaction.base.LinkWithMatchedTransactionsTasklet
+import ru.tikhonovdo.enrichment.batch.matching.transaction.base.MatchedTransactionsExportTasklet
+import ru.tikhonovdo.enrichment.batch.matching.transaction.base.ValidationNeededRowCounter
 import ru.tikhonovdo.enrichment.batch.matching.transfer.base.TransferMatchingExportTasklet
-import ru.tikhonovdo.enrichment.domain.enitity.*
-import ru.tikhonovdo.enrichment.repository.financepm.TransactionRepository
+import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
+import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
+import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
 import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CurrencyMatchingRepository
-import javax.sql.DataSource
 
 @Configuration
 class BaseMatchingJobConfig(
     jobRepository: JobRepository,
-    private val dataSource: DataSource,
     private val jdbcTemplate: JdbcTemplate,
     private val transactionManager: PlatformTransactionManager,
     private val categoryMatchingRepository: CategoryMatchingRepository,
     private val accountMatchingRepository: AccountMatchingRepository,
-    private val currencyMatchingRepository: CurrencyMatchingRepository,
-    private val transactionRepository: TransactionRepository
+    private val currencyMatchingRepository: CurrencyMatchingRepository
 ): AbstractJobConfig(jobRepository) {
 
     @Bean
@@ -47,25 +46,26 @@ class BaseMatchingJobConfig(
         AccountMatchingStepProcessor(accountMatchingRepository)
 
     @Bean
-    fun matchedTransactionsExportStep(
-        matchedTransactionsExportStepReader: ItemReader<TransactionMatching>,
-        matchedTransactionsExportStepProcessor: ItemProcessor<TransactionMatching, Transaction>,
-    ): Step {
+    fun matchedTransactionsExportStep(): Step {
         return step("matchedTransactionsExportStep")
-            .chunk<TransactionMatching, Transaction>(10, transactionManager)
-            .reader(matchedTransactionsExportStepReader)
-            .processor(matchedTransactionsExportStepProcessor)
-            .writer { transactionRepository.saveBatch(it.items) }
+            .tasklet(MatchedTransactionsExportTasklet(jdbcTemplate), transactionManager)
             .build()
     }
 
     @Bean
-    fun matchedTransactionsExportStepReader(): ItemReader<TransactionMatching> =
-        MatchedTransactionsExportStepReader(dataSource)
+    fun linkWithMatchedTransactionsStep(): Step {
+        return step("linkWithMatchedTransactionsStep")
+            .tasklet(LinkWithMatchedTransactionsTasklet(jdbcTemplate), transactionManager)
+            .build()
+    }
 
     @Bean
-    fun matchedTransactionsExportStepProcessor(): ItemProcessor<TransactionMatching, Transaction> =
-        MatchedTransactionsExportStepProcessor(transactionRepository)
+    fun actualizeMatchedTransactionsStep(): Step {
+        return step("actualizeMatchedTransactionsStep")
+            .tasklet(ActualizeMatchedTransactionsTasklet(jdbcTemplate), transactionManager)
+            .listener(ValidationNeededRowCounter(jdbcTemplate))
+            .build()
+    }
 
 
     @Bean
