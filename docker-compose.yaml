@@ -3,12 +3,28 @@ services:
   postgres:
     image: postgres:13.3
     restart: always
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: "enrichment"
-      POSTGRES_USER: "enrichment"
-      POSTGRES_PASSWORD: "enrichment"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - .:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    network_mode: host
+
+  enrichment:
+    image: dtikhonov/enrichment:latest
+    container_name: enrichment
+    env_file:
+      - .env
+    environment:
+      DB_URL: ${DB_URL}
+    ports:
+      - "80:8080"
+    network_mode: host
+    depends_on:
+      - postgres

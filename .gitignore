@@ -14,7 +14,7 @@ build/
 /configs/
 /operations/
 /pgdata
-*.data
+.env.*
 
 ### Eclipse ###
 .apt_generated
@@ -40,4 +40,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+*.bat
 

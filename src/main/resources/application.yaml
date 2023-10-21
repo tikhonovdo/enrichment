@@ -3,7 +3,7 @@ spring:
   main.banner-mode: OFF
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/enrichment
+    url: ${DB_URL}
     username: enrichment
     password: enrichment
     hikari:
@@ -15,7 +15,7 @@ spring:
       auto-commit: true
   liquibase:
     change-log: classpath:db/changelog/master-changelog.xml
-    enabled: false
+    enabled: true
   batch:
     job.enabled: false
     jdbc.initialize-schema: never
