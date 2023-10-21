@@ -30,21 +30,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-        <profile>
-            <id>prod</id>
-            <properties>
-                <targetPlatform></targetPlatform>
-            </properties>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -71,16 +56,6 @@
         </dependency>
 
         <!-- csv + json-->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-            <version>1.10.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.beust</groupId>
-            <artifactId>klaxon</artifactId>
-            <version>5.6</version>
-        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
@@ -211,9 +186,17 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>docker-build</id>
+                        <id>Build docker container</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>Push docker container</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>push</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -349,10 +332,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
-<!--        <pluginRepository>-->
-<!--            <id>onejar-maven-plugin.googlecode.com</id>-->
-<!--            <url>https://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>-->
-<!--        </pluginRepository>-->
     </pluginRepositories>
 
 </project>

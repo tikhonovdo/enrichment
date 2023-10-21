@@ -1,7 +1,5 @@
 package ru.tikhonovdo.enrichment.domain.enitity
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
 import lombok.NoArgsConstructor
 import java.math.BigDecimal
@@ -191,7 +189,6 @@ data class TransactionMatching(
         return result
     }
 }
-
 
 @Entity
 @Table(schema = "matching", name = "transfer")

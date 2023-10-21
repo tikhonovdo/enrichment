@@ -7,9 +7,7 @@ import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.core.step.builder.FlowStepBuilder
 import org.springframework.batch.core.step.builder.StepBuilder
 
-abstract class AbstractJobConfig(
-    private val jobRepository: JobRepository,
-) {
+abstract class AbstractJobConfig(private val jobRepository: JobRepository) {
 
     fun flowStep(flow: Flow): Step =
         FlowStepBuilder(step(flow.name)).flow(flow).build()
@@ -17,7 +15,6 @@ abstract class AbstractJobConfig(
     fun step(name: String): StepBuilder =
         StepBuilder(name, jobRepository)
             .allowStartIfComplete(true)
-//            .listener(StepExecutionListener)
 
     fun job(name: String): JobBuilder = JobBuilder(name, jobRepository)
 

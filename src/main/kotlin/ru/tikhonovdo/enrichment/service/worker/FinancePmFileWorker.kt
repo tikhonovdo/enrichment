@@ -88,13 +88,13 @@ class FinancePmFileWorkerImpl (
     override fun retrieveData(): ByteArray {
         val data = FinancePmData(
             version = 2,
-            transactions = transactionRepository.findAll().toMutableList(),
-            transfers = transferRepository.findAll().toMutableList(),
-            accounts = accountRepository.findAll().toMutableList(),
-            categories = categoryRepository.findAll().toMutableList(),
-            currencies = currencyRepository.findAll().toMutableList(),
-            arrears = arrearRepository.findAll().toMutableList(),
-            arrearTransaction = arrearTransactionRepository.findAll().toMutableList(),
+            transactions = transactionRepository.findAll(),
+            transfers = transferRepository.findAll(),
+            accounts = accountRepository.findAll(),
+            categories = categoryRepository.findAll(),
+            currencies = currencyRepository.findAll(),
+            arrears = arrearRepository.findAll(),
+            arrearTransaction = arrearTransactionRepository.findAll(),
         )
 
         return JSON_MAPPER.writeValueAsBytes(data)

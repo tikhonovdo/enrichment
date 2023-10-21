@@ -59,7 +59,6 @@ class TinkoffMatchingJobConfig(
         .addStep(flowStep(tinkoffTransferMatchingFlow))
         .build()
 
-
     @Bean
     fun tinkoffCategoryMatchingStep(
         tinkoffCategoryMatchingStepReader: ItemReader<CategoryMatching>,
@@ -76,7 +75,6 @@ class TinkoffMatchingJobConfig(
     @Bean
     fun tinkoffCategoryMatchingStepReader(): ItemReader<CategoryMatching> =
         TinkoffCategoryMatchingStepReader(dataSource)
-
     
     @Bean
     fun tinkoffCurrencyMatchingStep(
@@ -94,7 +92,6 @@ class TinkoffMatchingJobConfig(
     @Bean
     fun tinkoffCurrencyMatchingStepReader(): ItemReader<CurrencyMatching> =
         TinkoffCurrencyMatchingStepReader(dataSource)
-
 
     @Bean
     fun tinkoffAccountMatchingFlow(
@@ -145,7 +142,6 @@ class TinkoffMatchingJobConfig(
     fun tinkoffImplicitAccountMatchingStepProcessor(): ItemProcessor<AccountMatching.Tinkoff, AccountMatching.Tinkoff> =
         TinkoffImplicitAccountMatchingStepProcessor(tinkoffAccountMatchingRepository)
 
-
     @Bean
     fun tinkoffTransactionMatchingStep(
         tinkoffTransactionMatchingStepReader: ItemReader<TinkoffRecord>,
@@ -173,7 +169,6 @@ class TinkoffMatchingJobConfig(
             accountMatchingRepository,
             tinkoffAccountMatchingRepository
         )
-
 
     @Bean
     fun tinkoffTransferMatchingFlow(
@@ -212,7 +207,6 @@ class TinkoffMatchingJobConfig(
     fun tinkoffAccountsTransferMatchingStepWriter(): ItemWriter<TransferMatching> =
         TinkoffAccountsTransferMatchingStepWriter(transactionMatchingRepository, transferMatchingRepository)
 
-
     @Bean
     fun tinkoffCashTransferMatchingStep(
         tinkoffCashTransferMatchingStepReader: ItemReader<TransactionMatching>,
@@ -240,5 +234,4 @@ class TinkoffMatchingJobConfig(
         TinkoffCashTransferMatchingStepWriter(
             accountRepository, transactionMatchingRepository, transferMatchingRepository
         )
-
 }

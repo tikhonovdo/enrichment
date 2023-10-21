@@ -45,25 +45,4 @@ data class TinkoffRecord(
         var roundingForInvestKopilka: Double? = null,
         var sumWithRoundingForInvestKopilka: Double? = null,
     )
-
-    fun toCashTransfer(): TinkoffRecord {
-        return TinkoffRecord(
-            null,
-            operationDate,
-            paymentDate,
-            "rub_cash",
-            status,
-            operationSum * -1,
-            operationCurrency,
-            paymentSum * -1,
-            paymentCurrency,
-            cashback,
-            category,
-            mcc,
-            description,
-            totalBonuses,
-            roundingForInvestKopilka,
-            sumWithRoundingForInvestKopilka * -1
-        )
-    }
 }

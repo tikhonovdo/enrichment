@@ -27,10 +27,3 @@ logging:
   level:
     root: INFO
     liquibase: INFO
-
-mapping:
-  accounts: configs/account-mapping.csv
-  categories: configs/categories-mapping.csv
-output-file:
-  name: financePM_{date}_enriched.data
-  date-pattern: dd-MM-yyyy

@@ -12,7 +12,8 @@ import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
 
-interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long>, BatchRepository<TransactionMatching>, CustomTransactionMatchingRepository {
+interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long>,
+    BatchRepository<TransactionMatching>, CustomTransactionMatchingRepository {
     fun existsByDraftTransactionId(draftTransactionId: Long): Boolean
 }
 

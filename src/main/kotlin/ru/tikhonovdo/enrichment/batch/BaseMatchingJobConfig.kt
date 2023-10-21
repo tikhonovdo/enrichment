@@ -67,7 +67,6 @@ class BaseMatchingJobConfig(
             .build()
     }
 
-
     @Bean
     fun matchedTransfersExportStep(): Step {
         return step("matchedTransfersExportStep")
