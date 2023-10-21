@@ -1,6 +1,5 @@
 package ru.tikhonovdo.enrichment.domain.dto
 
-import com.beust.klaxon.Json
 import com.fasterxml.jackson.annotation.JsonProperty
 import ru.tikhonovdo.enrichment.domain.enitity.*
 import ru.tikhonovdo.enrichment.domain.enitity.Currency
@@ -14,7 +13,6 @@ data class FinancePmData(
     val categories: List<Category>,
     val currencies: List<Currency>,
     val arrears: List<Arrear>,
-    @Json(name = "arrear_transaction_relations")
     @JsonProperty("arrear_transaction_relations")
     val arrearTransaction: List<ArrearTransaction>
 )
