@@ -19,6 +19,8 @@ services:
   enrichment:
     image: dtikhonov/enrichment:latest
     container_name: enrichment
+    pull_policy: always
+    restart: always
     env_file:
       - .env
     environment:

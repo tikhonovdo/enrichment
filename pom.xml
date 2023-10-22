@@ -152,56 +152,6 @@
 
         <plugins>
             <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.43.4</version>
-                <configuration>
-                    <images>
-                        <image>
-                            <name>dtikhonov/${project.build.finalName}:${project.version}</name>
-                            <build>
-                                <from>eclipse-temurin:17-jdk-jammy</from>
-                                <buildx>
-                                    <platforms>
-                                        <platform>linux/amd64,linux/arm64</platform>
-                                    </platforms>
-                                </buildx>
-                                <maintainer>chitzkoy@gmail.com</maintainer>
-                                <tags>
-                                    <tag>latest</tag>
-                                </tags>
-                                <entryPoint>
-                                    <exec>
-                                        <arg>java</arg>
-                                        <arg>-jar</arg>
-                                        <arg>/maven/${project.build.finalName}.jar</arg>
-                                    </exec>
-                                </entryPoint>
-                                <assembly>
-                                    <descriptorRef>artifact</descriptorRef>
-                                </assembly>
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>Build docker container</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>Push docker container</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>push</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
@@ -301,21 +251,54 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.spotify</groupId>
+                <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>1.2.2</version>
+                <version>0.43.4</version>
                 <configuration>
-                    <imageName>enrichment</imageName>
-                    <baseImage>java</baseImage>
-                    <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]</entryPoint>
-                    <resources>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>${project.build.directory}</directory>
-                            <include>${project.build.finalName}.jar</include>
-                        </resource>
-                    </resources>
+                    <images>
+                        <image>
+                            <name>dtikhonov/${project.build.finalName}:${project.version}</name>
+                            <build>
+                                <from>eclipse-temurin:17-jdk-jammy</from>
+                                <buildx>
+                                    <platforms>
+                                        <platform>linux/amd64,linux/arm64</platform>
+                                    </platforms>
+                                </buildx>
+                                <maintainer>chitzkoy@gmail.com</maintainer>
+                                <tags>
+                                    <tag>latest</tag>
+                                </tags>
+                                <entryPoint>
+                                    <exec>
+                                        <arg>java</arg>
+                                        <arg>-jar</arg>
+                                        <arg>/maven/${project.build.finalName}.jar</arg>
+                                    </exec>
+                                </entryPoint>
+                                <assembly>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>Build docker container</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>Push docker container</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
