@@ -19,6 +19,8 @@ interface CustomDraftTransactionRepository {
 
     fun findAllByBankId(bankId: Long): List<DraftTransaction>
 
+    fun findAllByBankIdAndDateBetween(bankId: Long, start: LocalDateTime?, end: LocalDateTime?): List<DraftTransaction>
+
     fun deleteObsoleteDraft(): Int
 }
 @Repository
@@ -52,12 +54,23 @@ class DraftTransactionRepositoryImpl(
     }
 
     override fun findAllByBankId(bankId: Long): List<DraftTransaction> {
+        return findAllByBankIdAndDateBetween(bankId, null, null)
+    }
+
+    override fun findAllByBankIdAndDateBetween(bankId: Long, start: LocalDateTime?, end: LocalDateTime?): List<DraftTransaction> {
+        var betweenCondition = ""
+        val params: MutableMap<String, Any> = mutableMapOf("bankId" to bankId)
+        if (start != null && end != null) {
+            betweenCondition = " AND date BETWEEN :start AND :end"
+            params["start"] = start
+            params["end"] = end
+        }
         return namedParameterJdbcTemplate.query(
             """
                 SELECT date, sum, data
                 FROM matching.draft_transaction
-                WHERE bank_id = :bankId""".trimIndent(),
-            MapSqlParameterSource(mapOf("bankId" to bankId))
+                WHERE bank_id = :bankId $betweenCondition""".trimIndent(),
+            MapSqlParameterSource(params)
         ) { rs, _ ->
             DraftTransaction(
                 bankId = bankId,

@@ -21,14 +21,22 @@ class TinkoffFileWorker(private val draftTransactionRepository: DraftTransaction
 
     @Transactional
     override fun saveData(file: MultipartFile, fullReset: Boolean) {
+        saveData(file.resource.contentAsByteArray)
+    }
+
+    fun saveData(contentAsByteArray: ByteArray) {
         val deleted = draftTransactionRepository.deleteObsoleteDraft()
         log.info("$deleted drafts are obsolete and has been deleted")
 
-        val rawRecords = readExcelFile(file.resource.contentAsByteArray)
-        val tinkoffDrafts = draftTransactionRepository.findAllByBankId(Bank.TINKOFF.id)
+        val rawRecords = readExcelFile(contentAsByteArray)
 
-        rawRecords.map { toDraftTransaction(it) }.filter {
-            !tinkoffDrafts.contains(it)
+        val drafts = rawRecords.map { toDraftTransaction(it) }
+        val minDate = drafts.minBy { it.date }.date
+        val maxDate = drafts.maxBy { it.date }.date
+        val existingTinkoffDrafts = draftTransactionRepository.findAllByBankIdAndDateBetween(Bank.TINKOFF.id, minDate, maxDate)
+
+        drafts.filter {
+            !existingTinkoffDrafts.contains(it)
         }.let {
             var inserted = 0
             if (it.isNotEmpty()) {
