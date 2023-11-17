@@ -11,10 +11,7 @@ import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.ActualizeMatchedTransactionsTasklet
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.LinkWithMatchedTransactionsTasklet
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.MatchedTransactionsExportTasklet
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.ValidationNeededRowCounter
+import ru.tikhonovdo.enrichment.batch.matching.transaction.base.*
 import ru.tikhonovdo.enrichment.batch.matching.transfer.base.TransferMatchingExportTasklet
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
@@ -22,6 +19,7 @@ import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
 import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CurrencyMatchingRepository
+import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
 @Configuration
 class BaseMatchingJobConfig(
@@ -30,7 +28,8 @@ class BaseMatchingJobConfig(
     private val transactionManager: PlatformTransactionManager,
     private val categoryMatchingRepository: CategoryMatchingRepository,
     private val accountMatchingRepository: AccountMatchingRepository,
-    private val currencyMatchingRepository: CurrencyMatchingRepository
+    private val currencyMatchingRepository: CurrencyMatchingRepository,
+    private val transactionMatchingRepository: TransactionMatchingRepository
 ): AbstractJobConfig(jobRepository) {
 
     @Bean
@@ -71,6 +70,13 @@ class BaseMatchingJobConfig(
     fun matchedTransfersExportStep(): Step {
         return step("matchedTransfersExportStep")
             .tasklet(TransferMatchingExportTasklet(jdbcTemplate), transactionManager)
+            .build()
+    }
+
+    @Bean
+    fun cleanUnmatchedTransactionsStep(): Step {
+        return step("cleanUnmatchedTransactionsStep")
+            .tasklet(CleanUnmatchedTransactionsTasklet(transactionMatchingRepository), transactionManager)
             .build()
     }
 

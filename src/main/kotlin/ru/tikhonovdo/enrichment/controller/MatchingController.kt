@@ -27,7 +27,7 @@ class MatchingController(
             }
         }
         jobLauncher.run(matchingJob, params.toJobParameters())
-        val count = transactionMatchingRepository.getUnmatchedTransactionsCount()
+        val count = transactionMatchingRepository.getUnmatchedTransactionIds().size
         return "$count unmatched records left"
     }
 

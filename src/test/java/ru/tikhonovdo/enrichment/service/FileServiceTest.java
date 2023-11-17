@@ -1,14 +1,10 @@
 package ru.tikhonovdo.enrichment.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import ru.tikhonovdo.enrichment.AbstractTestSuite;
 import ru.tikhonovdo.enrichment.domain.Bank;
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData;
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction;
@@ -24,31 +20,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class FileServiceTest {
-    @LocalServerPort
-    private Integer port;
-
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-            "postgres:13.3-alpine"
-    );
-
-    @BeforeAll
-    static void beforeAll() {
-        postgres.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        postgres.stop();
-    }
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+public class FileServiceTest extends AbstractTestSuite {
 
     @Autowired
     FileService fileService;
@@ -57,11 +29,6 @@ public class FileServiceTest {
     DraftTransactionRepository draftTransactionRepository;
 
     final ObjectMapper MAPPER = JsonMapper.Companion.getJSON_MAPPER();
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.baseURI = "http://localhost:" + port;
-    }
 
     @Test
     void shouldSaveFinancePMAndLoadExactlySame() throws IOException, URISyntaxException {

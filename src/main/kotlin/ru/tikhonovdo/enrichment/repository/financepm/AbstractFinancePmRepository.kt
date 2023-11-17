@@ -30,7 +30,7 @@ abstract class AbstractFinancePmRepository<T>(
     }
 
     override fun updateSequence() {
-        jdbcTemplate.execute("SELECT setval('${tableName}_id_seq', (SELECT MAX(id) FROM $tableName))")
+        jdbcTemplate.execute("SELECT setval('${tableName}_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM $tableName), false)")
     }
 
     override fun saveDataFromScratch(entities: Collection<T>): Int {

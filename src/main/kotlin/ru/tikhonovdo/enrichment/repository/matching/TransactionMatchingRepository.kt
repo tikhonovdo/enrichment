@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
@@ -16,7 +17,11 @@ interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long
 interface CustomTransactionMatchingRepository {
     fun setEventIdForTransactions(eventId: Long?, matchingTransactionIds: Collection<Long>)
 
-    fun getUnmatchedTransactionsCount(): Long
+    fun getUnmatchedTransactionIds(): List<Long>
+
+    fun deleteByIdIn(ids: Collection<Long>): Int
+
+    fun updateSequence()
 }
 
 @Repository
@@ -38,11 +43,11 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
         )
     }
 
-    override fun getUnmatchedTransactionsCount(): Long {
-        return jdbcTemplate.queryForObject(
+    override fun getUnmatchedTransactionIds(): List<Long> {
+        return jdbcTemplate.queryForList(
         """
-            SELECT count(1) as count
-            -- mt.id, mt.name, tr_t.name as transaction_type, fc.name as category, mt.category_id,cat_t.name as category_type, mt.date, mt.sum, mt.account_id, fa.name, mt.description, mt.event_id, mt.draft_transaction_id, mt.validated
+            SELECT mt.id
+                -- mt.name, tr_t.name as transaction_type, fc.name as category, mt.category_id, cat_t.name as category_type, mt.date, mt.sum, mt.account_id, fa.name, mt.description, mt.event_id, mt.draft_transaction_id, mt.validated
             FROM matching.transaction mt
                      left join financepm.category fc on mt.category_id = fc.id
                      left join financepm.account fa on mt.account_id = fa.id
@@ -50,11 +55,22 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
                      left join financepm.type cat_t ON fc.type = cat_t.id
             WHERE (
                 (account_id IS NULL) -- не задан счет
-                OR ((category_id IS NOT NULL AND event_id IS NOT NULL) -- не является событием, но задана категория
+                OR ((category_id IS NOT NULL AND event_id IS NOT NULL) -- обозначено как событие и задана категория
                 OR (category_id IS NULL AND event_id IS NULL)) -- не является событием и не задана категория
                 OR (tr_t.id != cat_t.id) -- тип категории не соответвует типу транзацкии
                 ) AND NOT validated
-        """.trimIndent()
-        ) { rs, _ -> rs.getLong("count") }!!
+        """.trimIndent(), Long::class.java)
+    }
+
+    @Transactional
+    override fun deleteByIdIn(ids: Collection<Long>): Int {
+        return namedParameterJdbcTemplate.update(
+            "DELETE FROM matching.transaction WHERE id IN (:ids)", MapSqlParameterSource(mapOf("ids" to ids))
+        )
+    }
+
+    @Transactional
+    override fun updateSequence() {
+        jdbcTemplate.execute("SELECT setval('matching.transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.transaction), false)")
     }
 }

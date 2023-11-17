@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.namedparam.SqlParameterSource
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
+import org.springframework.transaction.annotation.Transactional
 
 interface BatchRepository<T> {
     fun insertBatch(entities: Collection<T>): Int
@@ -34,7 +35,8 @@ abstract class AbstractBatchRepository<T>(
         throw UnsupportedOperationException("update batch is not supported")
     }
 
-    protected fun batchQuery(query: String, entities: Collection<T>): Int {
+    @Transactional
+    protected open fun batchQuery(query: String, entities: Collection<T>): Int {
         return namedParameterJdbcTemplate.batchUpdate(query, createBatchParams(entities)).size
     }
 

@@ -18,10 +18,12 @@ import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
                     matchedTransactionsExportStep: Step,
                     linkWithMatchedTransactionsStep: Step,
                     actualizeMatchedTransactionsStep: Step,
-                    matchedTransfersExportStep: Step
+                    matchedTransfersExportStep: Step,
+                    cleanUnmatchedTransactionsStep: Step
     ): Job {
         return job("matchingJob")
-            .start(tinkoffMatchingFlow)
+            .flow(cleanUnmatchedTransactionsStep)
+            .next(tinkoffMatchingFlow)
             .next(matchedTransactionsExportStep)
             .next(linkWithMatchedTransactionsStep)
             .next(actualizeMatchedTransactionsStep)
