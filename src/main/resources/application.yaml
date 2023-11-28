@@ -1,11 +1,37 @@
 spring:
-  main:
-    web-application-type: NONE
-    banner-mode: OFF
+  application.name: enrichment
+  main.banner-mode: OFF
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: ${DB_URL}
+    username: enrichment
+    password: enrichment
+    hikari:
+      connection-timeout: 5000
+      leak-detection-threshold: 30000
+      max-lifetime: 900000
+      maximum-pool-size: 5
+      pool-name: PrimaryPool
+      auto-commit: true
+  liquibase:
+    change-log: classpath:db/changelog/master-changelog.xml
+    enabled: true
+  batch:
+    job.enabled: false
+    jdbc.initialize-schema: never
+  servlet:
+    multipart:
+      max-file-size: 10MB
 
-mapping:
-  accounts: configs/account-mapping.csv
-  categories: configs/categories-mapping.csv
-output-file:
-  name: financePM_{date}_enriched.data
-  date-pattern: dd-MM-yyyy
+logging:
+  level:
+    root: INFO
+    liquibase: INFO
+
+selenium-waiting-period: 5s
+server.servlet.session:
+  timeout: 3m
+  cookie:
+    http-only: true
+    secure: true
+  tracking-modes: cookie

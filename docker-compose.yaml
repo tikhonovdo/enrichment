@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:13.3
+    restart: always
+    environment:
+      POSTGRES_DB: "enrichment"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ${DB_VOLUME_HOST_URI}:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  enrichment:
+    image: dtikhonov/enrichment:latest
+    container_name: enrichment
+    pull_policy: always
+    restart: always
+    environment:
+      DB_URL: ${DB_URL}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  selenoid:
+    image: "aerokube/selenoid"
+    container_name: selenoid
+    restart: always
+    ports:
+      - "4444:4444"
+    volumes:
+      - ".:/etc/selenoid/" # assumed current dir contains browsers.json
+      - "/var/run/docker.sock:/var/run/docker.sock"
