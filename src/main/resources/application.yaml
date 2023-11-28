@@ -27,3 +27,11 @@ logging:
   level:
     root: INFO
     liquibase: INFO
+
+selenium-waiting-period: 5s
+server.servlet.session:
+  timeout: 3m
+  cookie:
+    http-only: true
+    secure: true
+  tracking-modes: cookie

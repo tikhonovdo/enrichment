@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.service;
+package ru.tikhonovdo.enrichment.service.file;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;

@@ -1,16 +1,15 @@
-package ru.tikhonovdo.enrichment.service.worker
+package ru.tikhonovdo.enrichment.service.file.worker
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Workbook
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
-import ru.tikhonovdo.enrichment.service.FileServiceWorker
+import ru.tikhonovdo.enrichment.service.file.FileServiceWorker
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 import java.io.ByteArrayInputStream
 
@@ -20,15 +19,15 @@ class TinkoffFileWorker(private val draftTransactionRepository: DraftTransaction
     private val log = LoggerFactory.getLogger(TinkoffFileWorker::class.java)
 
     @Transactional
-    override fun saveData(file: MultipartFile, fullReset: Boolean) {
-        saveData(file.resource.contentAsByteArray)
+    override fun saveData(content: ByteArray, fullReset: Boolean) {
+        saveData(content)
     }
 
-    fun saveData(contentAsByteArray: ByteArray) {
+    fun saveData(content: ByteArray) {
         val deleted = draftTransactionRepository.deleteObsoleteDraft()
         log.info("$deleted drafts are obsolete and has been deleted")
 
-        val rawRecords = readExcelFile(contentAsByteArray)
+        val rawRecords = readExcelFile(content)
 
         val drafts = rawRecords.map { toDraftTransaction(it) }
         val minDate = drafts.minBy { it.date }.date
@@ -48,8 +47,8 @@ class TinkoffFileWorker(private val draftTransactionRepository: DraftTransaction
 
     private fun readExcelFile(contentAsByteArray: ByteArray): List<TinkoffRecord.Raw> {
         val workbook: Workbook = HSSFWorkbook(ByteArrayInputStream(contentAsByteArray))
-        val sheet = workbook.getSheetAt(0);
-        val rowIterator = sheet.iterator();
+        val sheet = workbook.getSheetAt(0)
+        val rowIterator = sheet.iterator()
         if (rowIterator.hasNext()) {
             rowIterator.next() // skip header row
         }

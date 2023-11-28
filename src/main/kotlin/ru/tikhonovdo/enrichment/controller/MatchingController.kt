@@ -5,8 +5,6 @@ import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import ru.tikhonovdo.enrichment.service.tinkoff.TinkoffSerivce
-import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
 @RestController
@@ -15,7 +13,6 @@ import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepositor
 class MatchingController(
     private val jobLauncher: JobLauncher,
     private val matchingJob: Job,
-    private val tinkoffService: TinkoffSerivce,
     private val transactionMatchingRepository: TransactionMatchingRepository
 ) {
     @PostMapping
@@ -29,10 +26,5 @@ class MatchingController(
         jobLauncher.run(matchingJob, params.toJobParameters())
         val count = transactionMatchingRepository.getUnmatchedTransactionIds().size
         return "$count unmatched records left"
-    }
-
-    @PostMapping("/import/{bank}")
-    fun importTinkoffData(@PathVariable("bank") bank: Bank, @RequestParam("sessionId") sessionId: String) {
-        tinkoffService.importData(sessionId)
     }
 }

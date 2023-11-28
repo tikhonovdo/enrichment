@@ -1,10 +1,10 @@
-package ru.tikhonovdo.enrichment.service.tinkoff
+package ru.tikhonovdo.enrichment.service.importscenario.tinkoff
 
 import feign.Param
 import feign.RequestLine
 import feign.Response
 
-interface TinkoffClient {
+internal interface TinkoffClient {
 
     @RequestLine("GET /export_operations/?format={format}&sessionid={sessionId}&start={start}&end={end}")
     fun getOperations(@Param("format") format: Format,

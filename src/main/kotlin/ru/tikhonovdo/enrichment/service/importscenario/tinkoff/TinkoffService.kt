@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.service.tinkoff
+package ru.tikhonovdo.enrichment.service.importscenario.tinkoff
 
 import feign.Feign
 import feign.Logger
@@ -6,20 +6,21 @@ import feign.okhttp.OkHttpClient
 import feign.slf4j.Slf4jLogger
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.RequestParam
+import ru.tikhonovdo.enrichment.domain.FileType
 import ru.tikhonovdo.enrichment.repository.financepm.TransactionRepository
-import ru.tikhonovdo.enrichment.service.worker.TinkoffFileWorker
+import ru.tikhonovdo.enrichment.service.file.FileService
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-interface TinkoffSerivce {
+interface TinkoffService {
     fun importData(sessionId: String)
 }
 
 @Service
 class TinkoffServiceImpl(
     private val transactionRepository: TransactionRepository,
-    private val tinkoffFileWorker: TinkoffFileWorker
-): TinkoffSerivce {
+    private val fileService: FileService
+): TinkoffService {
 
     private val tinkoffClient = Feign.builder()
         .client(OkHttpClient())
@@ -32,6 +33,6 @@ class TinkoffServiceImpl(
         val end = ZonedDateTime.now().toInstant().toEpochMilli()
         val operations = tinkoffClient.getOperations(Format.xls, sessionId, start, end)
 
-        tinkoffFileWorker.saveData(operations.body().asInputStream().readAllBytes())
+        fileService.saveData(operations.body().asInputStream().readAllBytes(), FileType.TINKOFF)
     }
 }

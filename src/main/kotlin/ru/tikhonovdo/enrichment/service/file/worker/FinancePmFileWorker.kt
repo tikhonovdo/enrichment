@@ -1,13 +1,12 @@
-package ru.tikhonovdo.enrichment.service.worker
+package ru.tikhonovdo.enrichment.service.file.worker
 
 import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData
 import ru.tikhonovdo.enrichment.repository.financepm.*
-import ru.tikhonovdo.enrichment.service.FileServiceWorker
+import ru.tikhonovdo.enrichment.service.file.FileServiceWorker
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 
 interface FinancePmFileWorker: FileServiceWorker {
@@ -29,10 +28,8 @@ class FinancePmFileWorkerImpl (
     private val log = LoggerFactory.getLogger(FinancePmFileWorkerImpl::class.java)
 
     @Transactional
-    override fun saveData(file: MultipartFile, fullReset: Boolean) {
-        JSON_MAPPER.readValue(
-            file.resource.contentAsByteArray, FinancePmData::class.java
-        )?.let {
+    override fun saveData(content: ByteArray, fullReset: Boolean) {
+        JSON_MAPPER.readValue(content, FinancePmData::class.java)?.let {
             save(it, fullReset)
         }
     }

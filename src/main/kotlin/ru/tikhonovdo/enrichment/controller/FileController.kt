@@ -7,26 +7,26 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import ru.tikhonovdo.enrichment.service.FileService
-import java.time.LocalDate
+import ru.tikhonovdo.enrichment.service.file.FileService
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/file")
 @Controller
 class FileController(private val fileService: FileService) {
 
-    @PostMapping("/upload", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun uploadData(@RequestParam("file") file: MultipartFile,
-                   @RequestParam("reset") fullReset: Boolean?) {
-        fileService.store(file, fullReset ?: false)
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun upload(@RequestParam("file") file: MultipartFile, @RequestParam("reset") fullReset: Boolean?) {
+        fileService.saveData(file, fullReset ?: false)
     }
 
-    @GetMapping("/download")
-    fun downloadData(): ResponseEntity<Resource> {
+    @GetMapping(produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    fun download(): ResponseEntity<Resource> {
         val resource = fileService.load()
 
         val headers = HttpHeaders()
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=financePM_${LocalDate.now()}.data")
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=financePM_${now()}.data")
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate")
         headers.add("Pragma", "no-cache")
         headers.add("Expires", "0")
@@ -34,8 +34,10 @@ class FileController(private val fileService: FileService) {
         return ResponseEntity.ok()
             .headers(headers)
             .contentLength(resource.contentLength())
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .body(resource);
     }
+
+    private fun now(): String =
+        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
 }

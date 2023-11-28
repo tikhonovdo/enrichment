@@ -24,3 +24,13 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+
+  selenoid:
+    image: "aerokube/selenoid"
+    container_name: selenoid
+    restart: always
+    ports:
+      - "4444:4444"
+    volumes:
+      - ".:/etc/selenoid/" # assumed current dir contains browsers.json
+      - "/var/run/docker.sock:/var/run/docker.sock"
