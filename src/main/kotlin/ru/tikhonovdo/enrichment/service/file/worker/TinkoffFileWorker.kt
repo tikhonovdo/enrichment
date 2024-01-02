@@ -2,51 +2,20 @@ package ru.tikhonovdo.enrichment.service.file.worker
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Workbook
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
-import ru.tikhonovdo.enrichment.service.file.FileServiceWorker
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 import java.io.ByteArrayInputStream
 
 @Component
-class TinkoffFileWorker(private val draftTransactionRepository: DraftTransactionRepository): FileServiceWorker {
+class TinkoffFileWorker(draftTransactionRepository: DraftTransactionRepository):
+    BankFileWorker(draftTransactionRepository, Bank.TINKOFF) {
 
-    private val log = LoggerFactory.getLogger(TinkoffFileWorker::class.java)
-
-    @Transactional
-    override fun saveData(content: ByteArray, fullReset: Boolean) {
-        saveData(content)
-    }
-
-    fun saveData(content: ByteArray) {
-        val deleted = draftTransactionRepository.deleteObsoleteDraft()
-        log.info("$deleted drafts are obsolete and has been deleted")
-
-        val rawRecords = readExcelFile(content)
-
-        val drafts = rawRecords.map { toDraftTransaction(it) }
-        val minDate = drafts.minBy { it.date }.date
-        val maxDate = drafts.maxBy { it.date }.date
-        val existingTinkoffDrafts = draftTransactionRepository.findAllByBankIdAndDateBetween(Bank.TINKOFF.id, minDate, maxDate)
-
-        drafts.filter {
-            !existingTinkoffDrafts.contains(it)
-        }.let {
-            var inserted = 0
-            if (it.isNotEmpty()) {
-                inserted = draftTransactionRepository.insertBatch(it)
-            }
-            log.info("Upload success. $inserted records was inserted")
-        }
-    }
-
-    private fun readExcelFile(contentAsByteArray: ByteArray): List<TinkoffRecord.Raw> {
-        val workbook: Workbook = HSSFWorkbook(ByteArrayInputStream(contentAsByteArray))
+    override fun readFile(content: ByteArray): List<DraftTransaction> {
+        val workbook: Workbook = HSSFWorkbook(ByteArrayInputStream(content))
         val sheet = workbook.getSheetAt(0)
         val rowIterator = sheet.iterator()
         if (rowIterator.hasNext()) {
@@ -55,7 +24,7 @@ class TinkoffFileWorker(private val draftTransactionRepository: DraftTransaction
 
         val records = mutableListOf<TinkoffRecord.Raw>()
         rowIterator.forEachRemaining {  row ->
-            val rawTinkoffRecord = TinkoffRecord.Raw().apply {
+            TinkoffRecord.Raw().apply {
                 row.cellIterator().forEachRemaining { cell ->
                     when (cell.columnIndex) {
                         0  -> this.operationDate = cell.stringCellValue
@@ -75,10 +44,11 @@ class TinkoffFileWorker(private val draftTransactionRepository: DraftTransaction
                         14 -> this.sumWithRoundingForInvestKopilka = cell.numericCellValue
                     }
                 }
+            }.let {
+                records.add(it)
             }
-            records.add(rawTinkoffRecord)
         }
-        return records
+        return records.map { toDraftTransaction(it) }
     }
 
     private fun toDraftTransaction(record: TinkoffRecord.Raw) = DraftTransaction(

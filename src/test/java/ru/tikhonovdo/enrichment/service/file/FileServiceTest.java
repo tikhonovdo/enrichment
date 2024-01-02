@@ -41,7 +41,7 @@ public class FileServiceTest extends AbstractTestSuite {
                 .multiPart("file", source)
                 .param("reset", "true")
                 .when()
-                .post("/file/upload")
+                .post("/file")
                 .then()
                 .statusCode(200);
         FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
@@ -60,13 +60,13 @@ public class FileServiceTest extends AbstractTestSuite {
                 .multiPart("file", source)
                 .param("reset", "true")
                 .when()
-                .post("/file/upload")
+                .post("/file")
                 .then()
                 .statusCode(200);
         given()
                 .multiPart("file", source)
                 .when()
-                .post("/file/upload")
+                .post("/file")
                 .then()
                 .statusCode(200);
         FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
@@ -76,26 +76,49 @@ public class FileServiceTest extends AbstractTestSuite {
 
     @Test
     void shouldSaveTheSameTinkoffDataOnlyOnce() throws URISyntaxException {
-        URL sourceUrl = FileServiceTest.class.getResource("operations_tinkoff_test_03.08.20-09.08.20.xls");
+        URL sourceUrl = FileServiceTest.class.getResource("tinkoff/operations_03.08.20-04.08.20.xls");
         File source = Paths.get(sourceUrl.toURI()).toFile();
 
         given()
                 .multiPart("file", source)
                 .when()
-                .post("/file/upload")
+                .post("/file")
                 .then()
                 .statusCode(200);
         given()
                 .multiPart("file", source)
                 .when()
-                .post("/file/upload")
+                .post("/file")
                 .then()
                 .statusCode(200);
 
 
         List<DraftTransaction> draftTransactions = draftTransactionRepository.findAllByBankId(Bank.TINKOFF.getId());
 
-        Assertions.assertEquals(25, draftTransactions.size());
+        Assertions.assertEquals(6, draftTransactions.size());
+    }
+
+    @Test
+    void shouldSaveTheSameAlfaDataOnlyOnce() throws URISyntaxException {
+        URL sourceUrl = FileServiceTest.class.getResource("alfa/Statement 06.06.2021 - 06.06.2021.xlsx");
+        File source = Paths.get(sourceUrl.toURI()).toFile();
+
+        given()
+                .multiPart("file", source)
+                .when()
+                .post("/file")
+                .then()
+                .statusCode(200);
+        given()
+                .multiPart("file", source)
+                .when()
+                .post("/file")
+                .then()
+                .statusCode(200);
+
+        List<DraftTransaction> draftTransactions = draftTransactionRepository.findAllByBankId(Bank.ALFA.getId());
+
+        Assertions.assertEquals(2, draftTransactions.size());
     }
 
 

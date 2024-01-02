@@ -84,7 +84,8 @@ class DraftTransactionRepositoryImpl(
     override fun deleteObsoleteDraft(): Int {
         val deleted = jdbcTemplate.update("""
             DELETE FROM matching.draft_transaction 
-            WHERE bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK')
+            WHERE (bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK'))
+                OR (bank_id = ${Bank.ALFA.id} AND ((data->>'paymentDate') IS NULL OR ((data->>'status') != 'Выполнен' AND (data->>'category') != 'Пополнения')))
             """.trimIndent())
         jdbcTemplate.execute("SELECT setval('matching.draft_transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.draft_transaction), false)")
         return deleted

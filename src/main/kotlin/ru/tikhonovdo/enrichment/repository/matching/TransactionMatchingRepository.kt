@@ -1,6 +1,7 @@
 package ru.tikhonovdo.enrichment.repository.matching
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
@@ -8,9 +9,19 @@ import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
+import java.time.LocalDateTime
+import java.util.Optional
 
 interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long>,
     BatchRepository<TransactionMatching>, CustomTransactionMatchingRepository {
+    @Query("""
+        SELECT mt.date FROM matching.transaction mt
+        JOIN matching.draft_transaction mdt on mt.draft_transaction_id = mdt.id
+        WHERE mdt.bank_id = :bankId and mt.validated
+        ORDER BY mt.date DESC LIMIT 1;
+    """, nativeQuery = true)
+    fun findLastValidatedTransactionDateByBank(bankId: Long): Optional<LocalDateTime>
+
     fun existsByDraftTransactionId(draftTransactionId: Long): Boolean
 }
 

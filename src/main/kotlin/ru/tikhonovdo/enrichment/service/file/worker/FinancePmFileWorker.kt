@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData
 import ru.tikhonovdo.enrichment.repository.financepm.*
-import ru.tikhonovdo.enrichment.service.file.FileServiceWorker
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 
-interface FinancePmFileWorker: FileServiceWorker {
+interface FinancePmFileWorker: FileWorker {
     fun retrieveData(): ByteArray
 }
 

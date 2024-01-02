@@ -1,52 +1,53 @@
 package ru.tikhonovdo.enrichment.service.importscenario.tinkoff
 
-import com.codeborne.selenide.Selenide
-import com.codeborne.selenide.Selenide.`$`
+import com.codeborne.selenide.Selenide.*
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import ru.tikhonovdo.enrichment.service.importscenario.ImportScenario
-import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
-import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioSessionContext
+import ru.tikhonovdo.enrichment.domain.Bank
+import ru.tikhonovdo.enrichment.service.importscenario.*
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState.*
 import java.time.Duration
 import kotlin.random.Random
 
 @Component
 class TinkoffImportScenario(
-    @Value("\${selenium-waiting-period:5s}") private val waitingDuration: Duration,
+    @Value("\${import.tinkoff.home-url}") private val homeUrl: String,
     private val tinkoffService: TinkoffService,
-    private val sessionContext: ImportScenarioSessionContext
-): ImportScenario {
 
-    private val log = LoggerFactory.getLogger(TinkoffImportScenario::class.java)
+    @Value("\${selenium-waiting-period:5s}") waitingDuration: Duration,
+    context: ImportScenarioContext
+): AbstractImportScenario(context, waitingDuration, Bank.TINKOFF) {
 
-    override fun startLogin(scenarioData: ImportScenarioData): Boolean {
+    override fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState {
         val random = Random(System.currentTimeMillis())
 
-        Selenide.open("https://www.tinkoff.ru/mybank/")
-        random.sleep(5000, 10000)
+        open(homeUrl)
+        random.sleep(2000, 5000)
 
-        Selenide.Wait().until { it.findElement(By.xpath("//button[@type='submit']")) }
-        val phoneInput = `$`(By.xpath("//input[@automation-id='phone-input']"))
-        random.sleep(4000, 6000)
+        val driver = webdriver().`object`()
+        WebDriverWait(driver, waitingDuration)
+            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='phone-input']"))))
+            .sendKeys(scenarioData.phone)
+        WebDriverWait(driver, waitingDuration)
+            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@type='submit']"))))
+            .click()
+        random.sleep(3500, 5000)
 
-        phoneInput.sendKeys(scenarioData.phone)
-        phoneInput.pressEnter()
-        random.sleep(4000, 6000)
-
-        val otpInput = Selenide.Wait().until { `$`(By.xpath("//button[@automation-id='otp-input']")) }
-        sessionContext.moveToState(TINKOFF_OTP_SENT)
-
-        return otpInput != null
+        val otpInput = WebDriverWait(driver, waitingDuration)
+            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
+        return if (otpInput != null) {
+            OTP_SENT
+        } else {
+            INITIAL
+        }
     }
 
-    override fun confirmLoginAndImport(scenarioData: ImportScenarioData): Boolean {
+    override fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
+        val driver = driver()
         val random = Random(System.currentTimeMillis())
-        val driver = sessionContext.getDriver()
 
         val otpInput = WebDriverWait(driver, waitingDuration)
             .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
@@ -66,22 +67,24 @@ class TinkoffImportScenario(
         val cancelButton = WebDriverWait(driver, waitingDuration)
             .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='cancel-button']"))))
         cancelButton.click()
-        random.sleep(1500,3000)
+        Thread.sleep(1000) // simulate navigation
 
-        sessionContext.moveToState(TINKOFF_LOGIN_SUCCEED)
+        return if (elementPresented("//*[@data-qa-type='desktop-homer-container' and @data-qa-state='success']")) {
+            LOGIN_SUCCEED
+        } else {
+            INITIAL
+        }
+    }
+
+    override fun saveData(): Boolean {
         try {
-            val apiSession = driver.manage().getCookieNamed("api_session").value
+            val apiSession = driver().manage().getCookieNamed("api_session").value
             tinkoffService.importData(apiSession)
         } catch (e: Throwable) {
             log.warn("Error during import", e)
             return false
-        } finally {
-            driver.quit()
         }
         return true
     }
 
-    private fun Random.sleep(from: Long, until: Long) {
-        Thread.sleep(Duration.ofMillis(nextLong(from, until)))
-    }
 }

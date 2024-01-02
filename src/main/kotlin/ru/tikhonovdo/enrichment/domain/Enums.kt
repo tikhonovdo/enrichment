@@ -1,12 +1,13 @@
 package ru.tikhonovdo.enrichment.domain
 
 enum class Bank(val id: Long) {
-    TINKOFF(1)
+    TINKOFF(1), ALFA(2)
 }
 
 enum class FileType(val bankId: Long?) {
     FINANCE_PM(null),
-    TINKOFF(Bank.TINKOFF.id)
+    TINKOFF(Bank.TINKOFF.id),
+    ALFA(Bank.ALFA.id)
 }
 
 enum class Type(val id: Long) {

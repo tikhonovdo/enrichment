@@ -20,6 +20,7 @@ services:
     restart: always
     environment:
       DB_URL: ${DB_URL}
+      SELENOID_HOST_DOWNLOAD_PATH: ${SELENOID_HOST_DOWNLOAD_PATH}
     ports:
       - "8080:8080"
     depends_on:
@@ -32,5 +33,5 @@ services:
     ports:
       - "4444:4444"
     volumes:
-      - ".:/etc/selenoid/" # assumed current dir contains browsers.json
+      - ".:/etc/selenoid/" # assumed current dir contains browsers.json; in case of changes in browser.json selenoid must be restared
       - "/var/run/docker.sock:/var/run/docker.sock"

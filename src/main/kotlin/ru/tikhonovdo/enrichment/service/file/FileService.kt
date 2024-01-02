@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.FileType
 import ru.tikhonovdo.enrichment.domain.FileType.*
+import ru.tikhonovdo.enrichment.service.file.worker.AlfabankFileWorker
+import ru.tikhonovdo.enrichment.service.file.worker.FileWorker
 import ru.tikhonovdo.enrichment.service.file.worker.FinancePmFileWorker
 import ru.tikhonovdo.enrichment.service.file.worker.TinkoffFileWorker
 
@@ -16,22 +18,20 @@ interface FileService {
     fun load() : Resource
 }
 
-interface FileServiceWorker {
-    fun saveData(content: ByteArray, fullReset: Boolean = false)
-}
-
 @Service
 class FileServiceImpl(
     private val financePmFileWorker: FinancePmFileWorker,
-    tinkoffFileWorker: TinkoffFileWorker
+    tinkoffFileWorker: TinkoffFileWorker,
+    alfabankFileWorker: AlfabankFileWorker
 ) : FileService {
 
     private val log = LoggerFactory.getLogger(FileServiceImpl::class.java)
-    private val workers = mutableMapOf<FileType, FileServiceWorker>()
+    private val workers = mutableMapOf<FileType, FileWorker>()
 
     init {
         workers[FINANCE_PM] = financePmFileWorker
         workers[TINKOFF] = tinkoffFileWorker
+        workers[ALFA] = alfabankFileWorker
     }
 
     override fun saveData(file: MultipartFile, fullReset: Boolean) {
@@ -57,6 +57,9 @@ class FileServiceImpl(
         }
         if (file.originalFilename?.matches(Regex("operations(.*)")) == true) {
             return TINKOFF
+        }
+        if (file.originalFilename?.matches(Regex("Statement(.*).xlsx")) == true) {
+            return ALFA
         }
         throw IllegalStateException("unknown file type")
     }

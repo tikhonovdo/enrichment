@@ -2,6 +2,7 @@ package ru.tikhonovdo.enrichment.service.importscenario
 
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.Bank
+import ru.tikhonovdo.enrichment.service.importscenario.alfabank.AlfabankImportScenario
 import ru.tikhonovdo.enrichment.service.importscenario.tinkoff.TinkoffImportScenario
 
 interface ImportService {
@@ -14,10 +15,12 @@ interface ImportService {
 @Component
 class ImportServiceImpl(
     tinkoffImportScenario: TinkoffImportScenario,
+    alfabankImportScenario: AlfabankImportScenario
 ): ImportService {
 
     private val bankToScenarioMap = mapOf(
-        Bank.TINKOFF to tinkoffImportScenario
+        Bank.TINKOFF to tinkoffImportScenario,
+        Bank.ALFA to alfabankImportScenario
     )
 
     override fun login(bank: Bank, scenarioData: ImportScenarioData): Boolean {

@@ -5,9 +5,11 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <include file="classpath:org/springframework/batch/core/schema-postgresql.sql" />
-    <include file="./1_init-finance-pm/changes.xml" relativeToChangelogFile="true"/>
-    <include file="./2_init-matching/changes.xml" relativeToChangelogFile="true"/>
-    <include file="./3_alfabank_support/changes.xml" relativeToChangelogFile="true"/>
+    <changeSet id="alfabank_support_added" author="chitzkoy">
+        <insert schemaName="matching" tableName="bank">
+            <column name="id">2</column>
+            <column name="name">Альфа Банк</column>
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

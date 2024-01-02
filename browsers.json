@@ -6,6 +6,7 @@
         "image": "seleniarm/standalone-chromium:117.0",
         "port": "4444",
         "path": "/",
+        "volumes": ["/c/tmp/enrichment:/home/seluser/Downloads"],
         "env" : ["TZ=Europe/Moscow", "LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]
       }
     }
