@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff
+package ru.tikhonovdo.enrichment.batch.matching.transfer.alfa
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
@@ -10,7 +10,7 @@ import java.math.BigDecimal
 import javax.sql.DataSource
 import kotlin.math.abs
 
-class TinkoffCashTransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<TransactionMatching>() {
+class AlfaCashTransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<TransactionMatching>() {
 
     init {
         this.dataSource = dataSource
@@ -21,9 +21,9 @@ class TinkoffCashTransferMatchingStepReader(dataSource: DataSource): JdbcCursorI
                    dt.data->>'paymentSum' as payment_sum,
                    dt.data->>'description' as description
             FROM matching.draft_transaction dt
-            JOIN matching.account a ON a.bank_account_code = (dt.data->>'cardNumber') AND a.bank_id = ${Bank.TINKOFF.id}
-            WHERE dt.bank_id = ${Bank.TINKOFF.id} AND (dt.data->>'category') = 'Наличные' AND (dt.data->>'status') = 'OK';
-        """.trimIndent()
+            JOIN matching.account a ON a.bank_account_code = (dt.data->>'accountNumber') AND a.bank_id = ${Bank.ALFA.id}
+            WHERE dt.bank_id = ${Bank.ALFA.id} AND ??? AND (dt.data->>'status') = 'Выполнен';
+        """.trimIndent() //todo: нужно проверить как выглядят списания наличных у Альфы
         this.setRowMapper { rs, _ ->
             TransactionMatching(
                 draftTransactionId = rs.getLong("draft_transaction_id"),

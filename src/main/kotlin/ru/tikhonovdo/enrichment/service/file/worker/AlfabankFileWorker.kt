@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.AlfaRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
@@ -44,8 +44,8 @@ class AlfabankFileWorker(
                         4  -> this.cardName = cell.stringCellValue
                         5  -> this.cardNumber = cell.stringCellValue
                         6  -> this.description = cell.stringCellValue.replace(Regex("\\s+"), " ")
-                        7  -> this.operationSum = cell.numericCellValue
-                        8  -> this.operationCurrency = cell.stringCellValue
+                        7  -> this.paymentSum = cell.numericCellValue
+                        8  -> this.paymentCurrency = cell.stringCellValue
                         9  -> this.status = cell.stringCellValue
                         10 -> this.category = cell.stringCellValue
                         11 -> this.mcc = cell.numericCellValue.toInt().takeIf { it != 0 }
@@ -75,7 +75,7 @@ class AlfabankFileWorker(
     private fun toDraftTransaction(record: AlfaRecord.Raw) = DraftTransaction(
         bankId = Bank.ALFA.id,
         date = AlfaRecord.parseOperationDate(record.operationDate!!),
-        sum = record.operationSum.toString(),
+        sum = record.paymentSum.toString(),
         data = JSON_MAPPER.writeValueAsString(record)
     )
 

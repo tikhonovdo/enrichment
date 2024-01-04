@@ -21,7 +21,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
 import kotlin.random.Random
 
-
 @Component
 class AlfabankImportScenario(
     @Value("\${selenoid-host-download-path}") private val hostDownloadPath: String,
@@ -35,27 +34,10 @@ class AlfabankImportScenario(
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
     override fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState {
-        val random = Random(System.currentTimeMillis())
         resetDownloadPath()
+        runRequestOtpCodeScenario(scenarioData)
 
-        open(homeUrl)
-        random.sleep(2000, 5000)
-
-        val driver = webdriver().`object`()
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@type='text']"))))
-            .sendKeys(scenarioData.login)
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@type='password']"))))
-            .sendKeys(scenarioData.password)
-        random.sleep(2500, 4000)
-
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@type='submit']"))))
-            .click()
-        random.sleep(1000, 1500) // wait for request complete
-
-        val otpInput = WebDriverWait(driver, waitingDuration)
+        val otpInput = WebDriverWait(webdriver().`object`(), waitingDuration)
             .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//input[@autocomplete='one-time-code']")))
         return if (otpInput != null) {
             OTP_SENT
@@ -68,6 +50,25 @@ class AlfabankImportScenario(
         val path = Path(hostDownloadPath)
         FileSystemUtils.deleteRecursively(path)
         Files.createDirectories(path)
+    }
+
+    private fun runRequestOtpCodeScenario(scenarioData: ImportScenarioData) {
+        val random = Random(System.currentTimeMillis())
+
+        open(homeUrl)
+        random.sleep(2000, 5000)
+
+        val driver = webdriver().`object`()
+        val wait = WebDriverWait(driver, waitingDuration)
+        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@type='text']"))))
+            .sendKeys(scenarioData.login)
+        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@type='password']"))))
+            .sendKeys(scenarioData.password)
+        random.sleep(2500, 4000)
+
+        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@type='submit']"))))
+            .click()
+        random.sleep(1000, 1500) // wait for request complete
     }
 
     override fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
@@ -91,43 +92,13 @@ class AlfabankImportScenario(
     }
 
     override fun saveData(): Boolean {
-        val driver = driver()
-        val random = Random(System.currentTimeMillis())
-
-        val downloadPath = Path(hostDownloadPath)
         val watchService = FileSystems.getDefault().newWatchService()
+        val downloadPath = Path(hostDownloadPath)
         downloadPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
 
-        driver.get(URI.create(driver.currentUrl).resolve("history").toString())
-        random.sleep(1000,1500) // wait for the next form
+        saveDataScenario()
 
-        val operationsReportLink = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='categories-group']/../button")))
-        random.sleep(1000,2000) // simulate pointing on link
-
-        operationsReportLink.click()
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//*[@data-test-id='quick-period-tags']//following-sibling::button)[last()]")))
-            .click()
-        random.sleep(500,1000)
-
-        val accountSelectField = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-field']")))
-        random.sleep(1000,2000) // simulate pointing on link
-
-        accountSelectField.click()
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-option']")))
-            .click()
-        random.sleep(500,1000)
-
-        accountSelectField.click()
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='get-account-reports-button']")))
-            .click()
-
-        val report = waitForFileDownload(watchService, downloadPath)
-        report.setReadable(true)
+        val report = getDownloadedFile(watchService, downloadPath)
         try {
             fileService.saveData(report.readBytes(), FileType.ALFA)
             FileSystemUtils.deleteRecursively(downloadPath)
@@ -138,7 +109,41 @@ class AlfabankImportScenario(
         return true
     }
 
-    private fun waitForFileDownload(watchService: WatchService, downloadPath: Path): File {
+    private fun saveDataScenario() {
+        val random = Random(System.currentTimeMillis())
+        val driver = driver()
+        val wait = WebDriverWait(driver, waitingDuration)
+
+        driver.get(URI.create(driver.currentUrl).resolve("history").toString())
+        random.sleep(1000,1500) // wait for the next form
+
+        val operationsReportLink = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='categories-group']/../button")))
+        random.sleep(1000,2000) // simulate pointing on link
+
+        operationsReportLink.click()
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//*[@data-test-id='quick-period-tags']//following-sibling::button)[last()]")))
+            .click()
+        random.sleep(500,1000)
+
+        val accountSelectField = wait
+            .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-field']")))
+        random.sleep(1000,2000) // simulate pointing on link
+
+        accountSelectField.click()
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-option']")))
+            .click()
+        random.sleep(500,1000)
+
+        accountSelectField.click()
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='get-account-reports-button']")))
+            .click()
+
+        // just prolongate webdriver life
+        Thread.sleep(waitingDuration)
+        accountSelectField.isDisplayed
+    }
+
+    private fun getDownloadedFile(watchService: WatchService, downloadPath: Path): File {
         val start = sixMonthsAgo().format(dateFormatter)
         val end = LocalDate.now().format(dateFormatter)
         val expectedName = "Statement $start - $end.xlsx"
@@ -155,6 +160,9 @@ class AlfabankImportScenario(
         }
         watchService.close()
 
-        return downloadPath.resolve(expectedName).toFile()
+        val report = downloadPath.resolve(expectedName).toFile()
+        report.setReadable(true)
+
+        return report
     }
 }

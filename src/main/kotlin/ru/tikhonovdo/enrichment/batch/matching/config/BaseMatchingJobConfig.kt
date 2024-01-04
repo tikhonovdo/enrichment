@@ -1,8 +1,10 @@
-package ru.tikhonovdo.enrichment.batch
+package ru.tikhonovdo.enrichment.batch.matching.config
 
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.ItemProcessor
+import org.springframework.batch.item.ItemReader
+import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
@@ -11,26 +13,52 @@ import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transaction.base.*
-import ru.tikhonovdo.enrichment.batch.matching.transfer.base.TransferMatchingExportTasklet
-import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
-import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
-import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
-import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
-import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
-import ru.tikhonovdo.enrichment.repository.matching.CurrencyMatchingRepository
-import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
+import ru.tikhonovdo.enrichment.batch.matching.transaction.*
+import ru.tikhonovdo.enrichment.batch.matching.transfer.*
+import ru.tikhonovdo.enrichment.domain.enitity.*
+import ru.tikhonovdo.enrichment.repository.financepm.AccountRepository
+import ru.tikhonovdo.enrichment.repository.matching.*
+import javax.sql.DataSource
 
 @Configuration
 class BaseMatchingJobConfig(
     jobRepository: JobRepository,
+    private val dataSource: DataSource,
     private val jdbcTemplate: JdbcTemplate,
     private val transactionManager: PlatformTransactionManager,
+    private val accountRepository: AccountRepository,
     private val categoryMatchingRepository: CategoryMatchingRepository,
     private val accountMatchingRepository: AccountMatchingRepository,
     private val currencyMatchingRepository: CurrencyMatchingRepository,
-    private val transactionMatchingRepository: TransactionMatchingRepository
+    private val transactionMatchingRepository: TransactionMatchingRepository,
+    private val transferMatchingRepository: TransferMatchingRepository
 ): AbstractJobConfig(jobRepository) {
+
+    @Bean
+    fun transferMatchingStep(
+        transferMatchingStepReader: ItemReader<TransferMatching>,
+        transferMatchingStepProcessor: ItemProcessor<TransferMatching, TransferMatching>,
+        transferMatchingStepWriter: ItemWriter<TransferMatching>
+    ): Step {
+        return step("transferMatchingStep")
+            .chunk<TransferMatching, TransferMatching>(10, transactionManager)
+            .reader(transferMatchingStepReader)
+            .processor(transferMatchingStepProcessor)
+            .writer(transferMatchingStepWriter)
+            .build()
+    }
+
+    @Bean
+    fun transferMatchingStepReader(): ItemReader<TransferMatching> =
+        TransferMatchingStepReader(dataSource)
+
+    @Bean
+    fun transferMatchingStepProcessor(): ItemProcessor<TransferMatching, TransferMatching> =
+        TransferMatchingStepProcessor(transferMatchingRepository)
+
+    @Bean
+    fun transferMatchingStepWriter(): ItemWriter<TransferMatching> =
+        TransferMatchingStepWriter(transactionMatchingRepository, transferMatchingRepository)
 
     @Bean
     fun categoryMatchingStepProcessor(): ItemProcessor<CategoryMatching, CategoryMatching> =
@@ -43,6 +71,14 @@ class BaseMatchingJobConfig(
     @Bean
     fun accountMatchingStepProcessor(): ItemProcessor<AccountMatching, AccountMatching> =
         AccountMatchingStepProcessor(accountMatchingRepository)
+
+    @Bean
+    fun cashTransferMatchingStepProcessor(): ItemProcessor<TransactionMatching, TransactionMatching> =
+        CashTransferMatchingStepProcessor(transactionMatchingRepository)
+
+    @Bean
+    fun cashTransferMatchingStepWriter(): ItemWriter<TransactionMatching> =
+        CashTransferMatchingStepWriter(accountRepository, transactionMatchingRepository, transferMatchingRepository)
 
     @Bean
     fun matchedTransactionsExportStep(): Step {

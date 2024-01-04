@@ -92,7 +92,6 @@ public class FileServiceTest extends AbstractTestSuite {
                 .then()
                 .statusCode(200);
 
-
         List<DraftTransaction> draftTransactions = draftTransactionRepository.findAllByBankId(Bank.TINKOFF.getId());
 
         Assertions.assertEquals(6, draftTransactions.size());
@@ -120,7 +119,6 @@ public class FileServiceTest extends AbstractTestSuite {
 
         Assertions.assertEquals(2, draftTransactions.size());
     }
-
 
     private void bringScaleToValue(FinancePmData data, int newScale) {
         data.getTransactions().forEach(transaction ->

@@ -1,10 +1,10 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff
+package ru.tikhonovdo.enrichment.batch.matching.transfer
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.enitity.TransferMatching
 import javax.sql.DataSource
 
-class TinkoffAccountsTransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<TransferMatching>() {
+class TransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<TransferMatching>() {
     init {
         this.dataSource = dataSource
         sql = """

@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transaction.base
+package ru.tikhonovdo.enrichment.batch.matching.transaction
 
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.ExitStatus

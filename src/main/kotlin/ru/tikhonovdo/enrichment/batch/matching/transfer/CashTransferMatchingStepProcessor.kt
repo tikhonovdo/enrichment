@@ -1,10 +1,10 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff
+package ru.tikhonovdo.enrichment.batch.matching.transfer
 
 import org.springframework.batch.item.ItemProcessor
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
-class TinkoffCashTransferMatchingStepProcessor(private val transactionMatchingRepository: TransactionMatchingRepository):
+class CashTransferMatchingStepProcessor(private val transactionMatchingRepository: TransactionMatchingRepository):
     ItemProcessor<TransactionMatching, TransactionMatching> {
 
     override fun process(item: TransactionMatching): TransactionMatching? {

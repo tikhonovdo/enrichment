@@ -10,7 +10,7 @@ import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
 import java.time.LocalDateTime
-import java.util.Optional
+import java.util.*
 
 interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long>,
     BatchRepository<TransactionMatching>, CustomTransactionMatchingRepository {
@@ -75,9 +75,13 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
 
     @Transactional
     override fun deleteByIdIn(ids: Collection<Long>): Int {
-        return namedParameterJdbcTemplate.update(
-            "DELETE FROM matching.transaction WHERE id IN (:ids)", MapSqlParameterSource(mapOf("ids" to ids))
-        )
+        return if (ids.isNotEmpty()) {
+            namedParameterJdbcTemplate.update(
+                "DELETE FROM matching.transaction WHERE id IN (:ids)", MapSqlParameterSource(mapOf("ids" to ids))
+            )
+        } else {
+            0
+        }
     }
 
     @Transactional

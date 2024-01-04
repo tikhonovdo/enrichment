@@ -9,7 +9,6 @@ import ru.tikhonovdo.enrichment.service.importscenario.sixMonthsAgo
 import java.util.function.Predicate
 import java.util.function.Supplier
 
-
 @Configuration
 class AlfabankConfig {
 

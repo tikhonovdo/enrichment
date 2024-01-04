@@ -28,16 +28,14 @@ class TinkoffImportScenario(
         random.sleep(2000, 5000)
 
         val driver = webdriver().`object`()
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='phone-input']"))))
+        val wait = WebDriverWait(driver, waitingDuration)
+        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='phone-input']"))))
             .sendKeys(scenarioData.phone)
-        WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@type='submit']"))))
+        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@type='submit']"))))
             .click()
         random.sleep(3500, 5000)
 
-        val otpInput = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
+        val otpInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
         return if (otpInput != null) {
             OTP_SENT
         } else {
@@ -46,26 +44,23 @@ class TinkoffImportScenario(
     }
 
     override fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
-        val driver = driver()
         val random = Random(System.currentTimeMillis())
+        val driver = driver()
+        val wait = WebDriverWait(driver, waitingDuration)
 
-        val otpInput = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
+        val otpInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
         otpInput.sendKeys(scenarioData.otpCode)
         random.sleep(4000, 6000)
 
-        val passwordInput = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='password-input']"))))
-        val buttonSubmit = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='button-submit']"))))
+        val passwordInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='password-input']"))))
+        val buttonSubmit = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='button-submit']"))))
         random.sleep(6000,10000)
 
         passwordInput.sendKeys(scenarioData.password)
         buttonSubmit.click()
         random.sleep(2000,3000)
 
-        val cancelButton = WebDriverWait(driver, waitingDuration)
-            .until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='cancel-button']"))))
+        val cancelButton = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='cancel-button']"))))
         cancelButton.click()
         Thread.sleep(1000) // simulate navigation
 

@@ -4,7 +4,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER

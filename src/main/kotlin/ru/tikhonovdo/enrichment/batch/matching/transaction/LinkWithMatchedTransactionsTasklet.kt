@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transaction.base
+package ru.tikhonovdo.enrichment.batch.matching.transaction
 
 import org.springframework.batch.core.StepContribution
 import org.springframework.batch.core.scope.context.ChunkContext

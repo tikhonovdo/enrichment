@@ -2,7 +2,7 @@ package ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.TinkoffRecord
 import ru.tikhonovdo.enrichment.util.getNullable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

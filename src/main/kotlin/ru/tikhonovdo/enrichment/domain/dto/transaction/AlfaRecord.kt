@@ -1,29 +1,27 @@
-package ru.tikhonovdo.enrichment.domain.dto
+package ru.tikhonovdo.enrichment.domain.dto.transaction
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 data class AlfaRecord(
-    var draftTransactionId: Long? = null,
-    val operationDate: LocalDate, // Дата операции
+    override var draftTransactionId: Long? = null,
+    override val operationDate: LocalDateTime, // Дата операции
     val paymentDate: LocalDate?, // Дата проводки
     val accountName: String, // Название счета
     val accountNumber: String, // Номер счета
     val cardName: String?, // Название карты
     val cardNumber: String?, // Номер карты
-    val description: String, // Описание операции
-    val operationSum: Double, // Сумма
-    val operationCurrency: String, // Валюта
-    val status: String?, // Статус
-    val category: String, // Категория
-    val mcc: Int?, // MCC код
+    override val description: String, // Описание операции
+    override val paymentSum: Double, // Сумма платежа
+    val paymentCurrency: String, // Валюта платежа
+    override val status: String?, // Статус
+    override val category: String, // Категория
+    override val mcc: String?, // MCC код
     val type: String, // Тип (списание/начисление)
     val comment: String // Комментарий
-) {
+): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
     companion object {
-        private val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDate::from).atStartOfDay()
     }
 
@@ -35,8 +33,8 @@ data class AlfaRecord(
         var cardName: String? = null,
         var cardNumber: String? = null,
         var description: String? = null,
-        var operationSum: Double? = null,
-        var operationCurrency: String? = null,
+        var paymentSum: Double? = null,
+        var paymentCurrency: String? = null,
         var status: String? = null,
         var category: String? = null,
         var mcc: Int? = null,

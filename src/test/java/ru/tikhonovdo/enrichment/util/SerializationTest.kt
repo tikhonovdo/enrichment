@@ -6,9 +6,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import ru.tikhonovdo.enrichment.domain.enitity.Transaction
+import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 import java.math.BigDecimal
 import java.time.LocalDateTime
-import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 
 @RunWith(SpringJUnit4ClassRunner::class)
 class SerializationTest {
@@ -39,7 +39,6 @@ class SerializationTest {
             "source":0,
             "available":1}
         """.trimIndent().replace("\n", "")
-
 
         val actual = JSON_MAPPER.writeValueAsString(transaction)
 

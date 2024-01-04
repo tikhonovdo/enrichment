@@ -1,30 +1,28 @@
-package ru.tikhonovdo.enrichment.domain.dto
+package ru.tikhonovdo.enrichment.domain.dto.transaction
 
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 data class TinkoffRecord(
-    var draftTransactionId: Long? = null,
-    val operationDate: LocalDateTime,            // Дата операции
+    override var draftTransactionId: Long? = null,
+    override val operationDate: LocalDateTime,            // Дата операции
     val paymentDate: LocalDate?,                 // Дата платежа
     val cardNumber: String?,                     // Номер карты
-    val status: String,                          // Статус
+    override val status: String,                          // Статус
     val operationSum: Double,                    // Сумма операции
     val operationCurrency: String,               // Валюта операции
-    val paymentSum: Double,                      // Сумма платежа
+    override val paymentSum: Double,                      // Сумма платежа
     val paymentCurrency: String,                 // Валюта платежа
     val cashback: Double?,                       // Кэшбэк
-    val category: String,                        // Категория
-    val mcc: String?,                            // MCC
-    val description: String,                     // Описание
+    override val category: String,                        // Категория
+    override val mcc: String?,                            // MCC
+    override val description: String,                     // Описание
     val totalBonuses: Double,                    // Бонусы (включая кэшбэк)
     val roundingForInvestKopilka: Double,        // Округление на инвесткопилку
     val sumWithRoundingForInvestKopilka: Double  // Сумма операции с округлением
-) {
+): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
     companion object {
-        private val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy[ HH:mm:ss]")
         fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDateTime::from)
     }
 

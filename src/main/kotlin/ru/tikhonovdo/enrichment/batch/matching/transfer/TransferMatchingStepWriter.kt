@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff
+package ru.tikhonovdo.enrichment.batch.matching.transfer
 
 import org.springframework.batch.item.Chunk
 import org.springframework.batch.item.ItemWriter
@@ -7,7 +7,7 @@ import ru.tikhonovdo.enrichment.domain.enitity.TransferMatching
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransferMatchingRepository
 
-class TinkoffAccountsTransferMatchingStepWriter(
+class TransferMatchingStepWriter(
     private val transactionMatchingRepository: TransactionMatchingRepository,
     private val transferMatchingRepository: TransferMatchingRepository
 ): ItemWriter<TransferMatching> {
