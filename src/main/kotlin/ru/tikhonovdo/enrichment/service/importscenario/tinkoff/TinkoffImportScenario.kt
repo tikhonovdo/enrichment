@@ -54,11 +54,11 @@ class TinkoffImportScenario(
 
         val passwordInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='password-input']"))))
         val buttonSubmit = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='button-submit']"))))
-        random.sleep(6000,10000)
+        random.sleep(6000, 8000)
 
         passwordInput.sendKeys(scenarioData.password)
         buttonSubmit.click()
-        random.sleep(2000,3000)
+        random.sleep(2000, 3000)
 
         val cancelButton = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='cancel-button']"))))
         cancelButton.click()
@@ -71,15 +71,15 @@ class TinkoffImportScenario(
         }
     }
 
-    override fun saveData(): Boolean {
+    override fun saveData(): ScenarioState {
         try {
             val apiSession = driver().manage().getCookieNamed("api_session").value
             tinkoffService.importData(apiSession)
         } catch (e: Throwable) {
             log.warn("Error during import", e)
-            return false
+            return FAILURE
         }
-        return true
+        return DATA_SAVED
     }
 
 }

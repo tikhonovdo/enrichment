@@ -11,9 +11,9 @@ import kotlin.random.Random
 
 interface ImportScenario {
 
-    fun startLogin(scenarioData: ImportScenarioData): Boolean
+    fun startLogin(scenarioData: ImportScenarioData): ScenarioState
 
-    fun confirmLoginAndImport(scenarioData: ImportScenarioData): Boolean
+    fun confirmLoginAndImport(scenarioData: ImportScenarioData): ScenarioState
 }
 
 abstract class AbstractImportScenario(
@@ -24,30 +24,29 @@ abstract class AbstractImportScenario(
 
     protected val log: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun startLogin(scenarioData: ImportScenarioData): Boolean {
+    override fun startLogin(scenarioData: ImportScenarioData): ScenarioState {
         checkState(ScenarioState.INITIAL)
 
         val newState = requestOtpCode(scenarioData)
         switchState(newState)
 
-        return newState == ScenarioState.OTP_SENT
+        return newState
     }
 
-    override fun confirmLoginAndImport(scenarioData: ImportScenarioData): Boolean {
+    override fun confirmLoginAndImport(scenarioData: ImportScenarioData): ScenarioState {
         checkState(ScenarioState.OTP_SENT)
 
-        val newState = finishLogin(scenarioData)
+        var newState = finishLogin(scenarioData)
         switchState(newState)
 
-        return try {
-            checkState(ScenarioState.LOGIN_SUCCEED)
-            saveData()
-        } finally {
-            switchState(ScenarioState.DESTROYED)
-        }
+        checkState(ScenarioState.LOGIN_SUCCEED)
+        newState = saveData()
+        switchState(newState)
+
+        return newState
     }
 
-    abstract fun saveData(): Boolean
+    abstract fun saveData(): ScenarioState
 
     abstract fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState
 

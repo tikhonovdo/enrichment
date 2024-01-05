@@ -2,6 +2,7 @@ package ru.tikhonovdo.enrichment.domain.dto.transaction
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class TinkoffRecord(
     override var draftTransactionId: Long? = null,
@@ -23,6 +24,7 @@ data class TinkoffRecord(
 ): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
     companion object {
+        private val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy[ HH:mm:ss]")
         fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDateTime::from)
     }
 

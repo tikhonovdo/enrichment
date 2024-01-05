@@ -4,7 +4,7 @@ import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.Event
 import ru.tikhonovdo.enrichment.domain.Type
-import ru.tikhonovdo.enrichment.domain.dto.transaction.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import java.math.BigDecimal
 import javax.sql.DataSource
@@ -31,7 +31,7 @@ class AlfaCashTransferMatchingStepReader(dataSource: DataSource): JdbcCursorItem
                 typeId = Type.OUTCOME.id,
                 categoryId = null,
                 eventId = Event.TRANSFER.id,
-                date = TinkoffRecord.parseOperationDate(rs.getString("operation_date")),
+                date = AlfaRecord.parseOperationDate(rs.getString("operation_date")),
                 sum = BigDecimal.valueOf(abs(rs.getDouble("payment_sum"))),
                 accountId = rs.getLong("account_id")
             )

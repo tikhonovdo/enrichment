@@ -22,7 +22,9 @@ class ImportScenarioContext {
 
     @PreDestroy
     fun preDestroy() {
-        switchState(DESTROYED, null)
+        currentState = DESTROYED
+        currentBank = null
+        destroyDriver()
     }
 
     fun checkState(expected: ScenarioState, bank: Bank?) {
@@ -45,9 +47,10 @@ class ImportScenarioContext {
             OTP_SENT -> {
                 driver.set(Selenide.webdriver().`object`())
             }
-            DESTROYED -> {
+            DATA_SAVED,
+            FAILURE -> {
+                currentState = INITIAL
                 currentBank = null
-                destroyDriver()
             }
             else -> { }
         }
@@ -59,8 +62,7 @@ class ImportScenarioContext {
     }
 
     private fun isAvailableMove(nextState: ScenarioState, bank: Bank?) =
-        nextState == DESTROYED ||
-                currentState.weight < nextState.weight && (currentBank == null || currentBank == bank)
+        currentState.weight < nextState.weight && (currentBank == null || currentBank == bank)
 
     private fun destroyDriver() {
         driver.get()?.quit()

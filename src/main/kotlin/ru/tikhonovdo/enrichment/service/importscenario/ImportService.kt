@@ -7,9 +7,9 @@ import ru.tikhonovdo.enrichment.service.importscenario.tinkoff.TinkoffImportScen
 
 interface ImportService {
 
-    fun login(bank: Bank, scenarioData: ImportScenarioData): Boolean
+    fun login(bank: Bank, scenarioData: ImportScenarioData): ScenarioState?
 
-    fun confirmLoginAndImport(bank: Bank, scenarioData: ImportScenarioData): Boolean
+    fun confirmLoginAndImport(bank: Bank, scenarioData: ImportScenarioData): ScenarioState?
 }
 
 @Component
@@ -23,11 +23,11 @@ class ImportServiceImpl(
         Bank.ALFA to alfabankImportScenario
     )
 
-    override fun login(bank: Bank, scenarioData: ImportScenarioData): Boolean {
-        return bankToScenarioMap[bank]?.startLogin(scenarioData) ?: false
+    override fun login(bank: Bank, scenarioData: ImportScenarioData): ScenarioState? {
+        return bankToScenarioMap[bank]?.startLogin(scenarioData)
     }
 
-    override fun confirmLoginAndImport(bank: Bank, scenarioData: ImportScenarioData): Boolean {
-        return bankToScenarioMap[bank]?.confirmLoginAndImport(scenarioData) ?: false
+    override fun confirmLoginAndImport(bank: Bank, scenarioData: ImportScenarioData): ScenarioState? {
+        return bankToScenarioMap[bank]?.confirmLoginAndImport(scenarioData)
     }
 }

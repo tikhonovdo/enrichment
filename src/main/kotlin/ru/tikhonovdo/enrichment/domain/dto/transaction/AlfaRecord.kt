@@ -2,6 +2,7 @@ package ru.tikhonovdo.enrichment.domain.dto.transaction
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class AlfaRecord(
     override var draftTransactionId: Long? = null,
@@ -22,7 +23,8 @@ data class AlfaRecord(
 ): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
     companion object {
-        fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDate::from).atStartOfDay()
+        private val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd[ HH:mm:ss]")
+        fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDateTime::from)
     }
 
     class Raw(

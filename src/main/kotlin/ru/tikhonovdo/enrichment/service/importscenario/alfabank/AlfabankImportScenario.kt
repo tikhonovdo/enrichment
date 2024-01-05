@@ -91,7 +91,7 @@ class AlfabankImportScenario(
         }
     }
 
-    override fun saveData(): Boolean {
+    override fun saveData(): ScenarioState {
         val watchService = FileSystems.getDefault().newWatchService()
         val downloadPath = Path(hostDownloadPath)
         downloadPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
@@ -104,9 +104,9 @@ class AlfabankImportScenario(
             FileSystemUtils.deleteRecursively(downloadPath)
         } catch (e: Throwable) {
             log.warn("Error during import", e)
-            return false
+            return FAILURE
         }
-        return true
+        return DATA_SAVED
     }
 
     private fun saveDataScenario() {
@@ -115,24 +115,24 @@ class AlfabankImportScenario(
         val wait = WebDriverWait(driver, waitingDuration)
 
         driver.get(URI.create(driver.currentUrl).resolve("history").toString())
-        random.sleep(1000,1500) // wait for the next form
+        random.sleep(1000, 1500) // wait for the next form
 
         val operationsReportLink = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='categories-group']/../button")))
-        random.sleep(1000,2000) // simulate pointing on link
+        random.sleep(1000, 2000) // simulate pointing on link
 
         operationsReportLink.click()
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//*[@data-test-id='quick-period-tags']//following-sibling::button)[last()]")))
             .click()
-        random.sleep(500,1000)
+        random.sleep(500, 1000)
 
         val accountSelectField = wait
             .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-field']")))
-        random.sleep(1000,2000) // simulate pointing on link
+        random.sleep(1000, 2000) // simulate pointing on link
 
         accountSelectField.click()
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-option']")))
             .click()
-        random.sleep(500,1000)
+        random.sleep(500, 1000)
 
         accountSelectField.click()
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='get-account-reports-button']")))

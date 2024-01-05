@@ -36,7 +36,7 @@ class AlfaRecordReader(dataSource: DataSource): JdbcCursorItemReader<AlfaRecord>
             AlfaRecord(
                 draftTransactionId = rs.getLong("draft_transaction_id"),
                 operationDate = AlfaRecord.parseOperationDate(rs.getString("operation_date")),
-                paymentDate = rs.getString("payment_date")?.let {
+                paymentDate = rs.getString("payment_date")?.takeIf { it.isNotBlank() }?.let {
                     dateFormatter.parse(it, LocalDate::from)
                 },
                 accountName = rs.getString("account_name"),

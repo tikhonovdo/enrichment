@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
 import ru.tikhonovdo.enrichment.service.importscenario.ImportService
+import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
 import java.util.*
 import java.util.function.Supplier
 
@@ -25,11 +26,13 @@ class ImportController(private val importService: ImportService) {
          return response { importService.confirmLoginAndImport(bank, scenarioData) }
     }
 
-    private fun response(resultSupplier: Supplier<Boolean>): ResponseEntity<Any> {
-        return if (resultSupplier.get())
-            ResponseEntity.ok(null)
-        else
+    private fun response(resultSupplier: Supplier<ScenarioState?>): ResponseEntity<Any> {
+        val state = resultSupplier.get()
+        return if (state != null) {
+            ResponseEntity.ok(state.name)
+        } else {
             ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+        }
     }
 
 }

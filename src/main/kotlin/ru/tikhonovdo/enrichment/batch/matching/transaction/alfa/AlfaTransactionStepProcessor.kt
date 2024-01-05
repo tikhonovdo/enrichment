@@ -22,7 +22,7 @@ class AlfaTransactionStepProcessor(
     }
 
     override fun getType(item: AlfaRecord): Type {
-        return when (item.type.lowercase()) {
+        return when (item.type) {
             "Пополнение" -> { Type.INCOME }
             "Списание" -> { Type.OUTCOME }
             else -> { throw IllegalStateException("Unknown type in AlfaRecord: ${item.type}") }
