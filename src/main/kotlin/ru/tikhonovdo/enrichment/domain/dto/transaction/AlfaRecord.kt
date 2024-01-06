@@ -24,7 +24,9 @@ data class AlfaRecord(
 
     companion object {
         private val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd[ HH:mm:ss]")
+        private val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
         fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDateTime::from)
+        fun parseRawDate(value: String): LocalDateTime = dateTimeFormatter.parse(value, LocalDate::from).atStartOfDay()
     }
 
     class Raw(

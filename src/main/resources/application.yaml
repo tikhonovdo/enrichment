@@ -39,8 +39,16 @@ server.servlet.session:
   tracking-modes: cookie
 
 import:
+  last-transaction-default-period: P6M
   tinkoff:
     home-url: https://www.tinkoff.ru/mybank/
     api-url: https://www.tinkoff.ru/api/common/v1
   alfa:
     home-url: https://click.alfabank.ru/
+
+---
+spring:
+  config.activate.on-profile: test
+
+import:
+  last-transaction-default-period: P100Y

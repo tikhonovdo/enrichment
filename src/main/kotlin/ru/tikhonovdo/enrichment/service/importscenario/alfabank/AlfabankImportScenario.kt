@@ -17,6 +17,7 @@ import java.net.URI
 import java.nio.file.*
 import java.time.Duration
 import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
 import kotlin.random.Random
@@ -25,6 +26,8 @@ import kotlin.random.Random
 class AlfabankImportScenario(
     @Value("\${selenoid-host-download-path}") private val hostDownloadPath: String,
     @Value("\${import.alfa.home-url}") private val homeUrl: String,
+    @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
+
     private val fileService: FileService,
 
     @Value("\${selenium-waiting-period:5s}") waitingDuration: Duration,
@@ -144,7 +147,7 @@ class AlfabankImportScenario(
     }
 
     private fun getDownloadedFile(watchService: WatchService, downloadPath: Path): File {
-        val start = sixMonthsAgo().format(dateFormatter)
+        val start = periodAgo(lastTransactionDefaultPeriod).format(dateFormatter)
         val end = LocalDate.now().format(dateFormatter)
         val expectedName = "Statement $start - $end.xlsx"
 

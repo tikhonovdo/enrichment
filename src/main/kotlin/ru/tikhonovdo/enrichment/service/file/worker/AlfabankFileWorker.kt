@@ -74,7 +74,7 @@ class AlfabankFileWorker(
 
     private fun toDraftTransaction(record: AlfaRecord.Raw) = DraftTransaction(
         bankId = Bank.ALFA.id,
-        date = AlfaRecord.parseOperationDate(record.operationDate!!),
+        date = AlfaRecord.parseRawDate(record.operationDate!!),
         sum = record.paymentSum.toString(),
         data = JSON_MAPPER.writeValueAsString(record)
     )

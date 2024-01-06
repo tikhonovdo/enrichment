@@ -10,7 +10,7 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.FileType
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import ru.tikhonovdo.enrichment.service.file.FileService
-import ru.tikhonovdo.enrichment.service.importscenario.sixMonthsAgo
+import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
 import java.time.*
 
 interface TinkoffService {
@@ -20,6 +20,7 @@ interface TinkoffService {
 @Service
 class TinkoffServiceImpl(
     @Value("\${import.tinkoff.api-url}") private val tinkoffApiUrl: String,
+    @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
     private val transactionMatchingRepository: TransactionMatchingRepository,
     private val fileService: FileService
 ): TinkoffService {
@@ -32,7 +33,7 @@ class TinkoffServiceImpl(
 
     override fun importData(sessionId: String) {
         val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.TINKOFF.id)
-            .orElse(sixMonthsAgo()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            .orElse(periodAgo(lastTransactionDefaultPeriod)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val end = ZonedDateTime.now().toInstant().toEpochMilli()
         val operations = tinkoffClient.getOperations(Format.xls, sessionId, start, end)
 

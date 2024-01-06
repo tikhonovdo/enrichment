@@ -17,12 +17,12 @@ class AlfaCashTransferMatchingStepReader(dataSource: DataSource): JdbcCursorItem
         sql = """
             SELECT dt.id as draft_transaction_id,
                    a.account_id,
-                   dt.data->>'operationDate' as operation_date,
+                   date as operation_date,
                    dt.data->>'paymentSum' as payment_sum,
                    dt.data->>'description' as description
             FROM matching.draft_transaction dt
             JOIN matching.account a ON a.bank_account_code = (dt.data->>'accountNumber') AND a.bank_id = ${Bank.ALFA.id}
-            WHERE dt.bank_id = ${Bank.ALFA.id} AND ??? AND (dt.data->>'status') = 'Выполнен';
+            WHERE dt.bank_id = ${Bank.ALFA.id} AND (dt.data->>'status') = 'Выполнен';
         """.trimIndent() //todo: нужно проверить как выглядят списания наличных у Альфы
         this.setRowMapper { rs, _ ->
             TransactionMatching(
