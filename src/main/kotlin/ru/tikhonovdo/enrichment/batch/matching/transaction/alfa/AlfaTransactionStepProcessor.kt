@@ -18,7 +18,7 @@ class AlfaTransactionStepProcessor(
 
     override fun isInvalidTransaction(item: AlfaRecord): Boolean {
         val exists = transactionMatchingRepository.existsByDraftTransactionId(item.draftTransactionId!!)
-        return exists || item.status != "В обработке"
+        return exists || item.status == "В обработке"
     }
 
     override fun getType(item: AlfaRecord): Type {

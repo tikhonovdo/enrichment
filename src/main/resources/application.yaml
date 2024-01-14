@@ -48,7 +48,12 @@ import:
 
 ---
 spring:
-  config.activate.on-profile: test
+  config.activate.on-profile: docker
+server:
+  port: 8081
 
+---
+spring:
+  config.activate.on-profile: test
 import:
   last-transaction-default-period: P100Y

@@ -68,7 +68,7 @@ abstract class AbstractImportScenario(
     }
 
     protected fun Random.sleep(from: Long, until: Long) {
-        Thread.sleep(Duration.ofMillis(nextLong(from, until)))
+        Thread.sleep(nextLong(from, until))
     }
 
     private fun checkState(state: ScenarioState) {

@@ -1,10 +1,12 @@
 package ru.tikhonovdo.enrichment.batch.matching.transaction.base
 
-import io.restassured.RestAssured.*
+import io.restassured.RestAssured.post
 import org.hamcrest.Matchers.equalTo
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import ru.tikhonovdo.enrichment.AbstractTestSuite
+import ru.tikhonovdo.enrichment.DatabaseAwareTest
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import java.math.BigDecimal
@@ -12,7 +14,7 @@ import java.time.LocalDateTime
 
 class CleanUnmatchedTransactionsStepTest(
     @Autowired private val matchingTransactionRepository: TransactionMatchingRepository
-): AbstractTestSuite() {
+): DatabaseAwareTest() {
 
     @BeforeEach
     fun beforeEach() {

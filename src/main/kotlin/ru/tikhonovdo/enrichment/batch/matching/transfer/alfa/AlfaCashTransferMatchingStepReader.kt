@@ -22,8 +22,8 @@ class AlfaCashTransferMatchingStepReader(dataSource: DataSource): JdbcCursorItem
                    dt.data->>'description' as description
             FROM matching.draft_transaction dt
             JOIN matching.account a ON a.bank_account_code = (dt.data->>'accountNumber') AND a.bank_id = ${Bank.ALFA.id}
-            WHERE dt.bank_id = ${Bank.ALFA.id} AND (dt.data->>'status') = 'Выполнен';
-        """.trimIndent() //todo: нужно проверить как выглядят списания наличных у Альфы
+            WHERE dt.bank_id = ${Bank.ALFA.id} AND (dt.data->>'category') = 'Выдача наличных' AND (dt.data->>'status') = 'Выполнен';
+        """.trimIndent()
         this.setRowMapper { rs, _ ->
             TransactionMatching(
                 draftTransactionId = rs.getLong("draft_transaction_id"),

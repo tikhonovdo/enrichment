@@ -17,25 +17,33 @@ import ru.tikhonovdo.enrichment.batch.matching.config.tinkoff.TinkoffMatchingJob
 class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepository) {
 
     @Bean
-    fun matchingJob(tinkoffMatchingFlow: Flow,
-                    alfaMatchingFlow: Flow,
-                    transferMatchingFlow: Flow,
-                    matchedTransactionsExportStep: Step,
-                    linkWithMatchedTransactionsStep: Step,
-                    actualizeMatchedTransactionsStep: Step,
-                    matchedTransfersExportStep: Step,
-                    cleanUnmatchedTransactionsStep: Step
-    ): Job {
+    fun matchingJob(matchingFlow: Flow): Job {
         return job("matchingJob")
-            .flow(cleanUnmatchedTransactionsStep)
-            .next(tinkoffMatchingFlow)
-            .next(alfaMatchingFlow)
-            .next(transferMatchingFlow)
-            .next(matchedTransactionsExportStep)
-            .next(linkWithMatchedTransactionsStep)
-            .next(actualizeMatchedTransactionsStep)
-            .next(matchedTransfersExportStep)
+            .start(matchingFlow)
             .end()
+            .build()
+    }
+
+    @Bean
+    fun matchingFlow(
+        tinkoffMatchingFlow: Flow,
+        alfaMatchingFlow: Flow,
+        transferMatchingFlow: Flow,
+        matchedTransactionsExportStep: Step,
+        linkWithMatchedTransactionsStep: Step,
+        actualizeMatchedTransactionsStep: Step,
+        matchedTransfersExportStep: Step,
+        cleanUnmatchedTransactionsStep: Step
+    ): Flow {
+        return CustomFlowBuilder("matchingFlow")
+            .addStep(cleanUnmatchedTransactionsStep)
+            .addStep(flowStep(tinkoffMatchingFlow))
+            .addStep(flowStep(alfaMatchingFlow))
+            .addStep(flowStep(transferMatchingFlow))
+            .addStep(matchedTransactionsExportStep)
+            .addStep(linkWithMatchedTransactionsStep)
+            .addStep(actualizeMatchedTransactionsStep)
+            .addStep(matchedTransfersExportStep)
             .build()
     }
 

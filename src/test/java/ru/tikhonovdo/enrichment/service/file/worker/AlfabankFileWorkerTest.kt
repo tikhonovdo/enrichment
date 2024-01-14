@@ -3,7 +3,7 @@ package ru.tikhonovdo.enrichment.service.file.worker
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import ru.tikhonovdo.enrichment.AbstractTestSuite
+import ru.tikhonovdo.enrichment.DatabaseAwareTest
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
@@ -12,7 +12,7 @@ import ru.tikhonovdo.enrichment.service.importscenario.format
 import java.nio.file.Paths
 import java.time.LocalDateTime
 
-class AlfabankFileWorkerTest : AbstractTestSuite() {
+class AlfabankFileWorkerTest : DatabaseAwareTest() {
     @Autowired
     lateinit var draftTransactionRepository: DraftTransactionRepository
 

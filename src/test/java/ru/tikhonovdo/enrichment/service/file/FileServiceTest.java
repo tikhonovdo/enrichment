@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.tikhonovdo.enrichment.AbstractTestSuite;
+import ru.tikhonovdo.enrichment.DatabaseAwareTest;
 import ru.tikhonovdo.enrichment.domain.Bank;
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData;
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction;
@@ -20,7 +20,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
-public class FileServiceTest extends AbstractTestSuite {
+public class FileServiceTest extends DatabaseAwareTest {
 
     @Autowired
     FileService fileService;

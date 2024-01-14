@@ -1,4 +1,9 @@
 version: "3.9"
+
+networks:
+  selenoid:
+    external: true
+
 services:
   postgres:
     image: postgres:13.3
@@ -10,28 +15,33 @@ services:
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - ${DB_VOLUME_HOST_URI}:/var/lib/postgresql/data
+    networks:
+      selenoid: null
     ports:
       - "5432:5432"
 
   enrichment:
     image: dtikhonov/enrichment:latest
-    container_name: enrichment
-    pull_policy: always
     restart: always
     environment:
       DB_URL: ${DB_URL}
       SELENOID_HOST_DOWNLOAD_PATH: ${SELENOID_HOST_DOWNLOAD_PATH}
+      ACTIVE_PROFILES: ${ACTIVE_PROFILES}
+    networks:
+      selenoid: null
     ports:
-      - "8080:8080"
+      - "8080:8081"
     depends_on:
       - postgres
 
   selenoid:
     image: "aerokube/selenoid"
-    container_name: selenoid
     restart: always
-    ports:
-      - "4444:4444"
+    command: ["-conf", "/etc/selenoid/browsers.json", "-container-network", "selenoid"]
     volumes:
       - ".:/etc/selenoid/" # assumed current dir contains browsers.json; in case of changes in browser.json selenoid must be restared
       - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      selenoid: null
+    ports:
+      - "4444:4444"
