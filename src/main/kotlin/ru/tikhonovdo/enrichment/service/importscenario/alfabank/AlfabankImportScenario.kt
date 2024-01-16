@@ -1,6 +1,7 @@
 package ru.tikhonovdo.enrichment.service.importscenario.alfabank
 
-import com.codeborne.selenide.Selenide.*
+import com.codeborne.selenide.Selenide.open
+import com.codeborne.selenide.Selenide.webdriver
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -142,7 +143,7 @@ class AlfabankImportScenario(
             .click()
 
         // just prolongate webdriver life
-        Thread.sleep(waitingDuration)
+        Thread.sleep(waitingDuration.toMillis())
         accountSelectField.isDisplayed
     }
 
@@ -151,6 +152,7 @@ class AlfabankImportScenario(
         val end = LocalDate.now().format(dateFormatter)
         val expectedName = "Statement $start - $end.xlsx"
 
+        //todo: try to make test for it
         var key: WatchKey?
         var reportPath: Path? = null
         while (watchService.take().also { key = it } != null && reportPath != null) {
