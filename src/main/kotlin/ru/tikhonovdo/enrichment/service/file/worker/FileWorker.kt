@@ -38,7 +38,7 @@ abstract class BankFileWorker(
             if (it.isNotEmpty()) {
                 inserted = draftTransactionRepository.insertBatch(it)
             }
-            log.info("Upload success. $inserted records for was inserted")
+            log.info("Upload success. $inserted records was inserted")
         }
     }
 

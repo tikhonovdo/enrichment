@@ -15,12 +15,16 @@ import ru.tikhonovdo.enrichment.service.importscenario.*
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState.*
 import java.io.File
 import java.net.URI
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.notExists
 import kotlin.random.Random
 
 @Component
@@ -96,13 +100,11 @@ class AlfabankImportScenario(
     }
 
     override fun saveData(): ScenarioState {
-        val watchService = FileSystems.getDefault().newWatchService()
         val downloadPath = Path(hostDownloadPath)
-        downloadPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE)
 
+        log.info("Starting save data scenario")
         saveDataScenario()
 
-        val report = getDownloadedFile(watchService, downloadPath)
         try {
             fileService.saveData(report.readBytes(), FileType.ALFA)
             FileSystemUtils.deleteRecursively(downloadPath)
@@ -118,13 +120,17 @@ class AlfabankImportScenario(
         val driver = driver()
         val wait = WebDriverWait(driver, waitingDuration)
 
+        log.trace("Open history page")
         driver.get(URI.create(driver.currentUrl).resolve("history").toString())
         random.sleep(1000, 1500) // wait for the next form
 
         val operationsReportLink = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='categories-group']/../button")))
         random.sleep(1000, 2000) // simulate pointing on link
 
+        log.trace("Click on operations report link")
         operationsReportLink.click()
+
+        log.trace("Click on 6 months period")
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//*[@data-test-id='quick-period-tags']//following-sibling::button)[last()]")))
             .click()
         random.sleep(500, 1000)
@@ -133,41 +139,53 @@ class AlfabankImportScenario(
             .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-field']")))
         random.sleep(1000, 2000) // simulate pointing on link
 
+        log.trace("Show select accounts menu")
         accountSelectField.click()
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='account-select-option']")))
             .click()
+        log.trace("Accounts selected")
         random.sleep(500, 1000)
 
+        log.trace("Hide select accounts menu")
         accountSelectField.click()
+
+        log.trace("Click on download report button")
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-test-id='get-account-reports-button']")))
             .click()
-
-        // just prolongate webdriver life
-        Thread.sleep(waitingDuration.toMillis())
-        accountSelectField.isDisplayed
     }
 
-    private fun getDownloadedFile(watchService: WatchService, downloadPath: Path): File {
+    private fun getDownloadedFile(downloadPath: Path): File {
+        log.trace("Getting downloaded file")
+        log.trace("Timezone: {}", ZoneId.systemDefault())
+        log.trace("Start: {}", periodAgo(lastTransactionDefaultPeriod))
+        log.trace("End: {}", LocalDate.now())
         val start = periodAgo(lastTransactionDefaultPeriod).format(dateFormatter)
         val end = LocalDate.now().format(dateFormatter)
         val expectedName = "Statement $start - $end.xlsx"
+        val reportPath = downloadPath.resolve(expectedName)
+        log.trace("Looking for file '{}'", downloadPath.resolve(expectedName))
 
-        //todo: try to make test for it
-        var key: WatchKey?
-        var reportPath: Path? = null
-        while (watchService.take().also { key = it } != null && reportPath != null) {
-            for (event in key!!.pollEvents()) {
-                if (event.context().toString() == expectedName) {
-                    reportPath = downloadPath.resolve(expectedName)
+        fun getReport(): File {
+            log.trace("File found!")
+            val report = reportPath.toFile()
+            report.setReadable(true)
+            return report
+        }
+
+        return if (reportPath.exists()) {
+            getReport()
+        } else {
+            var attempt = 0
+            while (attempt < 3 && reportPath.notExists()) {
+                log.trace("Wait {} for download", waitingDuration)
+                Thread.sleep(waitingDuration.toMillis())
+                if (reportPath.exists()) {
+                    return getReport()
+                } else {
+                    attempt++
                 }
             }
-            key!!.reset()
+            throw IllegalStateException("Max attempts reached")
         }
-        watchService.close()
-
-        val report = downloadPath.resolve(expectedName).toFile()
-        report.setReadable(true)
-
-        return report
     }
 }

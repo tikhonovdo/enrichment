@@ -8,7 +8,6 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
 import ru.tikhonovdo.enrichment.service.importscenario.ImportService
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
-import java.util.*
 import java.util.function.Supplier
 
 @RestController

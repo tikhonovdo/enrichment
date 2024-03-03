@@ -17,21 +17,20 @@ class ImportScenarioContext {
     private val log = LoggerFactory.getLogger(ImportScenarioContext::class.java)
 
     private val driver: AtomicReference<WebDriver?> = AtomicReference<WebDriver?>()
-    private var currentState: ScenarioState = INITIAL
-    private var currentBank: Bank? = null
+    private var currentState: AtomicReference<ScenarioState> = AtomicReference(INITIAL)
+    private var currentBank: AtomicReference<Bank?> = AtomicReference<Bank?>(null)
 
     @PreDestroy
     fun preDestroy() {
-        currentState = DESTROYED
-        currentBank = null
-        destroyDriver()
+        log.info("Destroying scenario context...")
+        resetContextWithState(DESTROYED)
     }
 
     fun checkState(expected: ScenarioState, bank: Bank?) {
-        if (currentState != expected) {
+        if (currentState.get() != expected) {
             throw IllegalStateException("Expected state '$expected', but current '$currentState'")
         }
-        if (currentBank != null && currentBank != bank) {
+        if (currentBank.get().let { it != null && it != bank }) {
             throw IllegalStateException("You trying process $bank, but current is $currentBank")
         }
     }
@@ -41,16 +40,17 @@ class ImportScenarioContext {
             return false
         }
 
-        currentState = nextState
-        currentBank = bank
-        when (currentState) {
+        log.info("Changing state $currentState to $nextState, bank = $bank")
+        currentState.set(nextState)
+        currentBank.set(bank)
+        when (nextState) {
             OTP_SENT -> {
                 driver.set(Selenide.webdriver().`object`())
             }
             DATA_SAVED,
             FAILURE -> {
-                currentState = INITIAL
-                currentBank = null
+                log.info("Terminal state reached. Commit reset to initial state")
+                resetContextWithState(INITIAL)
             }
             else -> { }
         }
@@ -62,7 +62,13 @@ class ImportScenarioContext {
     }
 
     private fun isAvailableMove(nextState: ScenarioState, bank: Bank?) =
-        currentState.weight < nextState.weight && (currentBank == null || currentBank == bank)
+        currentState.get().weight < nextState.weight && (currentBank.get().let { it == null || it == bank })
+
+    fun resetContextWithState(state: ScenarioState) {
+        currentState.set(state)
+        currentBank.set(null)
+        destroyDriver()
+    }
 
     private fun destroyDriver() {
         driver.get()?.quit()

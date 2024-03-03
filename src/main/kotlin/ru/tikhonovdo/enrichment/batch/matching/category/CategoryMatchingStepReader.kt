@@ -18,8 +18,13 @@ abstract class CategoryMatchingStepReader(dataSource: DataSource, bank: Bank): J
                     data->>'category' as bank_category_name,
                     data->>'mcc' as mcc,
                     data->>'description' as description
-                FROM matching.draft_transaction 
-                WHERE bank_id = ${bank.id} AND (data->>'category') != 'Наличные'
+                FROM matching.draft_transaction dt
+                --     LEFT JOIN matching.category mc ON (
+                --        dt.data->>'category' = mc.bank_category_name AND 
+                --        dt.bank_id = mc.bank_id AND
+                --        dt.data->>'description' like ('%' || mc.pattern || '%')
+                --     )
+                WHERE dt.bank_id = ${bank.id} AND lower(dt.data->>'category') not like '%наличн%'
             ) SELECT * FROM t WHERE t.bank_category_name IS NOT NULL;
         """.trimIndent()
         setRowMapper { rs, _ ->

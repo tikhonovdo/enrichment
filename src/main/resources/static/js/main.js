@@ -9,18 +9,18 @@ Array.from(document.getElementsByTagName("form")).forEach(form => {
 })
 
 function initMatchingForm(form) {
-    form.onsubmit = function (event) {
+    form.run.onclick = function (event) {
         let xhr = new XMLHttpRequest();
-        let submitButton = Array.from(form.getElementsByTagName("button"))[0]
+        let runMatchingButton = Array.from(form.getElementsByTagName("button"))[0]
 
         xhr.open('POST', '/matching')
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send();
-        setLoading(form, submitButton, true)
+        setLoading(form, runMatchingButton, true)
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState == XMLHttpRequest.DONE) {
-                setLoading(form, submitButton, true)
+                setLoading(form, runMatchingButton, true)
                 document.getElementById("matching-result").innerText = xhr.response
             }
         }
@@ -29,7 +29,7 @@ function initMatchingForm(form) {
 }
 
 function initBankForm(form) {
-    form.onsubmit = function (event) {
+    form.action.onclick = function (event) {
         let xhr = new XMLHttpRequest();
         let formData = new FormData(form);
         let bank = form.id.split("-")[1]
@@ -42,7 +42,7 @@ function initBankForm(form) {
         setLoading(form, submitButton, true)
 
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == XMLHttpRequest.DONE) {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
                 setLoading(form, submitButton, false)
                 currentState = xhr.response
                 switch (currentState) {
@@ -60,6 +60,9 @@ function initBankForm(form) {
         }
         //Fail the onsubmit to avoid page refresh.
         return false;
+    }
+    form.cancel.onclick = function (event) {
+        destroySession()
     }
 }
 
