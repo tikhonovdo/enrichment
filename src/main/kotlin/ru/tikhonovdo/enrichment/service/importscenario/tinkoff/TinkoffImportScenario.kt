@@ -68,7 +68,7 @@ class TinkoffImportScenario(
         cancelButton.click()
         Thread.sleep(1000) // simulate navigation
 
-        return if (elementPresented("//*[@data-qa-type='desktop-homer-container' and @data-qa-state='success']")) {
+        return if (elementPresented("//*[@data-qa-type='molecule-desktop-title' and @data-qa-state='success']")) {
             LOGIN_SUCCEED
         } else {
             INITIAL

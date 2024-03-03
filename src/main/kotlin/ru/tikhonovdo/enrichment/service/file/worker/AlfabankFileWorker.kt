@@ -18,8 +18,8 @@ class AlfabankFileWorker(
     private val alfaFileWorkerResultFilter: Supplier<Predicate<DraftTransaction>> = Supplier { Predicate { true } }
 ): BankFileWorker(draftTransactionRepository, Bank.ALFA) {
 
-    override fun readFile(content: ByteArray): List<DraftTransaction> {
-        val workbook: Workbook = XSSFWorkbook(ByteArrayInputStream(content))
+    override fun readBytes(vararg content: ByteArray): List<DraftTransaction> {
+        val workbook: Workbook = XSSFWorkbook(ByteArrayInputStream(content[0]))
         val sheet = workbook.getSheetAt(0)
         val rowIterator = sheet.iterator()
         if (rowIterator.hasNext()) {

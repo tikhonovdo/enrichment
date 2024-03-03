@@ -20,10 +20,12 @@ import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.currency.TinkoffCurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffTransactionStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transfer.*
-import ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff.*
-import ru.tikhonovdo.enrichment.domain.dto.transaction.TinkoffRecord
-import ru.tikhonovdo.enrichment.domain.enitity.*
+import ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff.TinkoffCashTransferMatchingStepReader
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
+import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
+import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
+import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.repository.matching.*
 import javax.sql.DataSource

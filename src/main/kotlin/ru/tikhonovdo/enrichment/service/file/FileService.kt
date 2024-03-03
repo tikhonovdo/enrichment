@@ -14,7 +14,7 @@ import ru.tikhonovdo.enrichment.service.file.worker.TinkoffFileWorker
 
 interface FileService {
     fun saveData(file: MultipartFile, fullReset: Boolean)
-    fun saveData(content: ByteArray, fileType: FileType, fullReset: Boolean = false)
+    fun saveData(fileType: FileType, fullReset: Boolean = false, vararg content: ByteArray)
     fun load() : Resource
 }
 
@@ -37,13 +37,13 @@ class FileServiceImpl(
     override fun saveData(file: MultipartFile, fullReset: Boolean) {
         val fileType = detectFileType(file)
 
-        saveData(file.resource.contentAsByteArray, fileType, fullReset)
+        saveData(fileType, fullReset, file.resource.contentAsByteArray)
     }
 
-    override fun saveData(content: ByteArray, fileType: FileType, fullReset: Boolean) {
+    override fun saveData(fileType: FileType, fullReset: Boolean, vararg content: ByteArray) {
         workers[fileType]?.let {
             log.info("Recognized as $fileType data file")
-            it.saveData(content, fullReset)
+            it.saveData(fullReset, *content)
             log.info("$fileType data file was successfully saved")
         }
     }

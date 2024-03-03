@@ -45,7 +45,7 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
 
         val categoryId = getCategoryId(item)
         val accountId = getAccountId(item)
-        return TransactionMatching(
+        val resultEntity = TransactionMatching(
             draftTransactionId = item.draftTransactionId,
             name = item.description,
             typeId = getType(item).id,
@@ -55,6 +55,11 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
             accountId = accountId,
             validated = !Stream.of(categoryId, accountId).anyMatch { it == null }
         )
+        return postProcess(item, resultEntity)
+    }
+
+    protected open fun postProcess(item: T, entity: TransactionMatching): TransactionMatching {
+        return entity
     }
 
     protected abstract fun isInvalidTransaction(item: T): Boolean

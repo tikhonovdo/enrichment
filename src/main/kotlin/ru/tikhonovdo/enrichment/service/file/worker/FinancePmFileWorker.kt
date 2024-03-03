@@ -27,8 +27,8 @@ class FinancePmFileWorkerImpl (
     private val log = LoggerFactory.getLogger(FinancePmFileWorkerImpl::class.java)
 
     @Transactional
-    override fun saveData(content: ByteArray, fullReset: Boolean) {
-        JSON_MAPPER.readValue(content, FinancePmData::class.java)?.let {
+    override fun saveData(fullReset: Boolean, vararg content: ByteArray) {
+        JSON_MAPPER.readValue(content[0], FinancePmData::class.java)?.let {
             save(it, fullReset)
         }
     }

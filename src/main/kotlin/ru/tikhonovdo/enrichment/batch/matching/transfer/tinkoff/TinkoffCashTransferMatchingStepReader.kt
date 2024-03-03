@@ -4,7 +4,7 @@ import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.Event
 import ru.tikhonovdo.enrichment.domain.Type
-import ru.tikhonovdo.enrichment.domain.dto.transaction.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import java.math.BigDecimal
 import javax.sql.DataSource

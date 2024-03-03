@@ -27,16 +27,19 @@ logging:
   level:
     root: INFO
     liquibase: INFO
+    ru.tikhonovdo.enrichment.service: TRACE
 
-selenium-waiting-period: 5s
-selenoid-host-download-path: ${SELENOID_HOST_DOWNLOAD_PATH}
+selenium-waiting-period: 30s
+selenoid-host-download-path: ${SELENOID_HOST_DOWNLOAD_PATH} # make sure that all users can write to this path
 
-server.servlet.session:
-  timeout: 5m
-  cookie:
-    http-only: true
-    secure: true
-  tracking-modes: cookie
+server:
+  port: 8081
+  servlet.session:
+    timeout: 5m
+    cookie:
+      http-only: true
+      secure: false
+    tracking-modes: cookie
 
 import:
   last-transaction-default-period: P6M

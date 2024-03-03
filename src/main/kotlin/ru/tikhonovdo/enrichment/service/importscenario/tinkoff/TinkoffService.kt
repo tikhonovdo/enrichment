@@ -11,7 +11,9 @@ import ru.tikhonovdo.enrichment.domain.FileType
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import ru.tikhonovdo.enrichment.service.file.FileService
 import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
-import java.time.*
+import java.time.Period
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 interface TinkoffService {
     fun importData(sessionId: String)
@@ -35,8 +37,12 @@ class TinkoffServiceImpl(
         val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.TINKOFF.id)
             .orElse(periodAgo(lastTransactionDefaultPeriod)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val end = ZonedDateTime.now().toInstant().toEpochMilli()
-        val operations = tinkoffClient.getOperations(Format.xls, sessionId, start, end)
+        val operationsReport = tinkoffClient.getOperationsReport(Format.xls, sessionId, start, end)
+        val operationsRaw = tinkoffClient.getOperations(sessionId, start, end)
 
-        fileService.saveData(operations.body().asInputStream().readAllBytes(), FileType.TINKOFF)
+        fileService.saveData(FileType.TINKOFF, content = arrayOf(
+            operationsReport.body().asInputStream().readAllBytes(),
+            operationsRaw.body().asInputStream().readAllBytes()
+        ))
     }
 }

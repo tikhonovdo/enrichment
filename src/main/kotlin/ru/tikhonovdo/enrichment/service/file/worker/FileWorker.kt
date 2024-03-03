@@ -7,7 +7,7 @@ import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 
 interface FileWorker {
-    fun saveData(content: ByteArray, fullReset: Boolean = false)
+    fun saveData(fullReset: Boolean = false, vararg content: ByteArray)
 }
 
 abstract class BankFileWorker(
@@ -18,15 +18,15 @@ abstract class BankFileWorker(
     private val log = LoggerFactory.getLogger(BankFileWorker::class.java)
 
     @Transactional
-    override fun saveData(content: ByteArray, fullReset: Boolean) {
-        saveData(content)
+    override fun saveData(fullReset: Boolean, vararg content: ByteArray) {
+        saveData(*content)
     }
 
-    fun saveData(content: ByteArray) {
+    fun saveData(vararg content: ByteArray) {
         val deleted = draftTransactionRepository.deleteObsoleteDraft()
         log.info("$deleted drafts are obsolete and has been deleted")
 
-        val drafts = readFile(content)
+        val drafts = readBytes(*content)
         val minDate = drafts.minBy { it.date }.date
         val maxDate = drafts.maxBy { it.date }.date
         val existingDrafts = draftTransactionRepository.findAllByBankIdAndDateBetween(bank.id, minDate, maxDate)
@@ -42,6 +42,6 @@ abstract class BankFileWorker(
         }
     }
 
-    protected abstract fun readFile(content: ByteArray): List<DraftTransaction>
+    protected abstract fun readBytes(vararg content: ByteArray): List<DraftTransaction>
 
 }

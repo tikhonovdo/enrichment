@@ -106,7 +106,8 @@ class AlfabankImportScenario(
         saveDataScenario()
 
         try {
-            fileService.saveData(report.readBytes(), FileType.ALFA)
+            val report = getDownloadedFile(downloadPath)
+            fileService.saveData(FileType.ALFA, content = arrayOf(report.readBytes()))
             FileSystemUtils.deleteRecursively(downloadPath)
         } catch (e: Throwable) {
             log.warn("Error during import", e)

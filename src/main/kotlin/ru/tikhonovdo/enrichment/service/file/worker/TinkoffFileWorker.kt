@@ -4,18 +4,28 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.transaction.TinkoffRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffOperationsAdditionalDataPayload
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffOperationsAdditionalDataRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 import java.io.ByteArrayInputStream
+import kotlin.math.abs
 
 @Component
 class TinkoffFileWorker(draftTransactionRepository: DraftTransactionRepository):
     BankFileWorker(draftTransactionRepository, Bank.TINKOFF) {
 
-    override fun readFile(content: ByteArray): List<DraftTransaction> {
-        val workbook: Workbook = HSSFWorkbook(ByteArrayInputStream(content))
+    override fun readBytes(vararg content: ByteArray): List<DraftTransaction> {
+        val additionalDataRecords = parseAdditionalData(content[1])
+        val rawRecords = readXlsReport(content[0], additionalDataRecords)
+
+        return rawRecords.map { toDraftTransaction(it) }
+    }
+
+    private fun readXlsReport(xlsDocument: ByteArray, additionalDataRecords: List<TinkoffOperationsAdditionalDataRecord>?): List<TinkoffRecord.Raw> {
+        val workbook: Workbook = HSSFWorkbook(ByteArrayInputStream(xlsDocument))
         val sheet = workbook.getSheetAt(0)
         val rowIterator = sheet.iterator()
         if (rowIterator.hasNext()) {
@@ -44,11 +54,31 @@ class TinkoffFileWorker(draftTransactionRepository: DraftTransactionRepository):
                         14 -> this.sumWithRoundingForInvestKopilka = cell.numericCellValue
                     }
                 }
+
+                additionalDataRecords?.find {
+                    TinkoffRecord.parseOperationDateToEpochMillis(operationDate!!) == it.operationTime!! &&
+                    abs(operationSum!!) == it.accountAmount &&
+                    (cardNumber == null || it.cardNumber?.endsWith(cardNumber!!) == true)
+                }?.let {
+                    accountNumber = it.account
+                    message = it.message
+                    brandName = it.brandName
+                }
+
             }.let {
                 records.add(it)
             }
         }
-        return records.map { toDraftTransaction(it) }
+        return records
+    }
+
+    private fun parseAdditionalData(jsonPayloadBytes: ByteArray): List<TinkoffOperationsAdditionalDataRecord>? {
+        val data = JSON_MAPPER.readValue(jsonPayloadBytes, TinkoffOperationsAdditionalDataPayload::class.java)
+        return if (data.resultCode == "OK") {
+            data.payload
+        } else {
+            null
+        }
     }
 
     private fun toDraftTransaction(record: TinkoffRecord.Raw) = DraftTransaction(
