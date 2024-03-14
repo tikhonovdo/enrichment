@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.alfa
+package ru.tikhonovdo.enrichment.batch.matching.transfer.cash.alfa
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank

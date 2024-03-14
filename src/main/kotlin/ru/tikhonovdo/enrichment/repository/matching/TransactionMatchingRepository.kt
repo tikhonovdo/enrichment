@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
@@ -31,6 +32,9 @@ interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long
     fun findLastValidatedTransactionDateByBank(bankId: Long): Optional<LocalDateTime>
 
     fun existsByDraftTransactionId(draftTransactionId: Long): Boolean
+
+    fun findAllByDateBetweenAndTypeIdEquals(dateStart: LocalDateTime, dateEnd: LocalDateTime, type: Long): List<TransactionMatching>
+
 }
 
 interface CustomTransactionMatchingRepository {
@@ -41,18 +45,22 @@ interface CustomTransactionMatchingRepository {
     fun deleteByIdIn(ids: Collection<Long>): Int
 
     fun updateSequence()
+
+    fun batchUpdateRefundForId(transactions: Collection<TransactionMatching>)
+
+    fun markValidated(id: Long)
 }
 
 @Repository
 class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParameterJdbcTemplate): CustomTransactionMatchingRepository,
     AbstractBatchRepository<TransactionMatching>(
         namedParameterJdbcTemplate,
-        "INSERT INTO matching.transaction (name, type, category_id, date, sum, account_id, description, event_id, validated, draft_transaction_id) " +
-                "VALUES (:name, :typeId, :categoryId, :date, :sum, :accountId, :description, :eventId, :validated, :draftTransactionId)",
+        "INSERT INTO matching.transaction (name, type, category_id, date, sum, account_id, description, event_id, validated, draft_transaction_id, refund_for_id) " +
+                "VALUES (:name, :typeId, :categoryId, :date, :sum, :accountId, :description, :eventId, :validated, :draftTransactionId, :refundForId)",
         "UPDATE matching.transaction SET " +
                 "name = :name, type = :typeId, category_id = :categoryId, date = :date, sum = :sum, account_id = :accountId, " +
-                "description = :description, event_id = :eventId, validated = :validated " +
-                "WHERE draft_transaction_id = :draftTransactionId"
+                "description = :description, event_id = :eventId, validated = :validated, draft_transaction_id = :draftTransactionId, " +
+                "refund_for_id = :refundForId WHERE id = :id"
     ) {
 
     override fun setEventIdForTransactions(eventId: Long?, matchingTransactionIds: Collection<Long>) {
@@ -95,5 +103,19 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
     @Transactional
     override fun updateSequence() {
         jdbcTemplate.execute("SELECT setval('matching.transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.transaction), false)")
+    }
+
+    override fun markValidated(id: Long) {
+        namedParameterJdbcTemplate.update(
+            "UPDATE matching.transaction SET validated = true WHERE id IN (:id) ",
+            MapSqlParameterSource(mapOf("id" to id))
+        )
+    }
+
+    override fun batchUpdateRefundForId(transactions: Collection<TransactionMatching>) {
+        namedParameterJdbcTemplate.batchUpdate(
+            "UPDATE matching.transaction SET refund_for_id = :refundForId WHERE id = :id",
+            SqlParameterSourceUtils.createBatch(transactions)
+        )
     }
 }

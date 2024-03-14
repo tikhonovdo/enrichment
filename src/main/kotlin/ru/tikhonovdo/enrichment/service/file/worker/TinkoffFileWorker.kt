@@ -18,7 +18,7 @@ class TinkoffFileWorker(draftTransactionRepository: DraftTransactionRepository):
     BankFileWorker(draftTransactionRepository, Bank.TINKOFF) {
 
     override fun readBytes(vararg content: ByteArray): List<DraftTransaction> {
-        val additionalDataRecords = parseAdditionalData(content[1])
+        val additionalDataRecords = if (content.size > 1) parseAdditionalData(content[1]) else emptyList()
         val rawRecords = readXlsReport(content[0], additionalDataRecords)
 
         return rawRecords.map { toDraftTransaction(it) }

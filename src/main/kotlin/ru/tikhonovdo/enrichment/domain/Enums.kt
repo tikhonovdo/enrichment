@@ -13,6 +13,16 @@ enum class FileType(val bankId: Long?) {
 enum class Type(val id: Long) {
     INCOME(1L),
     OUTCOME(2L);
+
+    companion object {
+        fun swap(typeId: Long): Long {
+            when (typeId) {
+                INCOME.id -> return OUTCOME.id
+                OUTCOME.id -> return INCOME.id
+            }
+            throw IllegalArgumentException("Unknown typeId passed: $typeId")
+        }
+    }
 }
 
 enum class Event(val id: Long) {

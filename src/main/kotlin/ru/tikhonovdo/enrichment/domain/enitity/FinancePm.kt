@@ -37,7 +37,7 @@ data class Currency(
     var name: String,
 
     @JsonProperty("shortName")
-    var shortName: String,
+    var shortName: String = name,
 
     var point: Int = 2,
 
@@ -64,7 +64,7 @@ data class Category(
     @Column(name = "parent_id", nullable = true)
     @JsonSerialize(nullsUsing = NullAsZeroSerializer::class)
     @JsonDeserialize(using = ZeroAsNullDeserializer::class)
-    var parentId: Long?,
+    var parentId: Long? = null,
 
     var orderId: Int,
 
@@ -120,12 +120,12 @@ data class Account(
     var icon: Int = 1,
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    var balance: BigDecimal,
+    var balance: BigDecimal = BigDecimal.ZERO,
 
     var currencyId: Long,
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    var active : Boolean,
+    var active : Boolean = true,
 
     @JsonProperty("isDef")
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)

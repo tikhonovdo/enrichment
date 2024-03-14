@@ -18,12 +18,17 @@ import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.currency.AlfaCurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaTransactionStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transfer.*
-import ru.tikhonovdo.enrichment.batch.matching.transfer.alfa.AlfaCashTransferMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.alfa.AlfaCashTransferMatchingStepReader
 import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
-import ru.tikhonovdo.enrichment.domain.enitity.*
+import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
+import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
+import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
+import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
-import ru.tikhonovdo.enrichment.repository.matching.*
+import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
+import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
+import ru.tikhonovdo.enrichment.repository.matching.CurrencyMatchingRepository
+import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import javax.sql.DataSource
 
 @Configuration

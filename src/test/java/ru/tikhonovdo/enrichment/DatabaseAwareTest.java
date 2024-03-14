@@ -27,7 +27,7 @@ public abstract class DatabaseAwareTest {
     static Path seleniumDownloadPath = Paths.get("target", "tmp");
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
 
     static {
         postgres.start();

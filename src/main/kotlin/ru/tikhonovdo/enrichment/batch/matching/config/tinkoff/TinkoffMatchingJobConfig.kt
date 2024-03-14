@@ -20,7 +20,7 @@ import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.currency.TinkoffCurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffTransactionStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff.TinkoffCashTransferMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.tinkoff.TinkoffCashTransferMatchingStepReader
 import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching

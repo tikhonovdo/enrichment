@@ -10,5 +10,6 @@
     <include file="./2_init-matching/changes.xml" relativeToChangelogFile="true"/>
     <include file="./3_alfabank_support/changes.xml" relativeToChangelogFile="true"/>
     <include file="./4_tinkoff_additional_data_import/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./5_search_refund_step/changes.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

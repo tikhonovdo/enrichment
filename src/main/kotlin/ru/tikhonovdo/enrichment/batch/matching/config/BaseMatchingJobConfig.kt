@@ -14,7 +14,12 @@ import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProces
 import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.transaction.*
-import ru.tikhonovdo.enrichment.batch.matching.transfer.*
+import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingExportTasklet
+import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepProcessor
+import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepWriter
+import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.CashTransferMatchingStepProcessor
+import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.CashTransferMatchingStepWriter
 import ru.tikhonovdo.enrichment.domain.enitity.*
 import ru.tikhonovdo.enrichment.repository.financepm.AccountRepository
 import ru.tikhonovdo.enrichment.repository.matching.*

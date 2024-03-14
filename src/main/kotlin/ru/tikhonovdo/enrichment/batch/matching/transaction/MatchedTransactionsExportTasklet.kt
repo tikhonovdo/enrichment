@@ -18,7 +18,8 @@ class MatchedTransactionsExportTasklet(private val jdbcTemplate: JdbcTemplate): 
                   AND mt.id NOT IN (
                     SELECT distinct matching_transaction_id FROM financepm.transaction
                     WHERE matching_transaction_id IS NOT NULL
-                );
+                  )
+                  AND mt.refund_for_id IS NULL;
         """.trimIndent())
         contribution.incrementWriteCount(updated.toLong())
         return RepeatStatus.FINISHED

@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.tinkoff
+package ru.tikhonovdo.enrichment.batch.matching.transfer.cash.tinkoff
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank

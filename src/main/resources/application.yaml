@@ -49,6 +49,9 @@ import:
   alfa:
     home-url: https://click.alfabank.ru/
 
+refund:
+  income-category-id: 79
+
 ---
 spring:
   config.activate.on-profile: docker

@@ -147,6 +147,8 @@ data class TransactionMatching(
 
     var validated: Boolean = false,
 
+    var refundForId: Long? = null,
+
     @ManyToOne(targetEntity = Category::class)
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
     var category: Category? = null,

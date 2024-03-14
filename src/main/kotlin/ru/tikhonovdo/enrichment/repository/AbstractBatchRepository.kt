@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.namedparam.SqlParameterSource
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.transaction.annotation.Transactional
+import java.util.function.Function
 
 interface BatchRepository<T> {
     fun insertBatch(entities: Collection<T>): Int
@@ -15,8 +16,8 @@ abstract class AbstractBatchRepository<T>(
     protected val namedParameterJdbcTemplate: NamedParameterJdbcTemplate,
     private val insertQuery: String? = null,
     private val updateQuery: String? = null,
-    protected open val idExtractor: java.util.function.Function<T, Long?>? = null,
-    private val mapper: java.util.function.Function<T, SqlParameterSource>? = null,
+    protected open val idExtractor: Function<T, Long?>? = null,
+    private val mapper: Function<T, SqlParameterSource>? = null,
 ): BatchRepository<T> {
 
     protected val jdbcTemplate: JdbcTemplate = namedParameterJdbcTemplate.jdbcTemplate

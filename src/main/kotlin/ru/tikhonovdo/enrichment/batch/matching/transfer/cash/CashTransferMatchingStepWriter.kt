@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer
+package ru.tikhonovdo.enrichment.batch.matching.transfer.cash
 
 import org.springframework.batch.item.Chunk
 import org.springframework.batch.item.ItemWriter
