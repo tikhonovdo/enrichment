@@ -4,7 +4,10 @@ import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
 @RestController
@@ -23,6 +26,7 @@ class MatchingController(
                 params.addString("steps", it)
             }
         }
+        params.addLong("time", System.currentTimeMillis())
         jobLauncher.run(matchingJob, params.toJobParameters())
         val count = transactionMatchingRepository.getUnmatchedTransactionIds().size
         return "$count unmatched records left"

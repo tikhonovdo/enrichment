@@ -131,7 +131,7 @@ data class TransactionMatching(
     var typeId: Long,
 
     @Column(name = "category_id")
-    var categoryId: Long?,
+    var categoryId: Long? = null,
 
     var date: LocalDateTime,
 

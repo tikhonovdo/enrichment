@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.abs
 
 interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long>,
     BatchRepository<TransactionMatching>, CustomTransactionMatchingRepository {
@@ -49,6 +51,13 @@ interface CustomTransactionMatchingRepository {
     fun batchUpdateRefundForId(transactions: Collection<TransactionMatching>)
 
     fun markValidated(id: Long)
+
+    fun findTransferCandidatesToComplement(
+        sourceName: String,
+        sourceDescription: String,
+        sourceType: Long,
+        sourceAccountId: Long
+    ): Collection<TransactionMatching>
 }
 
 @Repository
@@ -117,5 +126,50 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
             "UPDATE matching.transaction SET refund_for_id = :refundForId WHERE id = :id",
             SqlParameterSourceUtils.createBatch(transactions)
         )
+    }
+
+    override fun findTransferCandidatesToComplement(
+        sourceName: String,
+        sourceDescription: String,
+        sourceType: Long,
+        sourceAccountId: Long
+    ): Collection<TransactionMatching> {
+        val result = namedParameterJdbcTemplate.query("""
+            SELECT * FROM matching.transaction mt1
+            WHERE mt1.name like :sourceName 
+                AND mt1.description = :sourceDescription 
+                AND mt1.type = :sourceType
+                AND mt1.account_id = :sourceAccountId
+                AND mt1.category_id IS NULL
+                AND NOT EXISTS(
+                    SELECT * FROM matching.transaction mt2
+                    WHERE mt1.name = mt2.name 
+                        AND mt1.description = mt2.description
+                        AND mt1.date = mt2.date
+                        AND mt1.draft_transaction_id = mt2.draft_transaction_id
+                        AND mt1.type != mt2.type
+                        AND mt1.account_id != mt2.account_id
+                )
+        """.trimIndent(),
+            MapSqlParameterSource(mapOf(
+                "sourceName" to "%$sourceName%",
+                "sourceDescription" to sourceDescription,
+                "sourceType" to sourceType,
+                "sourceAccountId" to sourceAccountId
+            ))
+        ) { rs, _ ->
+            TransactionMatching(
+                id = rs.getLong("id"),
+                draftTransactionId = rs.getLong("draft_transaction_id"),
+                name = rs.getString("name"),
+                description = rs.getString("description"),
+                typeId = rs.getLong("type"),
+                date = rs.getTimestamp("date").toLocalDateTime(),
+                sum = BigDecimal.valueOf(abs(rs.getDouble("sum"))),
+                accountId = rs.getLong("account_id")
+            )
+        }
+
+        return result.toList()
     }
 }
