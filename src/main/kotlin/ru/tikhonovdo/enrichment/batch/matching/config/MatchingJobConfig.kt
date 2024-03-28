@@ -18,9 +18,15 @@ import ru.tikhonovdo.enrichment.batch.matching.config.tinkoff.TinkoffMatchingJob
 class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepository) {
 
     @Bean
-    fun matchingJob(matchingFlow: Flow): Job {
+    fun matchingJob(
+        matchingFlow: Flow,
+        postMatchingFlow: Flow,
+        validatableRowCountStep: Step
+    ): Job {
         return job("matchingJob")
             .start(matchingFlow)
+            .next(postMatchingFlow)
+            .next(validatableRowCountStep)
             .end()
             .build()
     }
@@ -30,14 +36,9 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
         tinkoffMatchingFlow: Flow,
         alfaMatchingFlow: Flow,
         transferMatchingFlow: Flow,
-        searchRefundStep: Step,
-        applyRefundStep: Step,
-        matchedTransactionsExportStep: Step,
-        linkWithMatchedTransactionsStep: Step,
-        actualizeMatchedTransactionsStep: Step,
-        matchedTransfersExportStep: Step,
         cleanUnmatchedTransactionsStep: Step,
-        transferPatternPreMatchingStep: Step
+        transferPatternPreMatchingStep: Step,
+        exportMatchingTransactionsStep: Step
     ): Flow {
         return CustomFlowBuilder("matchingFlow")
             .addStep(cleanUnmatchedTransactionsStep)
@@ -45,10 +46,22 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
             .addStep(flowStep(alfaMatchingFlow))
             .addStep(transferPatternPreMatchingStep)
             .addStep(flowStep(transferMatchingFlow))
+            .addStep(exportMatchingTransactionsStep)
+            .build()
+    }
+
+    @Bean
+    fun postMatchingFlow(
+        matchWithMasterTransactionsStep: Step,
+        syncWithMatchedTransactionsStep: Step,
+        searchRefundStep: Step,
+        applyRefundStep: Step,
+        matchedTransfersExportStep: Step,
+    ): Flow {
+        return CustomFlowBuilder("postMatchingFlow")
             .addStep(searchRefundStep)
-            .addStep(matchedTransactionsExportStep)
-            .addStep(linkWithMatchedTransactionsStep)
-            .addStep(actualizeMatchedTransactionsStep)
+            .addStep(matchWithMasterTransactionsStep)
+            .addStep(syncWithMatchedTransactionsStep)
             .addStep(applyRefundStep)
             .addStep(matchedTransfersExportStep)
             .build()

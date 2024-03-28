@@ -54,6 +54,7 @@ class RefundFeatureConfig(
             .chunk<ApplyRefundInfo, ApplyRefundInfo?>(10, transactionManager)
             .reader(applyRefundStepReader)
             .processor(applyRefundStepProcessor)
+            .writer {}
             .build()
     }
 

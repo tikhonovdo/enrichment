@@ -1,16 +1,17 @@
 package ru.tikhonovdo.enrichment.batch.matching.transaction
 
 import org.slf4j.LoggerFactory
-import org.springframework.batch.core.ExitStatus
-import org.springframework.batch.core.StepExecution
-import org.springframework.batch.core.StepExecutionListener
+import org.springframework.batch.core.StepContribution
+import org.springframework.batch.core.scope.context.ChunkContext
+import org.springframework.batch.core.step.tasklet.Tasklet
+import org.springframework.batch.repeat.RepeatStatus
 import org.springframework.jdbc.core.JdbcTemplate
 
-class ValidationNeededRowCounter(private val jdbcTemplate: JdbcTemplate) : StepExecutionListener {
+class ValidatableRowCounter(private val jdbcTemplate: JdbcTemplate): Tasklet {
 
-    private val log = LoggerFactory.getLogger(ValidationNeededRowCounter::class.java)
+    private val log = LoggerFactory.getLogger(ValidatableRowCounter::class.java)
 
-    override fun afterStep(stepExecution: StepExecution): ExitStatus? {
+    override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus? {
         val needValidateRowCount = jdbcTemplate.queryForObject("""
             SELECT count(1) FROM matching.transaction
             WHERE NOT (validated OR account_id IS NOT NULL
@@ -18,6 +19,6 @@ class ValidationNeededRowCounter(private val jdbcTemplate: JdbcTemplate) : StepE
         """.trimIndent(), Long::class.java)
         log.info("$needValidateRowCount rows need to validate in matching.transaction")
 
-        return super.afterStep(stepExecution)
+        return RepeatStatus.FINISHED
     }
 }

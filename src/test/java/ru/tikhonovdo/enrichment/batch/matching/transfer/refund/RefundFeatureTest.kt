@@ -55,7 +55,7 @@ class RefundFeatureTest(
         prepareDataForApply(refundIncomeCategoryId)
         jdbcTemplate.update("SET session_replication_role = origin")
 
-        RestAssured.post("/matching?steps=matchedTransactionsExportStep,applyRefundStep")
+        RestAssured.post("/matching?steps=exportMatchingTransactionsStep,applyRefundStep")
             .then()
             .assertThat()
             .statusCode(200)

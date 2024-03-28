@@ -86,24 +86,30 @@ class BaseMatchingJobConfig(
         CashTransferMatchingStepWriter(accountRepository, transactionMatchingRepository, transferMatchingRepository)
 
     @Bean
-    fun matchedTransactionsExportStep(): Step {
-        return step("matchedTransactionsExportStep")
-            .tasklet(MatchedTransactionsExportTasklet(jdbcTemplate), transactionManager)
+    fun exportMatchingTransactionsStep(): Step {
+        return step("exportMatchingTransactionsStep")
+            .tasklet(ExportMatchingTransactionsTasklet(jdbcTemplate), transactionManager)
             .build()
     }
 
     @Bean
-    fun linkWithMatchedTransactionsStep(): Step {
-        return step("linkWithMatchedTransactionsStep")
-            .tasklet(LinkWithMatchedTransactionsTasklet(jdbcTemplate), transactionManager)
+    fun matchWithMasterTransactionsStep(): Step {
+        return step("matchWithMasterTransactionsStep")
+            .tasklet(MatchWithMasterTransactionsTasklet(jdbcTemplate), transactionManager)
             .build()
     }
 
     @Bean
-    fun actualizeMatchedTransactionsStep(): Step {
-        return step("actualizeMatchedTransactionsStep")
-            .tasklet(ActualizeMatchedTransactionsTasklet(jdbcTemplate), transactionManager)
-            .listener(ValidationNeededRowCounter(jdbcTemplate))
+    fun syncWithMatchedTransactionsStep(): Step {
+        return step("syncWithMatchedTransactionsStep")
+            .tasklet(SyncWithNotFinalizedMatchedTransactionsTasklet(jdbcTemplate), transactionManager)
+            .build()
+    }
+
+    @Bean
+    fun validatableRowCountStep(): Step {
+        return step("validatableRowCountStep")
+            .tasklet(ValidatableRowCounter(jdbcTemplate), transactionManager)
             .build()
     }
 

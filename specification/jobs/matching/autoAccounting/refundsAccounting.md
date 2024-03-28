@@ -1,10 +1,10 @@
 ## Фича: автоматический учет компенсаций
 
 По комментарию во входящем переводе автоматически рассчитывать сумму расходной транзакции во время финального матчинга в financepm.transaction.
-Для этого потребуется работа в трех шагах: тся правки в _matchedTransactionsExportStep_ и создание двух шагов:
-- [_searchRefundStep_](#searchrefundstep) - новый шаг, расположен непосредственно перед _matchedTransactionsExportStep_
-- [_matchedTransactionsExportStep_](#доработка-matchedtransactionsexportstep) - существует, потребуется правка
-- [_applyRefundStep_](#applyrefundstep) - новый шаг, расположен сразу после _matchedTransactionsExportStep_
+Для этого потребуется работа в трех шагах: правки в _exportMatchingTransactionsStep_ и создание двух шагов:
+- [_searchRefundStep_](#searchrefundstep) - новый шаг, расположен непосредственно перед _exportMatchingTransactionsStep_
+- [_exportMatchingTransactionsStep_](#доработка-exportMatchingTransactionsStep) - существует, потребуется правка
+- [_applyRefundStep_](#applyrefundstep) - новый шаг, расположен сразу после _exportMatchingTransactionsStep_
 
 ### _searchRefundStep_
 
@@ -15,7 +15,7 @@
 Для шага _transferMatchingStep_ (в TransferMatchingStepReader) потребуется задать дополнительное условие: для переводов отбирать только те доходные транзакции, в которых нет комментария
 
 
-### Доработка _matchedTransactionsExportStep_
+### Доработка _exportMatchingTransactionsStep_
 
 ###### Логика работы:
 - выбрать записи по существующей логике, кроме тех, у которых поле `matching.transaction.refund_for_id` != NULL

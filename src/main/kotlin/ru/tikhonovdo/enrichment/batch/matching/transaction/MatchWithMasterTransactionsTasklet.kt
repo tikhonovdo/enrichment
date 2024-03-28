@@ -6,7 +6,19 @@ import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.repeat.RepeatStatus
 import org.springframework.jdbc.core.JdbcTemplate
 
-class LinkWithMatchedTransactionsTasklet(private val jdbcTemplate: JdbcTemplate): Tasklet {
+/**
+ * Тасклет задает `financepm.transaction.matching_transaction_id` для расходных транзакций и переводов
+ * по точному совпадению кортежа из `matching.transaction`:
+ *  - `type`
+ *  - `category_id`
+ *  - `sum`
+ *  - `date`
+ *  - `event_id`
+ *
+ *  //todo: возможно матчинг по дате следует пересмотреть ввиду потери точности при обратном сравнении --
+ *  исходное приложение создает записи с менее точным заданием даты транзакции
+ */
+class MatchWithMasterTransactionsTasklet(private val jdbcTemplate: JdbcTemplate): Tasklet {
 
     override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus {
         val updated = jdbcTemplate.update("""
