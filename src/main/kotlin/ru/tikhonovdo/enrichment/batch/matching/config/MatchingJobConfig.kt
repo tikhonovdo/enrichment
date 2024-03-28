@@ -47,9 +47,9 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
             .addStep(flowStep(transferMatchingFlow))
             .addStep(searchRefundStep)
             .addStep(matchedTransactionsExportStep)
-            .addStep(applyRefundStep)
             .addStep(linkWithMatchedTransactionsStep)
             .addStep(actualizeMatchedTransactionsStep)
+            .addStep(applyRefundStep)
             .addStep(matchedTransfersExportStep)
             .build()
     }

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.transfer.refund.*
-import ru.tikhonovdo.enrichment.domain.enitity.Transaction
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.financepm.TransactionRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
@@ -22,7 +21,7 @@ class RefundFeatureConfig(
     private val dataSource: DataSource,
     private val transactionManager: PlatformTransactionManager,
     private val transactionMatchingRepository: TransactionMatchingRepository,
-    private val transactionRepository: TransactionRepository,
+    private val transactionRepository: TransactionRepository
 ): AbstractJobConfig(jobRepository) {
 
     @Bean
@@ -49,13 +48,12 @@ class RefundFeatureConfig(
     @Bean
     fun applyRefundStep(
         applyRefundStepReader: ItemReader<ApplyRefundInfo>,
-        applyRefundStepProcessor: ItemProcessor<ApplyRefundInfo, Transaction>
+        applyRefundStepProcessor: ItemProcessor<ApplyRefundInfo, ApplyRefundInfo?>
     ): Step {
         return step("applyRefundStep")
-            .chunk<ApplyRefundInfo, Transaction>(10, transactionManager)
+            .chunk<ApplyRefundInfo, ApplyRefundInfo?>(10, transactionManager)
             .reader(applyRefundStepReader)
             .processor(applyRefundStepProcessor)
-            .writer { transactionRepository.updateBatch(it.items) }
             .build()
     }
 
@@ -64,7 +62,9 @@ class RefundFeatureConfig(
         ApplyRefundStepReader(dataSource)
 
     @Bean
-    fun applyRefundStepProcessor(@Value("\${refund.income-category-id}") refundIncomeCategoryId: Long): ItemProcessor<ApplyRefundInfo, Transaction> =
+    fun applyRefundStepProcessor(
+        @Value("\${refund.income-category-id}") refundIncomeCategoryId: Long
+    ): ItemProcessor<ApplyRefundInfo, ApplyRefundInfo?> =
         ApplyRefundStepProcessor(refundIncomeCategoryId, transactionRepository, transactionMatchingRepository)
 
 }

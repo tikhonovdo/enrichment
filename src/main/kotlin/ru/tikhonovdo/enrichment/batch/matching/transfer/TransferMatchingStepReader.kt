@@ -13,7 +13,7 @@ class TransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<T
             FROM matching.transaction mt1
             JOIN matching.transaction mt2 ON (mt1.date <= mt2.date AND mt2.date < (mt1.date + INTERVAL '5s')) AND mt2.type = ${Type.INCOME.id} AND mt1.sum = mt2.sum
             WHERE mt1.type = ${Type.OUTCOME.id} AND mt1.category_id IS NULL AND mt2.category_id IS NULL AND 
-                (length(mt2.description) = 0 OR m1.draft_transaction_id = m2.m1.draft_transaction_id)
+                (length(mt2.description) = 0 OR mt1.draft_transaction_id = mt2.draft_transaction_id)
             ORDER BY mt1.date;
         """.trimIndent()
         this.setRowMapper { rs, _ ->

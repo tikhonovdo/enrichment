@@ -22,6 +22,7 @@ abstract class AbstractBatchRepository<T>(
 
     protected val jdbcTemplate: JdbcTemplate = namedParameterJdbcTemplate.jdbcTemplate
 
+    @Transactional
     override fun insertBatch(entities: Collection<T>): Int {
         if (insertQuery != null) {
             return batchQuery(insertQuery, entities)
@@ -29,6 +30,7 @@ abstract class AbstractBatchRepository<T>(
         throw UnsupportedOperationException("insert batch is not supported")
     }
 
+    @Transactional
     override fun updateBatch(entities: Collection<T>): Int {
         if (updateQuery != null) {
             return batchQuery(updateQuery, entities)
@@ -36,7 +38,6 @@ abstract class AbstractBatchRepository<T>(
         throw UnsupportedOperationException("update batch is not supported")
     }
 
-    @Transactional
     protected open fun batchQuery(query: String, entities: Collection<T>): Int {
         return namedParameterJdbcTemplate.batchUpdate(query, createBatchParams(entities)).size
     }

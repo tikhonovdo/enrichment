@@ -1,19 +1,20 @@
 package ru.tikhonovdo.enrichment.batch.matching.transfer.refund
 
+import jakarta.transaction.Transactional
 import org.springframework.batch.item.ItemProcessor
 import ru.tikhonovdo.enrichment.domain.Type
-import ru.tikhonovdo.enrichment.domain.enitity.Transaction
 import ru.tikhonovdo.enrichment.repository.financepm.TransactionRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
-class ApplyRefundStepProcessor(
+open class ApplyRefundStepProcessor(
     private val refundIncomeCategoryId: Long,
     private val transactionRepository: TransactionRepository,
-    private val transactionMatchingRepository: TransactionMatchingRepository,
-): ItemProcessor<ApplyRefundInfo, Transaction> {
+    private val transactionMatchingRepository: TransactionMatchingRepository
+): ItemProcessor<ApplyRefundInfo, ApplyRefundInfo?> {
 
-    override fun process(refundInfo: ApplyRefundInfo): Transaction? {
-        val transactionToRefund = transactionRepository.findByMatchingTransactionId(refundInfo.refundForId)?.copy() ?: return null
+    @Transactional
+    override fun process(refundInfo: ApplyRefundInfo): ApplyRefundInfo? {
+        val transactionToRefund = transactionRepository.findByMatchingTransactionId(refundInfo.refundForId) ?: return null
 
         val startSign = transactionToRefund.sum.signum()
         transactionToRefund.sum = transactionToRefund.sum.minus(refundInfo.sum)
@@ -24,9 +25,9 @@ class ApplyRefundStepProcessor(
             transactionToRefund.typeId = Type.swap(transactionToRefund.typeId)
             transactionToRefund.categoryId = refundIncomeCategoryId
         }
+        transactionRepository.flush()
+        transactionMatchingRepository.markValidatedByRefundForId(refundInfo.refundForId)
 
-        transactionMatchingRepository.markValidated(refundInfo.sourceId)
-
-        return transactionToRefund
+        return refundInfo
     }
 }

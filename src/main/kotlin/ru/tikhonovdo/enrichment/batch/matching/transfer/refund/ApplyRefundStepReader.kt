@@ -11,7 +11,7 @@ class ApplyRefundStepReader(dataSource: DataSource): JdbcCursorItemReader<ApplyR
         this.dataSource = dataSource
         sql = """
         SELECT SUM(sum) as sum, refund_for_id, id as source_id
-        FROM matching.transaction WHERE description is not null AND length(description) > 0 AND refund_for_id IS NOT NULL AND NOT validated
+        FROM matching.transaction WHERE refund_for_id IS NOT NULL AND NOT validated
         GROUP BY refund_for_id, id;
         """.trimIndent()
         this.setRowMapper { rs, _ ->

@@ -50,7 +50,7 @@ interface CustomTransactionMatchingRepository {
 
     fun batchUpdateRefundForId(transactions: Collection<TransactionMatching>)
 
-    fun markValidated(id: Long)
+    fun markValidatedByRefundForId(refundForId: Long)
 
     fun findTransferCandidatesToComplement(
         sourceName: String,
@@ -95,6 +95,7 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
                 OR (category_id IS NULL AND event_id IS NULL)) -- не является событием и не задана категория
                 OR (tr_t.id != cat_t.id) -- тип категории не соответвует типу транзацкии
                 ) AND NOT validated
+                AND mt.refund_for_id IS NULL
         """.trimIndent(), Long::class.java)
     }
 
@@ -114,10 +115,10 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
         jdbcTemplate.execute("SELECT setval('matching.transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.transaction), false)")
     }
 
-    override fun markValidated(id: Long) {
+    override fun markValidatedByRefundForId(refundForId: Long) {
         namedParameterJdbcTemplate.update(
-            "UPDATE matching.transaction SET validated = true WHERE id IN (:id) ",
-            MapSqlParameterSource(mapOf("id" to id))
+            "UPDATE matching.transaction SET validated = true WHERE refund_for_id = :refundForId ",
+            MapSqlParameterSource(mapOf("refundForId" to refundForId))
         )
     }
 
