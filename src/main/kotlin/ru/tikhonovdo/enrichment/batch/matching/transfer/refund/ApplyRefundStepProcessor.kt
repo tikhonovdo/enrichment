@@ -26,7 +26,7 @@ open class ApplyRefundStepProcessor(
             transactionToRefund.categoryId = refundIncomeCategoryId
         }
         transactionRepository.flush()
-        transactionMatchingRepository.markValidatedByRefundForId(refundInfo.refundForId)
+        transactionMatchingRepository.markValidated(listOf(refundInfo.sourceId, refundInfo.refundForId))
 
         return refundInfo
     }

@@ -38,7 +38,8 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
         transferMatchingFlow: Flow,
         cleanUnmatchedTransactionsStep: Step,
         transferPatternPreMatchingStep: Step,
-        exportMatchingTransactionsStep: Step
+        exportMatchingTransactionsStep: Step,
+        exportMatchedTransfersStep: Step,
     ): Flow {
         return CustomFlowBuilder("matchingFlow")
             .addStep(cleanUnmatchedTransactionsStep)
@@ -47,6 +48,7 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
             .addStep(transferPatternPreMatchingStep)
             .addStep(flowStep(transferMatchingFlow))
             .addStep(exportMatchingTransactionsStep)
+            .addStep(exportMatchedTransfersStep)
             .build()
     }
 
@@ -56,14 +58,12 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
         syncWithMatchedTransactionsStep: Step,
         searchRefundStep: Step,
         applyRefundStep: Step,
-        matchedTransfersExportStep: Step,
     ): Flow {
         return CustomFlowBuilder("postMatchingFlow")
             .addStep(searchRefundStep)
             .addStep(matchWithMasterTransactionsStep)
             .addStep(syncWithMatchedTransactionsStep)
             .addStep(applyRefundStep)
-            .addStep(matchedTransfersExportStep)
             .build()
     }
 

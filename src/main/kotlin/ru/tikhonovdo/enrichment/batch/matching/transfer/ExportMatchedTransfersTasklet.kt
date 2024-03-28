@@ -6,7 +6,13 @@ import org.springframework.batch.core.step.tasklet.Tasklet
 import org.springframework.batch.repeat.RepeatStatus
 import org.springframework.jdbc.core.JdbcTemplate
 
-class TransferMatchingExportTasklet(private val jdbcTemplate: JdbcTemplate): Tasklet {
+/**
+ * Тасклет экспортирует данные из `matching.transfer` в `financepm.transfer` при условии
+ *
+ *     1. формальной валидности значений записи ограничениям `financepm.transfer` и
+ *     2. в случае, если запись не была сматчена ранее
+ */
+class ExportMatchedTransfersTasklet(private val jdbcTemplate: JdbcTemplate): Tasklet {
 
     override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus {
         val updated = jdbcTemplate.update("""

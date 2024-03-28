@@ -14,7 +14,7 @@ import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepProces
 import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.transaction.*
-import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingExportTasklet
+import ru.tikhonovdo.enrichment.batch.matching.transfer.ExportMatchedTransfersTasklet
 import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepWriter
@@ -114,9 +114,9 @@ class BaseMatchingJobConfig(
     }
 
     @Bean
-    fun matchedTransfersExportStep(): Step {
-        return step("matchedTransfersExportStep")
-            .tasklet(TransferMatchingExportTasklet(jdbcTemplate), transactionManager)
+    fun exportMatchedTransfersStep(): Step {
+        return step("exportMatchedTransfersStep")
+            .tasklet(ExportMatchedTransfersTasklet(jdbcTemplate), transactionManager)
             .build()
     }
 

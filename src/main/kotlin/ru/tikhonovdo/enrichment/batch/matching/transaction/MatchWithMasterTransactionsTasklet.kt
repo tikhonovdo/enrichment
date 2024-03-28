@@ -7,7 +7,7 @@ import org.springframework.batch.repeat.RepeatStatus
 import org.springframework.jdbc.core.JdbcTemplate
 
 /**
- * Тасклет задает `financepm.transaction.matching_transaction_id` для расходных транзакций и переводов
+ * Тасклет задает `financepm.transaction.matching_transaction_id` для расходных транзакций и транзакций-переводов
  * по точному совпадению кортежа из `matching.transaction`:
  *  - `type`
  *  - `category_id`
@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate
  *  - `date`
  *  - `event_id`
  *
- *  //todo: возможно матчинг по дате следует пересмотреть ввиду потери точности при обратном сравнении --
+ *  todo: возможно матчинг по дате следует пересмотреть ввиду потери точности при обратном сравнении --
  *  исходное приложение создает записи с менее точным заданием даты транзакции
  */
 class MatchWithMasterTransactionsTasklet(private val jdbcTemplate: JdbcTemplate): Tasklet {
