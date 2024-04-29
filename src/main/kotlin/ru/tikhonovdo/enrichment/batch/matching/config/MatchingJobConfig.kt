@@ -13,8 +13,11 @@ import ru.tikhonovdo.enrichment.batch.matching.config.alfa.AlfaMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.config.tinkoff.TinkoffMatchingJobConfig
 
 @Configuration
-@Import(BaseMatchingJobConfig::class, RefundFeatureConfig::class, TransferPatternPreMatchingConfig::class,
-    AlfaMatchingJobConfig::class, TinkoffMatchingJobConfig::class)
+@Import(BaseMatchingJobConfig::class,
+    RefundFeatureConfig::class,
+    TransferManualMatchingConfig::class,
+    AlfaMatchingJobConfig::class,
+    TinkoffMatchingJobConfig::class)
 class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepository) {
 
     @Bean
@@ -35,9 +38,10 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
     fun matchingFlow(
         tinkoffMatchingFlow: Flow,
         alfaMatchingFlow: Flow,
-        transferMatchingFlow: Flow,
         cleanUnmatchedTransactionsStep: Step,
-        transferPatternPreMatchingStep: Step,
+        transferMatchingStep: Step,
+        transferComplementStep: Step,
+        transferManualMatchingStep: Step,
         exportMatchingTransactionsStep: Step,
         exportMatchedTransfersStep: Step,
     ): Flow {
@@ -45,8 +49,9 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
             .addStep(cleanUnmatchedTransactionsStep)
             .addStep(flowStep(tinkoffMatchingFlow))
             .addStep(flowStep(alfaMatchingFlow))
-            .addStep(transferPatternPreMatchingStep)
-            .addStep(flowStep(transferMatchingFlow))
+            .addStep(transferComplementStep)
+            .addStep(transferMatchingStep)
+            .addStep(transferManualMatchingStep)
             .addStep(exportMatchingTransactionsStep)
             .addStep(exportMatchedTransfersStep)
             .build()
@@ -64,19 +69,6 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
             .addStep(matchWithMasterTransactionsStep)
             .addStep(syncWithMatchedTransactionsStep)
             .addStep(applyRefundStep)
-            .build()
-    }
-
-    @Bean
-    fun transferMatchingFlow(
-        transferMatchingStep: Step,
-        tinkoffCashTransferMatchingStep: Step,
-        alfaCashTransferMatchingStep: Step
-    ): Flow {
-        return CustomFlowBuilder("transferMatchingFlow")
-            .addStep(transferMatchingStep)
-            .addStep(tinkoffCashTransferMatchingStep)
-            .addStep(alfaCashTransferMatchingStep)
             .build()
     }
 

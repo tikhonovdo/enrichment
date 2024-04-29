@@ -5,7 +5,6 @@ import org.springframework.batch.core.job.flow.Flow
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
-import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -18,7 +17,6 @@ import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.currency.AlfaCurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaTransactionStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.alfa.AlfaCashTransferMatchingStepReader
 import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
@@ -135,22 +133,5 @@ class AlfaMatchingJobConfig(
             accountMatchingRepository
         )
 
-    @Bean
-    fun alfaCashTransferMatchingStep(
-        alfaCashTransferMatchingStepReader: ItemReader<TransactionMatching>,
-        cashTransferMatchingStepWriter: ItemWriter<TransactionMatching>,
-        cashTransferMatchingStepProcessor: ItemProcessor<TransactionMatching, TransactionMatching>
-    ): Step {
-        return step("alfaCashTransferMatchingStep")
-            .chunk<TransactionMatching, TransactionMatching>(10, transactionManager)
-            .reader(alfaCashTransferMatchingStepReader)
-            .processor(cashTransferMatchingStepProcessor)
-            .writer(cashTransferMatchingStepWriter)
-            .build()
-    }
-
-    @Bean
-    fun alfaCashTransferMatchingStepReader(): AlfaCashTransferMatchingStepReader =
-        AlfaCashTransferMatchingStepReader(dataSource)
 
 }

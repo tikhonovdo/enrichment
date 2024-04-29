@@ -34,8 +34,7 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
                 data->>'sumWithRoundingForInvestKopilka' as sum_with_rounding_for_invest_kopilka,
                 data->>'message' as message,
                 data->>'brandName' as brand_name
-            FROM matching.draft_transaction
-            WHERE bank_id = ${Bank.TINKOFF.id} AND (data->>'category') != 'Наличные';
+            FROM matching.draft_transaction WHERE bank_id = ${Bank.TINKOFF.id};
         """.trimIndent()
         setRowMapper { rs, _ ->
             TinkoffRecord(
@@ -52,7 +51,7 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
                 paymentSum = rs.getDouble("payment_sum"),
                 paymentCurrency = rs.getString("payment_currency"),
                 cashback = rs.getNullable { it.getDouble("cashback") },
-                category = rs.getString("category"),
+                category = rs.getNullable {it.getString("category") }.orEmpty(),
                 mcc = rs.getNullable { it.getString("mcc") },
                 description = rs.getString("description"),
                 totalBonuses = rs.getDouble("total_bonuses"),

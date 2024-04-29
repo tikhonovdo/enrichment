@@ -29,8 +29,7 @@ class AlfaRecordReader(dataSource: DataSource): JdbcCursorItemReader<AlfaRecord>
                 data->>'description' as description,
                 data->>'type' as type,
                 data->>'comment' as comment
-            FROM matching.draft_transaction
-            WHERE bank_id = ${Bank.ALFA.id} AND (data->>'category') != 'Пополнения';
+            FROM matching.draft_transaction WHERE bank_id = ${Bank.ALFA.id};
         """.trimIndent()
         setRowMapper { rs, _ ->
             AlfaRecord(

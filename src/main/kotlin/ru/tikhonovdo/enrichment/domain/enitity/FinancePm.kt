@@ -223,6 +223,19 @@ data class Transaction(
         result = 31 * result + (matchingTransactionId?.hashCode() ?: 0)
         return result
     }
+
+    fun importHashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + typeId.hashCode()
+        result = 31 * result + (categoryId?.hashCode() ?: 0)
+        result = 31 * result + date.hashCode()
+        result = 31 * result + sum.hashCode()
+        result = 31 * result + (accountId?.hashCode() ?: 0)
+        result = 31 * result + description.hashCode()
+        result = 31 * result + (eventId?.hashCode() ?: 0)
+        result = 31 * result + available.hashCode()
+        return result
+    }
 }
 
 @Entity

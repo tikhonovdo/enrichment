@@ -18,8 +18,9 @@ import ru.tikhonovdo.enrichment.batch.matching.transfer.ExportMatchedTransfersTa
 import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transfer.TransferMatchingStepWriter
-import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.CashTransferMatchingStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.CashTransferMatchingStepWriter
+import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementInfo
+import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementStepProcessor
+import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementStepReader
 import ru.tikhonovdo.enrichment.domain.enitity.*
 import ru.tikhonovdo.enrichment.repository.financepm.AccountRepository
 import ru.tikhonovdo.enrichment.repository.matching.*
@@ -78,12 +79,25 @@ class BaseMatchingJobConfig(
         AccountMatchingStepProcessor(accountMatchingRepository)
 
     @Bean
-    fun cashTransferMatchingStepProcessor(): ItemProcessor<TransactionMatching, TransactionMatching> =
-        CashTransferMatchingStepProcessor(transactionMatchingRepository)
+    fun transferComplementStep(
+        transferComplementStepReader: ItemReader<TransferComplementInfo>,
+        transferComplementStepProcessor: ItemProcessor<TransferComplementInfo, Collection<TransactionMatching>>
+    ): Step {
+        return step("transferComplementStep")
+            .chunk<TransferComplementInfo, Collection<TransactionMatching>>(10, transactionManager)
+            .reader(transferComplementStepReader)
+            .processor(transferComplementStepProcessor)
+            .writer { transactionMatchingRepository.insertBatch(it.items.flatten()) }
+            .build()
+    }
 
     @Bean
-    fun cashTransferMatchingStepWriter(): ItemWriter<TransactionMatching> =
-        CashTransferMatchingStepWriter(accountRepository, transactionMatchingRepository, transferMatchingRepository)
+    fun transferComplementStepReader(): ItemReader<TransferComplementInfo> =
+        TransferComplementStepReader(dataSource)
+
+    @Bean
+    fun transferComplementStepProcessor(): ItemProcessor<TransferComplementInfo, Collection<TransactionMatching>> =
+        TransferComplementStepProcessor(transactionMatchingRepository)
 
     @Bean
     fun exportMatchingTransactionsStep(): Step {

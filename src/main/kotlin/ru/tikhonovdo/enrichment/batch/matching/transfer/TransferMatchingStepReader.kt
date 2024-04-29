@@ -17,7 +17,6 @@ class TransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<T
             WHERE mt1.type = ${Type.OUTCOME.id}
               AND mt1.category_id IS NULL AND mt2.category_id IS NULL
               AND CASE WHEN (a1.currency_id = a2.currency_id) THEN (mt1.sum = mt2.sum) ELSE TRUE END
-              AND (length(mt2.description) = 0 OR mt1.draft_transaction_id = mt2.draft_transaction_id)
             ORDER BY mt1.date;
         """.trimIndent()
         this.setRowMapper { rs, _ ->

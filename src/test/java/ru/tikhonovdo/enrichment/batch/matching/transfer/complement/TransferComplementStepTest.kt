@@ -1,4 +1,4 @@
-package ru.tikhonovdo.enrichment.batch.matching.transfer.pattern
+package ru.tikhonovdo.enrichment.batch.matching.transfer.complement
 
 import io.restassured.RestAssured
 import org.junit.jupiter.api.Assertions
@@ -17,7 +17,7 @@ import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepositor
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-class TransferPatternPreMatchingTest(
+class TransferComplementStepTest(
     @Autowired private val draftTransactionRepository: DraftTransactionRepository,
     @Autowired private val matchingTransactionRepository: TransactionMatchingRepository,
     @Autowired private val currencyRepository: CurrencyRepository,
@@ -25,14 +25,17 @@ class TransferPatternPreMatchingTest(
     @Autowired private val categoryRepository: CategoryRepository
 ): DatabaseAwareTest() {
 
+    lateinit var accounts: Map<Long, Account>
+
     @BeforeEach
     fun beforeEach() {
         prefillData()
+        accounts = accountRepository.findAll().associateBy { it.id!! }
     }
 
     @Test
-    fun `transferPatternPreMatchingStep - cash out, name pattern partial match`() {
-        jdbcTemplate.update("INSERT INTO matching.transfer_pattern " +
+    fun `transferComplementStep - cash out, name pattern partial match`() {
+        jdbcTemplate.update("INSERT INTO matching.transfer_complement " +
                 "(source_name, source_description, source_type, source_account_id, target_account_id) " +
                 "VALUES ('MCC6011', '', 2, 1, 3)")
         transactionMatching(
@@ -43,46 +46,46 @@ class TransferPatternPreMatchingTest(
             description = ""
         )
 
-        RestAssured.post("/matching?steps=transferPatternPreMatchingStep").then().assertThat().statusCode(200)
+        RestAssured.post("/matching?steps=transferComplementStep").then().assertThat().statusCode(200)
 
-        val alfaCashOut = matchingTransactionRepository.findAll().sortedByDescending { it.typeId }
+        val alfaCashOut = matchingTransactionRepository.findAll().associateBy { accounts[it.accountId]!!.name }
         Assertions.assertEquals(2, alfaCashOut.size)
-        Assertions.assertEquals(1, alfaCashOut[0].accountId)
-        Assertions.assertEquals(3, alfaCashOut[1].accountId)
-        Assertions.assertEquals(Type.OUTCOME.id, alfaCashOut[0].typeId)
-        Assertions.assertEquals(Type.INCOME.id, alfaCashOut[1].typeId)
-        Assertions.assertEquals(alfaCashOut[0].sum, alfaCashOut[1].sum)
-        Assertions.assertEquals(alfaCashOut[0].date, alfaCashOut[1].date)
+        Assertions.assertNotNull(alfaCashOut["alfa_account"])
+        Assertions.assertNotNull(alfaCashOut["cash_account"])
+        Assertions.assertEquals(Type.OUTCOME.id, alfaCashOut["alfa_account"]!!.typeId)
+        Assertions.assertEquals(Type.INCOME.id, alfaCashOut["cash_account"]!!.typeId)
+        Assertions.assertEquals(alfaCashOut["alfa_account"]!!.sum, alfaCashOut["cash_account"]!!.sum)
+        Assertions.assertEquals(alfaCashOut["alfa_account"]!!.date, alfaCashOut["cash_account"]!!.date)
     }
 
     @Test
-    fun `transferPatternPreMatchingStep - cash out, name pattern full match`() {
-        jdbcTemplate.update("INSERT INTO matching.transfer_pattern " +
+    fun `transferComplementStep - cash out, name pattern full match`() {
+        jdbcTemplate.update("INSERT INTO matching.transfer_complement " +
                 "(source_name, source_description, source_type, source_account_id, target_account_id) " +
-                "VALUES ('Снятие в банкомате', '', 2, 2, 3)")
+                "VALUES ('Снятие в банкомате Тинькофф', '', 2, 2, 3)")
         transactionMatching(
-            name = "Снятие в банкомате",
+            name = "Снятие в банкомате Тинькофф",
             type = Type.OUTCOME,
             sum = BigDecimal("5000.000000"),
             accountId = 2,
             description = "",
         )
 
-        RestAssured.post("/matching?steps=transferPatternPreMatchingStep").then().assertThat().statusCode(200)
+        RestAssured.post("/matching?steps=transferComplementStep").then().assertThat().statusCode(200)
 
-        val tinkoffCashOut = matchingTransactionRepository.findAll().sortedByDescending { it.typeId }
+        val tinkoffCashOut = matchingTransactionRepository.findAll().associateBy { accounts[it.accountId]!!.name }
         Assertions.assertEquals(2, tinkoffCashOut.size)
-        Assertions.assertEquals(2, tinkoffCashOut[0].accountId)
-        Assertions.assertEquals(3, tinkoffCashOut[1].accountId)
-        Assertions.assertEquals(Type.OUTCOME.id, tinkoffCashOut[0].typeId)
-        Assertions.assertEquals(Type.INCOME.id, tinkoffCashOut[1].typeId)
-        Assertions.assertEquals(tinkoffCashOut[0].sum, tinkoffCashOut[1].sum)
-        Assertions.assertEquals(tinkoffCashOut[0].date, tinkoffCashOut[1].date)
+        Assertions.assertNotNull(tinkoffCashOut["tinkoff_account"])
+        Assertions.assertNotNull(tinkoffCashOut["cash_account"])
+        Assertions.assertEquals(Type.OUTCOME.id, tinkoffCashOut["tinkoff_account"]!!.typeId)
+        Assertions.assertEquals(Type.INCOME.id, tinkoffCashOut["cash_account"]!!.typeId)
+        Assertions.assertEquals(tinkoffCashOut["tinkoff_account"]!!.sum, tinkoffCashOut["cash_account"]!!.sum)
+        Assertions.assertEquals(tinkoffCashOut["tinkoff_account"]!!.date, tinkoffCashOut["cash_account"]!!.date)
     }
 
     @Test
-    fun `transferPatternPreMatchingStep - incoming based self-transfer`() {
-        jdbcTemplate.update("INSERT INTO matching.transfer_pattern " +
+    fun `transferComplementStep - incoming based self-transfer`() {
+        jdbcTemplate.update("INSERT INTO matching.transfer_complement " +
                 "(source_name, source_description, source_type, source_account_id, target_account_id) " +
                 "VALUES ('Перевод по запросу самому себе', 'Яндекс Банк', 1, 2, 4)")
         transactionMatching(
@@ -93,21 +96,20 @@ class TransferPatternPreMatchingTest(
             description = "Яндекс Банк",
         )
 
-        RestAssured.post("/matching?steps=transferPatternPreMatchingStep").then().assertThat().statusCode(200)
+        RestAssured.post("/matching?steps=transferComplementStep").then().assertThat().statusCode(200)
 
-        val yaToTinkoff = matchingTransactionRepository.findAll().sortedByDescending { it.typeId }
+        val yaToTinkoff = matchingTransactionRepository.findAll().associateBy { accounts[it.accountId]!!.name }
         Assertions.assertEquals(2, yaToTinkoff.size)
-        Assertions.assertEquals(4, yaToTinkoff[0].accountId)
-        Assertions.assertEquals(2, yaToTinkoff[1].accountId)
-        Assertions.assertEquals(Type.OUTCOME.id, yaToTinkoff[0].typeId)
-        Assertions.assertEquals(Type.INCOME.id, yaToTinkoff[1].typeId)
-        Assertions.assertEquals(yaToTinkoff[0].sum, yaToTinkoff[1].sum)
-        Assertions.assertEquals(yaToTinkoff[0].date, yaToTinkoff[1].date)
+        Assertions.assertNotNull(yaToTinkoff["ya_account"])
+        Assertions.assertNotNull(yaToTinkoff["tinkoff_account"])
+        Assertions.assertEquals(Type.OUTCOME.id, yaToTinkoff["ya_account"]!!.typeId)
+        Assertions.assertEquals(Type.INCOME.id, yaToTinkoff["tinkoff_account"]!!.typeId)
+        Assertions.assertEquals(yaToTinkoff["ya_account"]!!.sum, yaToTinkoff["tinkoff_account"]!!.sum)
     }
 
     @Test
-    fun `transferPatternPreMatchingStep - outgoing based self-transfer`() {
-        jdbcTemplate.update("INSERT INTO matching.transfer_pattern " +
+    fun `transferComplementStep - outgoing based self-transfer`() {
+        jdbcTemplate.update("INSERT INTO matching.transfer_complement " +
                 "(source_name, source_description, source_type, source_account_id, target_account_id) " +
                 "VALUES ('Перевод по запросу самому себе', 'Яндекс Банк', 2, 2, 4)")
         transactionMatching(
@@ -118,20 +120,20 @@ class TransferPatternPreMatchingTest(
             description = "Яндекс Банк",
         )
 
-        RestAssured.post("/matching?steps=transferPatternPreMatchingStep").then().assertThat().statusCode(200)
+        RestAssured.post("/matching?steps=transferComplementStep").then().assertThat().statusCode(200)
 
-        val tinkoffToYa = matchingTransactionRepository.findAll().sortedByDescending { it.typeId }
+        val tinkoffToYa = matchingTransactionRepository.findAll().associateBy { accounts[it.accountId]!!.name }
         Assertions.assertEquals(2, tinkoffToYa.size)
-        Assertions.assertEquals(2, tinkoffToYa[0].accountId)
-        Assertions.assertEquals(4, tinkoffToYa[1].accountId)
-        Assertions.assertEquals(Type.OUTCOME.id, tinkoffToYa[0].typeId)
-        Assertions.assertEquals(Type.INCOME.id, tinkoffToYa[1].typeId)
-        Assertions.assertEquals(tinkoffToYa[0].sum, tinkoffToYa[1].sum)
+        Assertions.assertNotNull(tinkoffToYa["ya_account"])
+        Assertions.assertNotNull(tinkoffToYa["tinkoff_account"])
+        Assertions.assertEquals(Type.OUTCOME.id, tinkoffToYa["tinkoff_account"]!!.typeId)
+        Assertions.assertEquals(Type.INCOME.id, tinkoffToYa["ya_account"]!!.typeId)
+        Assertions.assertEquals(tinkoffToYa["tinkoff_account"]!!.sum, tinkoffToYa["ya_account"]!!.sum)
     }
 
     @Test
-    fun `transferPatternPreMatchingStep - idempotency test`() {
-        jdbcTemplate.update("INSERT INTO matching.transfer_pattern " +
+    fun `transferComplementStep - idempotency test`() {
+        jdbcTemplate.update("INSERT INTO matching.transfer_complement " +
                 "(source_name, source_description, source_type, source_account_id, target_account_id) " +
                 "VALUES ('MCC6011', '', 2, 1, 3)")
         transactionMatching(
@@ -142,8 +144,8 @@ class TransferPatternPreMatchingTest(
             description = ""
         )
 
-        RestAssured.post("/matching?steps=transferPatternPreMatchingStep").then().assertThat().statusCode(200)
-        RestAssured.post("/matching?steps=transferPatternPreMatchingStep").then().assertThat().statusCode(200)
+        RestAssured.post("/matching?steps=transferComplementStep").then().assertThat().statusCode(200)
+        RestAssured.post("/matching?steps=transferComplementStep").then().assertThat().statusCode(200)
 
         val alfaCashOut = matchingTransactionRepository.findAll()
         Assertions.assertEquals(2, alfaCashOut.size)
@@ -166,19 +168,29 @@ class TransferPatternPreMatchingTest(
             Category(id = 2, name = "outcome_category", typeId = Type.OUTCOME.id, orderId = 2)
         ))
         jdbcTemplate.execute("SELECT setval('matching.draft_transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.draft_transaction), false)")
-        draftTransactionRepository.insertBatch(listOf(DraftTransaction(1, Bank.TINKOFF.id, LocalDateTime.now(), "0.00", "{}")))
+        draftTransactionRepository.insertBatch(listOf(
+            DraftTransaction(
+                1,
+                Bank.TINKOFF.id,
+                LocalDateTime.now(),
+                "0.00",
+                "{}"
+            )
+        ))
     }
 
     private fun transactionMatching(name: String, type: Type, sum: BigDecimal, accountId: Long, description: String) {
-        matchingTransactionRepository.insertBatch(listOf(TransactionMatching(
-            name = name,
-            typeId = type.id,
-            date = LocalDateTime.now(),
-            sum = sum,
-            accountId = accountId,
-            description = description,
-            draftTransactionId = 1
-        )))
+        matchingTransactionRepository.insertBatch(listOf(
+            TransactionMatching(
+                name = name,
+                typeId = type.id,
+                date = LocalDateTime.now(),
+                sum = sum,
+                accountId = accountId,
+                description = description,
+                draftTransactionId = 1
+            )
+        ))
     }
 
 }

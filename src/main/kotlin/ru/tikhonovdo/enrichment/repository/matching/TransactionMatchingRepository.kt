@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementInfo
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
@@ -52,12 +53,7 @@ interface CustomTransactionMatchingRepository {
 
     fun markValidated(ids: Collection<Long>)
 
-    fun findTransferCandidatesToComplement(
-        sourceName: String,
-        sourceDescription: String,
-        sourceType: Long,
-        sourceAccountId: Long
-    ): Collection<TransactionMatching>
+    fun findTransferCandidatesToCreateComplement(transferInfo: TransferComplementInfo): Collection<TransactionMatching>
 }
 
 @Repository
@@ -73,10 +69,12 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
     ) {
 
     override fun setEventIdForTransactions(eventId: Long?, matchingTransactionIds: Collection<Long>) {
-        namedParameterJdbcTemplate.batchUpdate(
-            "UPDATE matching.transaction SET event_id = :eventId WHERE id IN (:matchingTransactionIds)",
-            arrayOf(MapSqlParameterSource(mapOf("eventId" to eventId, "matchingTransactionIds" to matchingTransactionIds)))
-        )
+        if (matchingTransactionIds.isNotEmpty()) {
+            namedParameterJdbcTemplate.batchUpdate(
+                "UPDATE matching.transaction SET event_id = :eventId WHERE id IN (:matchingTransactionIds)",
+                arrayOf(MapSqlParameterSource(mapOf("eventId" to eventId, "matchingTransactionIds" to matchingTransactionIds)))
+            )
+        }
     }
 
     override fun getUnmatchedTransactionIds(): List<Long> {
@@ -129,12 +127,13 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
         )
     }
 
-    override fun findTransferCandidatesToComplement(
-        sourceName: String,
-        sourceDescription: String,
-        sourceType: Long,
-        sourceAccountId: Long
-    ): Collection<TransactionMatching> {
+    override fun findTransferCandidatesToCreateComplement(transferInfo: TransferComplementInfo): Collection<TransactionMatching> {
+        val sourceName = transferInfo.sourceName
+        val sourceDescription = transferInfo.sourceDescription
+        val sourceType = transferInfo.sourceType
+        val sourceAccountId = transferInfo.sourceAccountId
+        val targetAccountId = transferInfo.targetAccountId
+
         val result = namedParameterJdbcTemplate.query("""
             SELECT * FROM matching.transaction mt1
             WHERE mt1.name like :sourceName 
@@ -149,14 +148,15 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
                         AND mt1.date = mt2.date
                         AND mt1.draft_transaction_id = mt2.draft_transaction_id
                         AND mt1.type != mt2.type
-                        AND mt1.account_id != mt2.account_id
+                        AND mt2.account_id = :targetAccountId
                 )
         """.trimIndent(),
             MapSqlParameterSource(mapOf(
                 "sourceName" to "%$sourceName%",
                 "sourceDescription" to sourceDescription,
                 "sourceType" to sourceType,
-                "sourceAccountId" to sourceAccountId
+                "sourceAccountId" to sourceAccountId,
+                "targetAccountId" to targetAccountId
             ))
         ) { rs, _ ->
             TransactionMatching(

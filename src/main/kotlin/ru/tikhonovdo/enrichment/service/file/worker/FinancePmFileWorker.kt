@@ -42,16 +42,41 @@ class FinancePmFileWorkerImpl (
         val arrears = data.arrears.sortedBy { it.id }.map { it.also { it.balance = it.balance.setScale(6) } }
         val arrearTransaction = data.arrearTransaction.sortedBy { it.id }
 
-        if (fullReset) {
-            log.info("Full reset requested")
+        when (saveMode) {
+            SaveMode.FULL_RESET -> {
+                log.info("Full reset requested")
+            }
+            SaveMode.APPEND -> {
+                var transactionDiff = 0L
+                transactionRepository.getLastId().ifPresent { lastTransactionId ->
+                    val minTransactionId = transactions.minOf { it.id!! }
+                    transactionDiff = lastTransactionId - minTransactionId + 1
+                    transactions.forEach { it.id = it.id!! + transactionDiff }
+                    arrearTransaction.forEach {
+                        it.transactionId += transactionDiff
+                    }
+                }
+                transferRepository.getLastId().ifPresent { lastTransferId ->
+                    val minTransferId = transfers.minOf { it.id!! }
+                    val transferDiff = lastTransferId - minTransferId + 1
+                    transfers.forEach {
+                        it.id = it.id!! + transferDiff
+                        it.transactionIdFrom += transactionDiff
+                        it.transactionIdTo += transactionDiff
+                    }
+                }
+            }
+
+            else -> {}
         }
-        saveData("currency", currencies, currencyRepository, fullReset)
-        saveData("account", accounts, accountRepository, fullReset)
-        saveData("category", categories, categoryRepository, fullReset)
-        saveData("transaction", transactions, transactionRepository, fullReset) { it.also { it.matchingTransactionId = null } }
-        saveData("transfer", transfers, transferRepository, fullReset)
-        saveData("arrear", arrears, arrearRepository, fullReset)
-        saveData("arrearTransaction", arrearTransaction, arrearTransactionRepository, fullReset)
+
+        saveData("currency", currencies, currencyRepository, saveMode)
+        saveData("account", accounts, accountRepository, saveMode)
+        saveData("category", categories, categoryRepository, saveMode)
+        saveData("transaction", transactions, transactionRepository, saveMode) { it.also { it.matchingTransactionId = null } }
+        saveData("transfer", transfers, transferRepository, saveMode)
+        saveData("arrear", arrears, arrearRepository, saveMode)
+        saveData("arrearTransaction", arrearTransaction, arrearTransactionRepository, saveMode)
     }
 
     private fun <T: Any> saveData(type: String, entities: Collection<T>, repository: FinancePmRepository<T>, fullReset: Boolean,

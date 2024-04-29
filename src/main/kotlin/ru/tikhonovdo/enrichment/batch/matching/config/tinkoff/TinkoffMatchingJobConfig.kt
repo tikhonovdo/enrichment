@@ -5,7 +5,6 @@ import org.springframework.batch.core.job.flow.Flow
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
-import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -20,7 +19,6 @@ import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.currency.TinkoffCurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffTransactionStepProcessor
-import ru.tikhonovdo.enrichment.batch.matching.transfer.cash.tinkoff.TinkoffCashTransferMatchingStepReader
 import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
@@ -167,23 +165,5 @@ class TinkoffMatchingJobConfig(
             accountMatchingRepository,
             tinkoffAccountMatchingRepository
         )
-
-    @Bean
-    fun tinkoffCashTransferMatchingStep(
-        tinkoffCashTransferMatchingStepReader: ItemReader<TransactionMatching>,
-        cashTransferMatchingStepWriter: ItemWriter<TransactionMatching>,
-        cashTransferMatchingStepProcessor: ItemProcessor<TransactionMatching, TransactionMatching>
-    ): Step {
-        return step("tinkoffCashTransferMatchingStep")
-            .chunk<TransactionMatching, TransactionMatching>(10, transactionManager)
-            .reader(tinkoffCashTransferMatchingStepReader)
-            .processor(cashTransferMatchingStepProcessor)
-            .writer(cashTransferMatchingStepWriter)
-            .build()
-    }
-
-    @Bean
-    fun tinkoffCashTransferMatchingStepReader(): ItemReader<TransactionMatching> =
-        TinkoffCashTransferMatchingStepReader(dataSource)
 
 }
