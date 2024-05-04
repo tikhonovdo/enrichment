@@ -1,16 +1,12 @@
-package ru.tikhonovdo.enrichment.service.file.worker
+package ru.tikhonovdo.enrichment.service.file.worker.financepm
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData
 import ru.tikhonovdo.enrichment.repository.financepm.*
-import ru.tikhonovdo.enrichment.service.file.worker.financepm.ImportMatchingData
-import ru.tikhonovdo.enrichment.service.file.worker.financepm.ImportMatchingDataBuilder
+import ru.tikhonovdo.enrichment.service.file.worker.FinancePmFileWorker
+import ru.tikhonovdo.enrichment.service.file.worker.SaveMode
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
-
-interface FinancePmFileWorker : FileWorker {
-    fun retrieveData(): ByteArray
-}
 
 @Component
 class FinancePmFileWorkerImpl(

@@ -10,6 +10,10 @@ interface FileWorker {
     fun saveData(saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
 }
 
+interface FinancePmFileWorker : FileWorker {
+    fun retrieveData(): ByteArray
+}
+
 abstract class BankFileWorker(
     private val draftTransactionRepository: DraftTransactionRepository,
     private val bank: Bank
