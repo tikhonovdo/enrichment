@@ -8,8 +8,10 @@ import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepositor
 class SearchRefundStepProcessor(private val transactionMatchingRepository: TransactionMatchingRepository): ItemProcessor<TransactionMatching, TransactionMatching> {
 
     override fun process(item: TransactionMatching): TransactionMatching? {
+        val previousDay = item.date.toLocalDate().minusDays(1).atStartOfDay()
+        val nextDay = item.date.toLocalDate().plusDays(1).atStartOfDay()
         val refundCandidates = transactionMatchingRepository.findAllByDateBetweenAndTypeIdEquals(
-            item.date.minusDays(1), item.date, Type.OUTCOME.id
+            previousDay, nextDay, Type.OUTCOME.id
         )
         val refundCandidate = refundCandidates
             .sortedByDescending { it.date }
