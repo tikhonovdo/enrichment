@@ -81,16 +81,19 @@ class AlfabankImportScenario(
 
     override fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
         val random = Random(System.currentTimeMillis())
+        val wait = WebDriverWait(driver(), waitingDuration)
 
         scenarioData.otpCode!!
             .map { it.toString() }
             .forEachIndexed { index: Int, char: String ->
-                WebDriverWait(driver(), waitingDuration)
-                    .until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//input)[${index + 1}]")))
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//input)[${index + 1}]")))
                     .sendKeys(char)
                 random.sleep(80, 150)
             }
         Thread.sleep(1000) // simulate navigation
+
+        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//*[@data-test-id='trust-device-page-cancel-btn']"))))
+            .click()
 
         return if (elementPresented("//*[@data-test-id='main-menu-layout-header-root']")) {
             LOGIN_SUCCEED
