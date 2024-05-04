@@ -7,14 +7,11 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.FileType
 import ru.tikhonovdo.enrichment.domain.FileType.*
-import ru.tikhonovdo.enrichment.service.file.worker.AlfabankFileWorker
-import ru.tikhonovdo.enrichment.service.file.worker.FileWorker
-import ru.tikhonovdo.enrichment.service.file.worker.FinancePmFileWorker
-import ru.tikhonovdo.enrichment.service.file.worker.TinkoffFileWorker
+import ru.tikhonovdo.enrichment.service.file.worker.*
 
 interface FileService {
-    fun saveData(file: MultipartFile, fullReset: Boolean)
-    fun saveData(fileType: FileType, fullReset: Boolean = false, vararg content: ByteArray)
+    fun saveData(file: MultipartFile, saveMode: SaveMode)
+    fun saveData(fileType: FileType, saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
     fun load() : Resource
 }
 
@@ -34,16 +31,16 @@ class FileServiceImpl(
         workers[ALFA] = alfabankFileWorker
     }
 
-    override fun saveData(file: MultipartFile, fullReset: Boolean) {
+    override fun saveData(file: MultipartFile, saveMode: SaveMode) {
         val fileType = detectFileType(file)
 
-        saveData(fileType, fullReset, file.resource.contentAsByteArray)
+        saveData(fileType, saveMode, file.resource.contentAsByteArray)
     }
 
-    override fun saveData(fileType: FileType, fullReset: Boolean, vararg content: ByteArray) {
+    override fun saveData(fileType: FileType, saveMode: SaveMode, vararg content: ByteArray) {
         workers[fileType]?.let {
             log.info("Recognized as $fileType data file")
-            it.saveData(fullReset, *content)
+            it.saveData(saveMode, *content)
             log.info("$fileType data file was successfully saved")
         }
     }
@@ -52,7 +49,7 @@ class FileServiceImpl(
         ByteArrayResource(financePmFileWorker.retrieveData())
 
     private fun detectFileType(file: MultipartFile): FileType {
-        if (file.originalFilename?.matches(Regex("finance(.*).data")) == true) {
+        if (isFinancePm(file)) {
             return FINANCE_PM
         }
         if (file.originalFilename?.matches(Regex("operations(.*)")) == true) {
@@ -62,6 +59,11 @@ class FileServiceImpl(
             return ALFA
         }
         throw IllegalStateException("unknown file type")
+    }
+
+    private fun isFinancePm(file: MultipartFile): Boolean {
+        return file.originalFilename?.matches(Regex("(.*).data")) == true
+                && String(file.bytes.sliceArray(1..11)) == "\"version\":2"
     }
 
 }

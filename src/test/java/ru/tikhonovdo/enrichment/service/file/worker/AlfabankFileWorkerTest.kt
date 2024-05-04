@@ -7,7 +7,6 @@ import ru.tikhonovdo.enrichment.DatabaseAwareTest
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
-import ru.tikhonovdo.enrichment.service.file.FileServiceTest
 import ru.tikhonovdo.enrichment.service.importscenario.format
 import java.nio.file.Paths
 import java.time.LocalDateTime
@@ -21,7 +20,7 @@ class AlfabankFileWorkerTest : DatabaseAwareTest() {
     @Test
     fun stableOrderingTest() {
         val worker = AlfabankFileWorker(draftTransactionRepository)
-        val sourceUrl = FileServiceTest::class.java.getResource("alfa/Statement 08.02.2023 - 03.04.2023.xlsx")
+        val sourceUrl = AlfabankFileWorkerTest::class.java.getResource("../alfa/Statement 08.02.2023 - 03.04.2023.xlsx")
         val source = Paths.get(sourceUrl!!.toURI()).toFile()
 
         worker.saveData(source.readBytes())
@@ -35,7 +34,7 @@ class AlfabankFileWorkerTest : DatabaseAwareTest() {
     @Test
     fun alfaDeletionObsoleteTest() {
         val worker = AlfabankFileWorker(draftTransactionRepository)
-        val sourceUrl = FileServiceTest::class.java.getResource("alfa/Statement 08.02.2023 - 03.04.2023.xlsx")
+        val sourceUrl = AlfabankFileWorkerTest::class.java.getResource("../alfa/Statement 08.02.2023 - 03.04.2023.xlsx")
         val source = Paths.get(sourceUrl!!.toURI()).toFile()
 
         worker.saveData(source.readBytes())

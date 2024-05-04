@@ -97,7 +97,6 @@ data class DraftTransaction(
 
         other as DraftTransaction
 
-        if (id != other.id) return false
         if (bankId != other.bankId) return false
         if (date != other.date) return false
         if (sum != other.sum) return false
@@ -106,8 +105,7 @@ data class DraftTransaction(
     }
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + bankId.hashCode()
+        var result = bankId.hashCode()
         result = 31 * result + date.hashCode()
         result = 31 * result + sum.hashCode()
         return result

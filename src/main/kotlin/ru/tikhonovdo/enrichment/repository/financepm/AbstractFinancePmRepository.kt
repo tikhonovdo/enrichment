@@ -35,6 +35,7 @@ abstract class AbstractFinancePmRepository<T>(
         jdbcTemplate.execute("SELECT setval('${tableName}_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM $tableName), false)")
     }
 
+    @Transactional
     override fun saveDataFromScratch(entities: Collection<T>): Int {
         truncate()
         jdbcTemplate.update("SET session_replication_role = replica")

@@ -194,7 +194,6 @@ data class Transaction(
 
         other as Transaction
 
-        if (id != other.id) return false
         if (name != other.name) return false
         if (typeId != other.typeId) return false
         if (categoryId != other.categoryId) return false
@@ -204,27 +203,11 @@ data class Transaction(
         if (description != other.description) return false
         if (eventId != other.eventId) return false
         if (available != other.available) return false
-        if (matchingTransactionId != other.matchingTransactionId) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + name.hashCode()
-        result = 31 * result + typeId.hashCode()
-        result = 31 * result + (categoryId?.hashCode() ?: 0)
-        result = 31 * result + date.hashCode()
-        result = 31 * result + sum.hashCode()
-        result = 31 * result + (accountId?.hashCode() ?: 0)
-        result = 31 * result + description.hashCode()
-        result = 31 * result + (eventId?.hashCode() ?: 0)
-        result = 31 * result + available.hashCode()
-        result = 31 * result + (matchingTransactionId?.hashCode() ?: 0)
-        return result
-    }
-
-    fun importHashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + typeId.hashCode()
         result = 31 * result + (categoryId?.hashCode() ?: 0)
@@ -241,7 +224,7 @@ data class Transaction(
 @Entity
 @Table(schema = "financepm")
 @JsonIgnoreProperties(value = ["transactionFrom", "transactionTo"])
-class Transfer(
+data class Transfer(
     @GeneratedValue(strategy = GenerationType.SEQUENCE,  generator = "transfer_id_seq")
     @SequenceGenerator(schema = "financepm", sequenceName = "transfer_id_seq", allocationSize = 1, name = "transfer_id_seq")
     @Id
@@ -275,7 +258,6 @@ class Transfer(
 
         other as Transfer
 
-        if (id != other.id) return false
         if (name != other.name) return false
         if (transactionIdFrom != other.transactionIdFrom) return false
         if (transactionIdTo != other.transactionIdTo) return false
@@ -285,8 +267,7 @@ class Transfer(
     }
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + name.hashCode()
+        var result = name.hashCode()
         result = 31 * result + transactionIdFrom.hashCode()
         result = 31 * result + transactionIdTo.hashCode()
         result = 31 * result + available.hashCode()

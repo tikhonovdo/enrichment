@@ -7,7 +7,7 @@ import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 
 interface FileWorker {
-    fun saveData(fullReset: Boolean = false, vararg content: ByteArray)
+    fun saveData(saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
 }
 
 abstract class BankFileWorker(
@@ -18,7 +18,7 @@ abstract class BankFileWorker(
     private val log = LoggerFactory.getLogger(BankFileWorker::class.java)
 
     @Transactional
-    override fun saveData(fullReset: Boolean, vararg content: ByteArray) {
+    override fun saveData(saveMode: SaveMode, vararg content: ByteArray) {
         saveData(*content)
     }
 
