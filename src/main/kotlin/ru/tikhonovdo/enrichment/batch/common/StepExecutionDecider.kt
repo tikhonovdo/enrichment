@@ -7,7 +7,8 @@ import org.springframework.batch.core.job.flow.JobExecutionDecider
 class StepExecutionDecider(private val stepName: String): JobExecutionDecider {
 
     companion object {
-        const val STEPS_PARAM = "steps"
+        const val INCLUDED_STEPS = "includedSteps"
+        const val EXCLUDED_STEPS = "excludedSteps"
         val SKIP = FlowExecutionStatus("SKIP")
         val CONTINUE = FlowExecutionStatus("CONTINUE")
     }
@@ -32,9 +33,19 @@ class StepExecutionDecider(private val stepName: String): JobExecutionDecider {
         }
 
     private fun isStepExecutable(jobParameters: JobParameters): Boolean {
-        val steps = jobParameters.getString(STEPS_PARAM)?.split(",")
-        return if (steps?.isNotEmpty() == true) {
-            steps.contains(stepName)
+        val excludedSteps = jobParameters.getString(EXCLUDED_STEPS)?.split(",").orEmpty()
+        val includedSteps = jobParameters.getString(INCLUDED_STEPS)?.split(",").orEmpty()
+
+        val stepExcluded =
+            if (excludedSteps.isNotEmpty()) {
+                excludedSteps.contains(stepName)
+            } else {
+                false
+            }
+        if (stepExcluded) return false
+
+        return if (includedSteps.isNotEmpty()) {
+            includedSteps.contains(stepName)
         } else {
             true
         }

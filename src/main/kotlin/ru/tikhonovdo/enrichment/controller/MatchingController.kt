@@ -4,10 +4,8 @@ import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import ru.tikhonovdo.enrichment.batch.common.StepExecutionDecider
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
 @RestController
@@ -19,11 +17,14 @@ class MatchingController(
     private val transactionMatchingRepository: TransactionMatchingRepository
 ) {
     @PostMapping
-    fun performMatching(@RequestParam(required = false) requestParam: Map<String, String>?): String {
+    fun performMatching(@RequestParam(required = false) requestParam: Map<String, String>?) {
         val params = JobParametersBuilder()
         requestParam?.let {
-            requestParam["steps"]?.let {
-                params.addString("steps", it)
+            requestParam[StepExecutionDecider.INCLUDED_STEPS]?.let {
+                params.addString(StepExecutionDecider.INCLUDED_STEPS, it)
+            }
+            requestParam[StepExecutionDecider.EXCLUDED_STEPS]?.let {
+                params.addString(StepExecutionDecider.EXCLUDED_STEPS, it)
             }
         }
         params.addLong("time", System.currentTimeMillis())

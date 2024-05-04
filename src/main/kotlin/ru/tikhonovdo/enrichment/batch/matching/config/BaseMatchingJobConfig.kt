@@ -22,7 +22,6 @@ import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferCompl
 import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementStepReader
 import ru.tikhonovdo.enrichment.domain.enitity.*
-import ru.tikhonovdo.enrichment.repository.financepm.AccountRepository
 import ru.tikhonovdo.enrichment.repository.matching.*
 import javax.sql.DataSource
 
@@ -32,7 +31,6 @@ class BaseMatchingJobConfig(
     private val dataSource: DataSource,
     private val jdbcTemplate: JdbcTemplate,
     private val transactionManager: PlatformTransactionManager,
-    private val accountRepository: AccountRepository,
     private val categoryMatchingRepository: CategoryMatchingRepository,
     private val accountMatchingRepository: AccountMatchingRepository,
     private val currencyMatchingRepository: CurrencyMatchingRepository,
