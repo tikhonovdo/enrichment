@@ -1,5 +1,38 @@
 # FinancePM enrichment
 
+---
+## Disclaimer
+Данный README изначально писался для консольной версии приложения, сейчас он устарел.
+Актуальная версия приложения крутится с docker, postgres и веб-мордой.
+Документация в процессе приведения в порядок. Stay tuned. :)
+
+Для запуска проекта нужна:
+- java 17,
+- maven,
+- docker (вместе с compose)
+
+#### Локальный запуск
+1) Требуется явно создать подсеть для selenoid, 
+2) Собрать приложение, запустить контейнеры postgres и selenoid,
+```shell
+docker network create selenoid
+mvn clean package && docker compose build && docker compose up postgres selenoid
+```
+3) Запустить приложение в дебаге, явно указав значения env_vars:
+   - DB_URL
+   - DB_USER
+   - DB_PASSWORD
+   - SELENOID_HOST_DOWNLOAD_PATH (должны быть права на запись в указанную директорию)
+
+#### Запуск приложения в докер-контейнере
+1) создать `.env.docker` файл, в котором указать `ACTIVE_PROFILES=docker`
+2) собрать образ и запустить via docker compose
+```shell
+mvn clean package -Pdocker && docker compose build && docker compose --env-file .env.docker up
+```
+
+---
+
 Программа позволяет удобно и быстро осуществлять пакетное внесение данных 
 в приложение [FinancePM](https://play.google.com/store/apps/details?id=com.finperssaver&hl=ru&gl=US)
 с использованием выписки из личного кабинета [Тинькофф](https://tinkoff.ru/login/)
