@@ -8,6 +8,7 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
 import ru.tikhonovdo.enrichment.service.importscenario.ImportService
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
+import java.time.LocalDateTime
 import java.util.function.Supplier
 
 @RestController
@@ -23,6 +24,11 @@ class ImportController(private val importService: ImportService) {
     @PostMapping("/{bank}/complete")
     fun importBankData(@PathVariable("bank") bank: Bank, @RequestBody scenarioData: ImportScenarioData): ResponseEntity<Any> {
          return response { importService.confirmLoginAndImport(bank, scenarioData) }
+    }
+
+    @GetMapping("/{bank}/last-update")
+    fun getLastUpdateDate(@PathVariable("bank") bank: Bank): ResponseEntity<LocalDateTime> {
+        return ResponseEntity.ok(importService.getLastUpdateDate(bank))
     }
 
     private fun response(resultSupplier: Supplier<ScenarioState?>): ResponseEntity<Any> {

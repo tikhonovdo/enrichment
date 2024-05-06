@@ -22,6 +22,8 @@ interface CustomDraftTransactionRepository {
     fun findAllByBankIdAndDateBetween(bankId: Long, start: LocalDateTime?, end: LocalDateTime?): List<DraftTransaction>
 
     fun deleteObsoleteDraft(): Int
+
+    fun getLastUpdateDate(bank: Bank): LocalDateTime?
 }
 @Repository
 class DraftTransactionRepositoryImpl(
@@ -89,5 +91,14 @@ class DraftTransactionRepositoryImpl(
             """.trimIndent())
         jdbcTemplate.execute("SELECT setval('matching.draft_transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.draft_transaction), false)")
         return deleted
+    }
+
+    override fun getLastUpdateDate(bank: Bank): LocalDateTime? {
+        var sql = "SELECT max(date) FROM matching.draft_transaction WHERE bank_id = :bankId"
+        if (bank == Bank.TINKOFF) {
+            sql += " AND data->>'status' = 'OK'"
+        }
+
+        return namedParameterJdbcTemplate.queryForObject(sql, MapSqlParameterSource(mapOf("bankId" to bank.id)), LocalDateTime::class.java)
     }
 }

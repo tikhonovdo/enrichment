@@ -11,7 +11,7 @@ class ValidatableRowCounter(private val jdbcTemplate: JdbcTemplate): Tasklet {
 
     private val log = LoggerFactory.getLogger(ValidatableRowCounter::class.java)
 
-    override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus? {
+    override fun execute(contribution: StepContribution, chunkContext: ChunkContext): RepeatStatus {
         val needValidateRowCount = jdbcTemplate.queryForObject("""
             SELECT count(1) FROM matching.transaction
             WHERE NOT (validated OR account_id IS NOT NULL

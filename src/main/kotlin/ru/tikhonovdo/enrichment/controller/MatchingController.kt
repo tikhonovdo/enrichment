@@ -18,18 +18,20 @@ class MatchingController(
 ) {
     @PostMapping
     fun performMatching(@RequestParam(required = false) requestParam: Map<String, String>?) {
-        val params = JobParametersBuilder()
-        requestParam?.let {
-            requestParam[StepExecutionDecider.INCLUDED_STEPS]?.let {
-                params.addString(StepExecutionDecider.INCLUDED_STEPS, it)
+        val params = JobParametersBuilder().apply {
+            addLong("time", System.currentTimeMillis())
+            requestParam?.get(StepExecutionDecider.INCLUDED_STEPS)?.let {
+                addString(StepExecutionDecider.INCLUDED_STEPS, it)
             }
-            requestParam[StepExecutionDecider.EXCLUDED_STEPS]?.let {
-                params.addString(StepExecutionDecider.EXCLUDED_STEPS, it)
+            requestParam?.get(StepExecutionDecider.EXCLUDED_STEPS)?.let {
+                addString(StepExecutionDecider.EXCLUDED_STEPS, it)
             }
         }
-        params.addLong("time", System.currentTimeMillis())
         jobLauncher.run(matchingJob, params.toJobParameters())
-        val count = transactionMatchingRepository.getUnmatchedTransactionIds().size
-        return "$count unmatched records left"
+    }
+
+    @GetMapping("/count")
+    fun getUnmatchedRecordsCount(): Int {
+        return transactionMatchingRepository.getUnmatchedTransactionIds().size
     }
 }

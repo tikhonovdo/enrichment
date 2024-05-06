@@ -15,10 +15,18 @@
             <div class="card blue-grey darken-1">
                 <div class="card-content white-text">
                     <span class="card-title">Matching</span>
-                    <p id="matching-result"></p>
+                    <span class="grey-text text-lighten-3">unmatched records: <span id="matching-count"></span></span>
                 </div>
 
                 <form id="matching" class="card-action">
+                    <div class="input-field col s12">
+                        <label for="included-steps">Included steps</label>
+                        <input type="text" name="includedSteps" id="included-steps">
+                    </div>
+                    <div class="input-field col s12">
+                        <label for="excluded-steps">Excluded steps</label>
+                        <input type="text" name="excludedSteps" id="excluded-steps">
+                    </div>
                     <button class="waves-effect waves-light btn-large" type="button" name="run">
                         Run
                         <i class="material-icons right">play_arrow</i>
@@ -36,7 +44,7 @@
         <div class="col s12 m6">
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title grey-text text-darken-4">Tinkoff</span>
+                    <span class="card-title grey-text text-darken-4">Tinkoff <span class="badge">last update: <span id="tinkoff-last-update"></span></span></span>
 
                     <form id="import-tinkoff">
                         <div class="input-field col s12">
@@ -76,7 +84,7 @@
         <div class="col s12 m6">
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title grey-text text-darken-4">Alfa</span>
+                    <span class="card-title grey-text text-darken-4">Alfa <span class="badge">last update: <span id="alfa-last-update"></span></span></span>
 
                     <form id="import-alfa" class="row s12">
                         <div class="input-field col s12">
