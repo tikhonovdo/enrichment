@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.*
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
 import ru.tikhonovdo.enrichment.service.importscenario.ImportService
-import java.util.*
+import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
+import java.time.LocalDateTime
 import java.util.function.Supplier
 
 @RestController
@@ -25,11 +26,18 @@ class ImportController(private val importService: ImportService) {
          return response { importService.confirmLoginAndImport(bank, scenarioData) }
     }
 
-    private fun response(resultSupplier: Supplier<Boolean>): ResponseEntity<Any> {
-        return if (resultSupplier.get())
-            ResponseEntity.ok(null)
-        else
+    @GetMapping("/{bank}/last-update")
+    fun getLastUpdateDate(@PathVariable("bank") bank: Bank): ResponseEntity<LocalDateTime> {
+        return ResponseEntity.ok(importService.getLastUpdateDate(bank))
+    }
+
+    private fun response(resultSupplier: Supplier<ScenarioState?>): ResponseEntity<Any> {
+        val state = resultSupplier.get()
+        return if (state != null) {
+            ResponseEntity.ok(state.name)
+        } else {
             ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
+        }
     }
 
 }

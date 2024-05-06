@@ -26,7 +26,7 @@ class CategoryMatchingStepProcessor(private val categoryMatchingRepository: Cate
         }
         item.pattern?.let {
             matcher = matcher
-                .withMatcher("pattern", ExampleMatcher.GenericPropertyMatchers.exact())
+                .withMatcher("pattern", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
         }
 
         val query = categoryMatchingRepository.findAll(Example.of(probe, matcher), Pageable.unpaged())

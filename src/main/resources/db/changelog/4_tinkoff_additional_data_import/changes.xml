@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="matching-draft_transaction_drop_cascade" author="chitzkoy">
+        <dropForeignKeyConstraint baseTableName="transaction"
+                                  baseTableSchemaName="matching"
+                                  constraintName="fk_matching_transaction_draft_transaction_id"/>
+
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="draft_transaction_id"
+                                 constraintName="fk_matching_transaction_draft_transaction_id"
+                                 referencedTableName="draft_transaction"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

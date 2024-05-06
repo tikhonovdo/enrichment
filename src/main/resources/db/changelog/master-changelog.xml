@@ -8,5 +8,10 @@
     <include file="classpath:org/springframework/batch/core/schema-postgresql.sql" />
     <include file="./1_init-finance-pm/changes.xml" relativeToChangelogFile="true"/>
     <include file="./2_init-matching/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./3_alfabank_support/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./4_tinkoff_additional_data_import/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./5_search_refund_step/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./6_self_transfers_accounting/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./7_transfers_accounting_refactoring/changes.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

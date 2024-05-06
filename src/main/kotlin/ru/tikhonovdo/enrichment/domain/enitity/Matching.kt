@@ -97,7 +97,6 @@ data class DraftTransaction(
 
         other as DraftTransaction
 
-        if (id != other.id) return false
         if (bankId != other.bankId) return false
         if (date != other.date) return false
         if (sum != other.sum) return false
@@ -106,8 +105,7 @@ data class DraftTransaction(
     }
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + bankId.hashCode()
+        var result = bankId.hashCode()
         result = 31 * result + date.hashCode()
         result = 31 * result + sum.hashCode()
         return result
@@ -131,7 +129,7 @@ data class TransactionMatching(
     var typeId: Long,
 
     @Column(name = "category_id")
-    var categoryId: Long?,
+    var categoryId: Long? = null,
 
     var date: LocalDateTime,
 
@@ -146,6 +144,8 @@ data class TransactionMatching(
     var eventId: Long? = null,
 
     var validated: Boolean = false,
+
+    var refundForId: Long? = null,
 
     @ManyToOne(targetEntity = Category::class)
     @JoinColumn(name = "category_id", insertable = false, updatable = false)

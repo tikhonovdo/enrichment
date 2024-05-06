@@ -4,11 +4,14 @@ import feign.Feign
 import feign.Logger
 import feign.okhttp.OkHttpClient
 import feign.slf4j.Slf4jLogger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestParam
+import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.FileType
-import ru.tikhonovdo.enrichment.repository.financepm.TransactionRepository
+import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import ru.tikhonovdo.enrichment.service.file.FileService
+import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
+import java.time.Period
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -18,7 +21,9 @@ interface TinkoffService {
 
 @Service
 class TinkoffServiceImpl(
-    private val transactionRepository: TransactionRepository,
+    @Value("\${import.tinkoff.api-url}") private val tinkoffApiUrl: String,
+    @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
+    private val transactionMatchingRepository: TransactionMatchingRepository,
     private val fileService: FileService
 ): TinkoffService {
 
@@ -26,13 +31,18 @@ class TinkoffServiceImpl(
         .client(OkHttpClient())
         .logger(Slf4jLogger(TinkoffClient::class.java))
         .logLevel(Logger.Level.FULL)
-        .target(TinkoffClient::class.java, "https://www.tinkoff.ru/api/common/v1")
+        .target(TinkoffClient::class.java, tinkoffApiUrl)
 
-    override fun importData(@RequestParam("sessionId") sessionId: String) {
-        val start = transactionRepository.findLastMatchedTransactionByDate().date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    override fun importData(sessionId: String) {
+        val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.TINKOFF.id)
+            .orElse(periodAgo(lastTransactionDefaultPeriod)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val end = ZonedDateTime.now().toInstant().toEpochMilli()
-        val operations = tinkoffClient.getOperations(Format.xls, sessionId, start, end)
+        val operationsReport = tinkoffClient.getOperationsReport(Format.xls, sessionId, start, end)
+        val operationsRaw = tinkoffClient.getOperations(sessionId, start, end)
 
-        fileService.saveData(operations.body().asInputStream().readAllBytes(), FileType.TINKOFF)
+        fileService.saveData(FileType.TINKOFF, content = arrayOf(
+            operationsReport.body().asInputStream().readAllBytes(),
+            operationsRaw.body().asInputStream().readAllBytes()
+        ))
     }
 }

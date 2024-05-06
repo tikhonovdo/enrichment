@@ -1,5 +1,6 @@
 package ru.tikhonovdo.enrichment.repository.financepm
 
+import jakarta.transaction.Transactional
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
@@ -11,6 +12,7 @@ sealed interface FinancePmRepository<T>: BatchRepository<T>, CustomFinancePmRepo
 
 interface CustomFinancePmRepository<T> {
     fun saveDataFromScratch(entities: Collection<T>): Int
+    @Deprecated(message = "not used")
     fun saveBatch(entities: Collection<T>): Int
     fun updateSequence()
 }
@@ -33,6 +35,7 @@ abstract class AbstractFinancePmRepository<T>(
         jdbcTemplate.execute("SELECT setval('${tableName}_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM $tableName), false)")
     }
 
+    @Transactional
     override fun saveDataFromScratch(entities: Collection<T>): Int {
         truncate()
         jdbcTemplate.update("SET session_replication_role = replica")
@@ -42,6 +45,8 @@ abstract class AbstractFinancePmRepository<T>(
         return count
     }
 
+    @Deprecated("not used")
+    @Transactional
     override fun saveBatch(entities: Collection<T>): Int {
         val withId = entities.filter { idExtractor.apply(it) != null }
         val withoutId = entities.filter { idExtractor.apply(it) == null }

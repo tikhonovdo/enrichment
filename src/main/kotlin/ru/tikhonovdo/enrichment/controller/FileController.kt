@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.service.file.FileService
+import ru.tikhonovdo.enrichment.service.file.worker.SaveMode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -17,8 +18,8 @@ import java.time.format.DateTimeFormatter
 class FileController(private val fileService: FileService) {
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun upload(@RequestParam("file") file: MultipartFile, @RequestParam("reset") fullReset: Boolean?) {
-        fileService.saveData(file, fullReset ?: false)
+    fun upload(@RequestParam("file") file: MultipartFile, @RequestParam("mode") saveMode: SaveMode?) {
+        fileService.saveData(file, saveMode ?: SaveMode.DEFAULT)
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])

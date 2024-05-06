@@ -7,43 +7,40 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.FileType
 import ru.tikhonovdo.enrichment.domain.FileType.*
-import ru.tikhonovdo.enrichment.service.file.worker.FinancePmFileWorker
-import ru.tikhonovdo.enrichment.service.file.worker.TinkoffFileWorker
+import ru.tikhonovdo.enrichment.service.file.worker.*
 
 interface FileService {
-    fun saveData(file: MultipartFile, fullReset: Boolean)
-    fun saveData(content: ByteArray, fileType: FileType, fullReset: Boolean = false)
+    fun saveData(file: MultipartFile, saveMode: SaveMode)
+    fun saveData(fileType: FileType, saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
     fun load() : Resource
-}
-
-interface FileServiceWorker {
-    fun saveData(content: ByteArray, fullReset: Boolean = false)
 }
 
 @Service
 class FileServiceImpl(
     private val financePmFileWorker: FinancePmFileWorker,
-    tinkoffFileWorker: TinkoffFileWorker
+    tinkoffFileWorker: TinkoffFileWorker,
+    alfabankFileWorker: AlfabankFileWorker
 ) : FileService {
 
     private val log = LoggerFactory.getLogger(FileServiceImpl::class.java)
-    private val workers = mutableMapOf<FileType, FileServiceWorker>()
+    private val workers = mutableMapOf<FileType, FileWorker>()
 
     init {
         workers[FINANCE_PM] = financePmFileWorker
         workers[TINKOFF] = tinkoffFileWorker
+        workers[ALFA] = alfabankFileWorker
     }
 
-    override fun saveData(file: MultipartFile, fullReset: Boolean) {
+    override fun saveData(file: MultipartFile, saveMode: SaveMode) {
         val fileType = detectFileType(file)
 
-        saveData(file.resource.contentAsByteArray, fileType, fullReset)
+        saveData(fileType, saveMode, file.resource.contentAsByteArray)
     }
 
-    override fun saveData(content: ByteArray, fileType: FileType, fullReset: Boolean) {
+    override fun saveData(fileType: FileType, saveMode: SaveMode, vararg content: ByteArray) {
         workers[fileType]?.let {
             log.info("Recognized as $fileType data file")
-            it.saveData(content, fullReset)
+            it.saveData(saveMode, *content)
             log.info("$fileType data file was successfully saved")
         }
     }
@@ -52,13 +49,21 @@ class FileServiceImpl(
         ByteArrayResource(financePmFileWorker.retrieveData())
 
     private fun detectFileType(file: MultipartFile): FileType {
-        if (file.originalFilename?.matches(Regex("finance(.*).data")) == true) {
+        if (isFinancePm(file)) {
             return FINANCE_PM
         }
         if (file.originalFilename?.matches(Regex("operations(.*)")) == true) {
             return TINKOFF
         }
+        if (file.originalFilename?.matches(Regex("Statement(.*).xlsx")) == true) {
+            return ALFA
+        }
         throw IllegalStateException("unknown file type")
+    }
+
+    private fun isFinancePm(file: MultipartFile): Boolean {
+        return file.originalFilename?.matches(Regex("(.*).data")) == true
+                && String(file.bytes.sliceArray(1..11)) == "\"version\":2"
     }
 
 }

@@ -1,17 +1,28 @@
 package ru.tikhonovdo.enrichment.domain
 
 enum class Bank(val id: Long) {
-    TINKOFF(1)
+    TINKOFF(1), ALFA(2)
 }
 
 enum class FileType(val bankId: Long?) {
     FINANCE_PM(null),
-    TINKOFF(Bank.TINKOFF.id)
+    TINKOFF(Bank.TINKOFF.id),
+    ALFA(Bank.ALFA.id)
 }
 
 enum class Type(val id: Long) {
     INCOME(1L),
     OUTCOME(2L);
+
+    companion object {
+        fun swap(typeId: Long): Long {
+            when (typeId) {
+                INCOME.id -> return OUTCOME.id
+                OUTCOME.id -> return INCOME.id
+            }
+            throw IllegalArgumentException("Unknown typeId passed: $typeId")
+        }
+    }
 }
 
 enum class Event(val id: Long) {

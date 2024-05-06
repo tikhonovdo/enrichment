@@ -18,6 +18,7 @@
 
 2. Загрузка данных от Банка - `POST /upload` - **ВЫПОЛНЕНО**
     - [x] Тинькофф 
+    - [x] Альфа
 
 
 3. matchingJob - `POST /performMatching`

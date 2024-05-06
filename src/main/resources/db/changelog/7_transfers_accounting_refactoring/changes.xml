@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="rename_matching-transfer_pattern-to-matching-transfer_complement" author="chitzkoy">
+        <renameTable schemaName="matching" oldTableName="transfer_pattern" newTableName="transfer_complement"/>
+    </changeSet>
+
+    <changeSet id="create_matching-transfer_manual-table" author="chitzkoy">
+        <createTable schemaName="matching" tableName="transfer_manual"
+                     remarks="Список паттернов пар транзакций, которые следует матчить в переводы">
+            <column name="source_name" type="varchar(128)"
+                    remarks="Подстрока поля `matching.transaction.name` расходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_description" type="varchar(255)"
+                    remarks="Подстрока поля `matching.transaction.description` расходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_account_id" type="bigint"
+                    remarks="Значение поля `matching.account.account_id` расходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_name" type="varchar(128)"
+                    remarks="Подстрока поля `matching.transaction.name` доходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_description" type="varchar(255)"
+                    remarks="Подстрока поля `matching.transaction.description` доходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_account_id" type="bigint"
+                    remarks="Значение поля `matching.account.account_id` доходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="transfer_manual"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="source_account_id"
+                                 constraintName="fk_matching_transfer_manual_source_account_id"
+                                 referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="transfer_manual"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="target_account_id"
+                                 constraintName="fk_matching_transfer_manual_target_account_id"
+                                 referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id" />
+    </changeSet>
+
+</databaseChangeLog>

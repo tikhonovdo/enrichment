@@ -27,11 +27,39 @@ logging:
   level:
     root: INFO
     liquibase: INFO
+    ru.tikhonovdo.enrichment.service: TRACE
 
-selenium-waiting-period: 5s
-server.servlet.session:
-  timeout: 3m
-  cookie:
-    http-only: true
-    secure: true
-  tracking-modes: cookie
+selenium-waiting-period: 30s
+selenoid-host-download-path: ${SELENOID_HOST_DOWNLOAD_PATH} # make sure that all users can write to this path
+
+server:
+  port: 8081
+  servlet.session:
+    timeout: 5m
+    cookie:
+      http-only: true
+      secure: false
+    tracking-modes: cookie
+
+import:
+  last-transaction-default-period: P6M
+  tinkoff:
+    home-url: https://www.tinkoff.ru/mybank/
+    api-url: https://www.tinkoff.ru/api/common/v1
+  alfa:
+    home-url: https://click.alfabank.ru/
+
+refund:
+  income-category-id: 79
+
+---
+spring:
+  config.activate.on-profile: docker
+server:
+  port: 8081
+
+---
+spring:
+  config.activate.on-profile: test
+import:
+  last-transaction-default-period: P100Y

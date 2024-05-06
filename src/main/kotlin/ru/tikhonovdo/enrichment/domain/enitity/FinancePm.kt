@@ -37,7 +37,7 @@ data class Currency(
     var name: String,
 
     @JsonProperty("shortName")
-    var shortName: String,
+    var shortName: String = name,
 
     var point: Int = 2,
 
@@ -64,7 +64,7 @@ data class Category(
     @Column(name = "parent_id", nullable = true)
     @JsonSerialize(nullsUsing = NullAsZeroSerializer::class)
     @JsonDeserialize(using = ZeroAsNullDeserializer::class)
-    var parentId: Long?,
+    var parentId: Long? = null,
 
     var orderId: Int,
 
@@ -120,12 +120,12 @@ data class Account(
     var icon: Int = 1,
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    var balance: BigDecimal,
+    var balance: BigDecimal = BigDecimal.ZERO,
 
     var currencyId: Long,
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    var active : Boolean,
+    var active : Boolean = true,
 
     @JsonProperty("isDef")
     @JsonFormat(shape = JsonFormat.Shape.NUMBER)
@@ -194,7 +194,6 @@ data class Transaction(
 
         other as Transaction
 
-        if (id != other.id) return false
         if (name != other.name) return false
         if (typeId != other.typeId) return false
         if (categoryId != other.categoryId) return false
@@ -204,14 +203,12 @@ data class Transaction(
         if (description != other.description) return false
         if (eventId != other.eventId) return false
         if (available != other.available) return false
-        if (matchingTransactionId != other.matchingTransactionId) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + name.hashCode()
+        var result = name.hashCode()
         result = 31 * result + typeId.hashCode()
         result = 31 * result + (categoryId?.hashCode() ?: 0)
         result = 31 * result + date.hashCode()
@@ -220,7 +217,6 @@ data class Transaction(
         result = 31 * result + description.hashCode()
         result = 31 * result + (eventId?.hashCode() ?: 0)
         result = 31 * result + available.hashCode()
-        result = 31 * result + (matchingTransactionId?.hashCode() ?: 0)
         return result
     }
 }
@@ -228,7 +224,7 @@ data class Transaction(
 @Entity
 @Table(schema = "financepm")
 @JsonIgnoreProperties(value = ["transactionFrom", "transactionTo"])
-class Transfer(
+data class Transfer(
     @GeneratedValue(strategy = GenerationType.SEQUENCE,  generator = "transfer_id_seq")
     @SequenceGenerator(schema = "financepm", sequenceName = "transfer_id_seq", allocationSize = 1, name = "transfer_id_seq")
     @Id
@@ -262,7 +258,6 @@ class Transfer(
 
         other as Transfer
 
-        if (id != other.id) return false
         if (name != other.name) return false
         if (transactionIdFrom != other.transactionIdFrom) return false
         if (transactionIdTo != other.transactionIdTo) return false
@@ -272,8 +267,7 @@ class Transfer(
     }
 
     override fun hashCode(): Int {
-        var result = id?.hashCode() ?: 0
-        result = 31 * result + name.hashCode()
+        var result = name.hashCode()
         result = 31 * result + transactionIdFrom.hashCode()
         result = 31 * result + transactionIdTo.hashCode()
         result = 31 * result + available.hashCode()

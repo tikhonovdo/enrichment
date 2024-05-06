@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create_matching-transfer_pattern" author="chitzkoy">
+        <createTable schemaName="matching" tableName="transfer_pattern">
+            <column name="source_name" type="varchar(128)"
+                    remarks="Значение поля `matching.transaction.name` исходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_description" type="varchar(255)"
+                    remarks="Значение поля `matching.transaction.description` исходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_type" type="bigint"
+                    remarks="Тип операции транзакции в `matching.transaction` - если здесь доход, значит будет создана расходная">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_account_id" type="bigint"
+                    remarks="Значение поля `matching.account.account_id` исходной транзакции">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_account_id" type="bigint"
+                    remarks="Значение поля `matching.account.account_id` целевой транзакции">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="transfer_pattern"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="source_type"
+                                 constraintName="fk_matching_transfer_pattern_source_type"
+                                 referencedTableName="type"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="transfer_pattern"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="source_account_id"
+                                 constraintName="fk_matching_transfer_pattern_source_account_id"
+                                 referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="transfer_pattern"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="target_account_id"
+                                 constraintName="fk_matching_transfer_pattern_target_account_id"
+                                 referencedTableName="account"
+                                 referencedTableSchemaName="financepm"
+                                 referencedColumnNames="id" />
+    </changeSet>
+
+</databaseChangeLog>
