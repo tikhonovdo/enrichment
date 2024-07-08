@@ -1,0 +1,116 @@
+{
+  "data": {
+    "bankUser": {
+      "id": "bankUserId",
+      "operations": {
+        "cursor": "cursor",
+        "items": [
+          {
+            "id": "31265731178446848",
+            "status": {
+              "code": "CLEAR",
+              "message": "Выполнено"
+            },
+            "type": "PURCHASE",
+            "datetime": "2024-01-11T13:21:39.232806Z",
+            "name": "KOMENDANTSKIJ",
+            "description": "Фастфуд",
+            "direction": "DEBIT",
+            "money": {
+              "amount": 798,
+              "currency": "RUB"
+            },
+            "comment": {
+              "text": "Коммент"
+            }
+          },
+          {
+            "id": "31265728805256960",
+            "status": {
+              "code": "CLEAR",
+              "message": "Выполнено"
+            },
+            "type": "TOPUP",
+            "datetime": "2024-01-11T13:21:30.180852Z",
+            "name": "Пополнение",
+            "description": "Со счёта в другом банке",
+            "direction": "CREDIT",
+            "money": {
+              "amount": 400,
+              "currency": "RUB"
+            },
+            "comment": null
+          },
+          {
+            "id": "31265724122054656",
+            "status": {
+              "code": "FAIL",
+              "message": "Ошибка проведения платежа"
+            },
+            "type": "PURCHASE",
+            "datetime": "2024-01-11T13:21:12.313773Z",
+            "name": "KOMENDANTSKIJ",
+            "description": "Фастфуд",
+            "direction": "DEBIT",
+            "money": {
+              "amount": 798,
+              "currency": "RUB"
+            },
+            "comment": null
+          },
+          {
+            "id": "31265720719687680",
+            "status": {
+              "code": "CLEAR",
+              "message": "Выполнено"
+            },
+            "type": "TOPUP",
+            "datetime": "2024-01-11T13:20:59.336420Z",
+            "name": "Пополнение",
+            "description": "Со счёта в другом банке",
+            "direction": "CREDIT",
+            "money": {
+              "amount": 398,
+              "currency": "RUB"
+            },
+            "comment": null
+          },
+          {
+            "id": "31243773736698112",
+            "status": {
+              "code": "CLEAR",
+              "message": "Выполнено"
+            },
+            "type": "PURCHASE",
+            "datetime": "2024-01-10T14:05:38.239344Z",
+            "name": "Лавка",
+            "description": "Яндекс",
+            "direction": "DEBIT",
+            "money": {
+              "amount": 2017,
+              "currency": "RUB"
+            },
+            "comment": null
+          },
+          {
+            "id": "31243762564907264",
+            "status": {
+              "code": "CANCEL",
+              "message": "Отмена"
+            },
+            "type": "PURCHASE",
+            "datetime": "2024-01-10T14:04:55.622783Z",
+            "name": "YANDEX*5411*YANDEX LAV",
+            "description": "Яндекс",
+            "direction": "DEBIT",
+            "money": {
+              "amount": 11,
+              "currency": "RUB"
+            },
+            "comment": null
+          }
+        ]
+      }
+    }
+  }
+}

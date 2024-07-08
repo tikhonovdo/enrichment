@@ -6,11 +6,11 @@ import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffOperations
 import ru.tikhonovdo.enrichment.util.JsonMapper
 import java.nio.file.Paths
 
-class TinkoffAdditionalOperationDataParseTest {
+class TinkoffAdditionalRawOperationDataParseTest {
 
     @Test
     fun baseParseTest() {
-        val sourceUrl = TinkoffAdditionalOperationDataParseTest::class.java.getResource("operations-payload.json")
+        val sourceUrl = TinkoffAdditionalRawOperationDataParseTest::class.java.getResource("operations-payload.json")
         val source = Paths.get(sourceUrl!!.toURI()).toFile()
 
         val payload = JsonMapper.JSON_MAPPER.readValue(source, TinkoffOperationsAdditionalDataPayload::class.java)

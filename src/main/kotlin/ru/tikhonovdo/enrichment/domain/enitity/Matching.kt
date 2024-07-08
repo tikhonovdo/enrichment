@@ -85,6 +85,7 @@ data class DraftTransaction(
 
     var bankId: Long,
 
+    // хранит время в UTC, если есть информация о времени
     var date: LocalDateTime,
 
     var sum: String,

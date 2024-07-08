@@ -16,14 +16,11 @@ import java.util.function.Supplier
 @Controller
 class ImportController(private val importService: ImportService) {
 
-    @PostMapping("/{bank}")
-    fun startLoginSequence(@PathVariable("bank") bank: Bank, @RequestBody scenarioData: ImportScenarioData): ResponseEntity<Any> {
-        return response { importService.login(bank, scenarioData) }
-    }
-
-    @PostMapping("/{bank}/complete")
-    fun importBankData(@PathVariable("bank") bank: Bank, @RequestBody scenarioData: ImportScenarioData): ResponseEntity<Any> {
-         return response { importService.confirmLoginAndImport(bank, scenarioData) }
+    @PostMapping("/{bank}/{stepName}")
+    fun performImportStep(@PathVariable("bank") bank: Bank,
+                          @PathVariable("stepName") stepName: String,
+                          @RequestBody scenarioData: ImportScenarioData): ResponseEntity<Any> {
+         return response { importService.performImportStep(bank, stepName, scenarioData) }
     }
 
     @GetMapping("/{bank}/last-update")
@@ -34,7 +31,7 @@ class ImportController(private val importService: ImportService) {
     private fun response(resultSupplier: Supplier<ScenarioState?>): ResponseEntity<Any> {
         val state = resultSupplier.get()
         return if (state != null) {
-            ResponseEntity.ok(state.name)
+            ResponseEntity.ok(state.stepName)
         } else {
             ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
         }

@@ -6,7 +6,7 @@
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="css/materialize.min.css">
 </head>
 <body>
 <div class="container">
@@ -41,28 +41,27 @@
     </div>
 
     <div class="row">
-        <div class="col s12 m6">
+        <div class="col s12 l6 xl4">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title grey-text text-darken-4">Tinkoff <span class="badge">last update: <span id="tinkoff-last-update"></span></span></span>
 
                     <form id="import-tinkoff">
-                        <div class="input-field col s12">
-                            <label for="phone-tinkoff">Phone</label>
-                            <input placeholder="Phone" type="tel" name="phone" id="phone-tinkoff">
+                        <div class="start state">
+                            <div class="input-field col s12">
+                                <label for="tinkoff-phone">Phone</label>
+                                <input placeholder="Phone" type="tel" name="phone" id="tinkoff-phone">
+                            </div>
                         </div>
-
-                        <div class="input-field col s12">
-                            <label for="login-tinkoff">Login</label>
-                            <input placeholder="Login" type="text" name="login" id="login-tinkoff">
-                        </div>
-                        <div class="input-field col s12">
-                            <label for="password-tinkoff">Password</label>
-                            <input placeholder="Password" type="password" name="password" id="password-tinkoff">
-                        </div>
-                        <div class="input-field col s12">
-                            <label for="otpCode-tinkoff">OTP</label>
-                            <input placeholder="OTP code" type="text" name="otpCode" id="otpCode-tinkoff">
+                        <div class="otp_sent state">
+                            <div class="input-field col s12">
+                                <label for="tinkoff-otpCode">OTP code</label>
+                                <input placeholder="OTP code" type="text" name="otpCode" id="tinkoff-otpCode">
+                            </div>
+                            <div class="input-field col s12">
+                                <label for="tinkoff-password">Password</label>
+                                <input placeholder="Password" type="password" name="password" id="tinkoff-password">
+                            </div>
                         </div>
 
                         <div class="progress">
@@ -81,25 +80,29 @@
             </div>
         </div>
 
-        <div class="col s12 m6">
+        <div class="col s12 l6 xl4">
             <div class="card">
                 <div class="card-content">
                     <span class="card-title grey-text text-darken-4">Alfa <span class="badge">last update: <span id="alfa-last-update"></span></span></span>
 
                     <form id="import-alfa" class="row s12">
-                        <div class="input-field col s12">
-                            <label for="login-alfa">Login</label>
-                            <input placeholder="Login" type="text" name="login" id="login-alfa">
+                        <div class="start state">
+                            <div class="input-field col s12">
+                                <label for="alfa-login">Login</label>
+                                <input type="text" name="login" id="alfa-login">
+                            </div>
+
+                            <div class="input-field col s12">
+                                <label for="alfa-password">Password</label>
+                                <input placeholder="Password" type="password" name="password" id="alfa-password">
+                            </div>
                         </div>
 
-                        <div class="input-field col s12">
-                            <label for="password-alfa">Password</label>
-                            <input placeholder="Password" type="password" name="password" id="password-alfa">
-                        </div>
-
-                        <div class="input-field col s12">
-                            <label for="otpCode-alfa">OTP</label>
-                            <input placeholder="OTP code" type="text" name="otpCode" id="otpCode-alfa">
+                        <div class="otp_sent state">
+                            <div class="input-field col s12">
+                                <label for="alfa-otpCode">OTP code</label>
+                                <input placeholder="OTP code" type="text" name="otpCode" id="alfa-otpCode">
+                            </div>
                         </div>
 
                         <div class="progress">
@@ -108,6 +111,50 @@
                         </div>
 
                         <button class="btn waves-effect waves-light" type="button" name="action">Login
+                            <i class="material-icons right">send</i>
+                        </button>
+
+                        <button class="btn red waves-effect waves-light" type="button" name="cancel">Cancel
+                            <i class="material-icons right">cancel</i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 l6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title grey-text text-darken-4">Yandex <span class="badge">last update: <span id="yandex-last-update"></span></span></span>
+
+                    <form id="import-yandex" class="row s12">
+                        <div class="start state">
+                            <div class="input-field col s12">
+                                <label for="yandex-cookie">Cookie</label>
+                                <input placeholder="Cookie" type="text" name="cookie" id="yandex-cookie">
+                            </div>
+
+<!--                            <div class="input-field col s12">-->
+<!--                                <label for="yandex-phone">Phone</label>-->
+<!--                                <input placeholder="Phone" type="tel" name="phone" id="yandex-phone">-->
+<!--                            </div>-->
+                        </div>
+
+<!--                        <div class="ya_login_otp_sent state">-->
+<!--                            <div class="input-field col s12">-->
+<!--                                <label for="yandex-account-login-sms">SMS code</label>-->
+<!--                                <input placeholder="Login" type="text" name="otpCode" id="yandex-account-login-sms">-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        <div class="otp_sent state">-->
+<!--                            <div class="input-field col s12">-->
+<!--                                <label for="yandex-otpCode">OTP code</label>-->
+<!--                                <input placeholder="OTP code" type="text" name="otpCode" id="yandex-otpCode">-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+                        <button class="btn waves-effect waves-light" type="button" name="action">Import
                             <i class="material-icons right">send</i>
                         </button>
 
@@ -121,7 +168,7 @@
     </div>
 </div>
 <!-- Compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script rel="script" src="js/materialize.min.js"></script>
 <script rel="script" src="js/main.js"></script>
 </body>
 </html>

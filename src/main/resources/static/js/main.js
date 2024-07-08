@@ -1,4 +1,5 @@
-let currentState = ""
+let currentState = "start"
+let currentBank = null
 
 Array.from(document.getElementsByTagName("form")).forEach(form => {
     if (form.id === "matching") {
@@ -7,6 +8,13 @@ Array.from(document.getElementsByTagName("form")).forEach(form => {
         initBankForm(form)
     }
 })
+
+function updateState() {
+    requestLastUpdateDate("tinkoff")
+    requestLastUpdateDate("alfa")
+    requestLastUpdateDate("yandex")
+    requestMatchingRecordsCount()
+}
 
 function initMatchingForm(form) {
     form.run.onclick = function (event) {
@@ -29,14 +37,12 @@ function initMatchingForm(form) {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 setLoading(form, button, false)
-                requestMatchingRecordsCount()
+                updateState()
             }
         }
         return false;
     }
-    requestLastUpdateDate("tinkoff")
-    requestLastUpdateDate("alfa")
-    requestMatchingRecordsCount()
+    updateState()
 }
 
 function initBankForm(form) {
@@ -44,28 +50,22 @@ function initBankForm(form) {
         let xhr = new XMLHttpRequest();
         let formData = new FormData(form);
         let bank = form.id.split("-")[1]
+        currentBank = bank;
 
-        updateBankForm(form, bank)
-        xhr.open('POST', '/import/' + bank + (currentState === "OTP_SENT" ? "/complete" : ""))
+        xhr.open('POST', '/import/' + bank + '/' + currentState);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(JSON.stringify(Object.fromEntries(formData)));
-        setLoading(form, this, true)
+        setLoading(form, this,  true)
         let button = this
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                setLoading(form, button, false)
-                currentState = xhr.response
-                switch (currentState) {
-                    case "OTP_SENT" :
-                        sendOtp(form, button)
-                        break
-                    case "DATA_SAVED" :
-                        markFormSucceed(form, button)
-                        // case "DESTROYED" : destroySession()
-                        break
-                    default:
-                        return
+                if (xhr.status === 200) {
+                    currentState = xhr.response
+                    setLoading(form, button, false)
+                    updateFormState(form, button)
+                } else {
+                    console.log(xhr.response)
                 }
             }
         }
@@ -75,18 +75,8 @@ function initBankForm(form) {
     form.cancel.onclick = function (event) {
         destroySession()
     }
-}
 
-function updateBankForm(form, bank) {
-    switch (bank) {
-        case "alfa" :
-            let inputs = Array.from(form.getElementsByTagName("input"))
-            inputs.forEach(element => element.disabled = true)
-            break
-        case "tinkoff":
-            form.getElementsByTagName("input").phone.disabled = false
-            break
-    }
+    updateFormState(form, null)
 }
 
 function setLoading(form, button, loading) {
@@ -101,16 +91,46 @@ function setLoading(form, button, loading) {
     button.classList.toggle("disabled", loading)
 }
 
-function sendOtp(form, button) {
-    form.getElementsByTagName("input").otpCode.disabled = false
-    form.getElementsByTagName("input").otpCode.value = ""
-    button.innerHTML = "Send OTP"
+function updateFormState(form, button) {
+    disableAllBlocks(form)
+    enableCurrentStateBlock(form)
+    if (button) {
+        updateButtonState(button)
+    }
 }
 
-function markFormSucceed(form, button) {
-    button.classList.add("disabled")
-    button.innerHTML = "Success"
-    form.getElementsByTagName("input").otpCode.value = ""
+function disableAllBlocks(form) {
+    let stateBlocks = Array.from(form.querySelectorAll(".state"));
+    stateBlocks.forEach((item) => {
+        item.style.display = 'none';
+        Array.from(item.getElementsByTagName("input")).forEach((field) => {
+            field.classList.add("disabled")
+            field.disabled = true
+        })
+    })
+}
+
+function enableCurrentStateBlock(form) {
+    let currentStateBlock = form.querySelector(".state."+ currentState);
+    currentStateBlock.style.display = 'block';
+    Array.from(currentStateBlock.getElementsByTagName("input")).forEach((field) => {
+        field.classList.remove("disabled")
+        field.disabled = false
+    })
+}
+
+function updateButtonState(button) {
+    switch (currentState.toUpperCase()) {
+        case "OTP_SENT" :
+            button.innerHTML = "Send OTP"
+            break
+        case "DATA_SAVED" :
+            button.classList.add("disabled")
+            button.innerHTML = "Finished!"
+            break
+        default:
+            return
+    }
 }
 
 function destroySession() {

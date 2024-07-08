@@ -5,50 +5,52 @@ import org.springframework.core.io.ByteArrayResource
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import ru.tikhonovdo.enrichment.domain.FileType
-import ru.tikhonovdo.enrichment.domain.FileType.*
+import ru.tikhonovdo.enrichment.domain.DataType
+import ru.tikhonovdo.enrichment.domain.DataType.*
 import ru.tikhonovdo.enrichment.service.file.worker.*
 
-interface FileService {
+interface RawDataService {
     fun saveData(file: MultipartFile, saveMode: SaveMode)
-    fun saveData(fileType: FileType, saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
+    fun saveData(dataType: DataType, saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
     fun load() : Resource
 }
 
 @Service
-class FileServiceImpl(
-    private val financePmFileWorker: FinancePmFileWorker,
-    tinkoffFileWorker: TinkoffFileWorker,
-    alfabankFileWorker: AlfabankFileWorker
-) : FileService {
+class RawDataServiceImpl(
+    private val financePmFileWorker: FinancePmDataWorker,
+    tinkoffFileWorker: TinkoffDataWorker,
+    alfabankFileWorker: AlfabankDataWorker,
+    yandexFileWorker: YandexDataWorker
+) : RawDataService {
 
-    private val log = LoggerFactory.getLogger(FileServiceImpl::class.java)
-    private val workers = mutableMapOf<FileType, FileWorker>()
+    private val log = LoggerFactory.getLogger(RawDataServiceImpl::class.java)
+    private val workers = mutableMapOf<DataType, DataWorker>()
 
     init {
         workers[FINANCE_PM] = financePmFileWorker
         workers[TINKOFF] = tinkoffFileWorker
         workers[ALFA] = alfabankFileWorker
+        workers[YANDEX] = yandexFileWorker
     }
 
     override fun saveData(file: MultipartFile, saveMode: SaveMode) {
-        val fileType = detectFileType(file)
+        val dataType = detectDataType(file)
 
-        saveData(fileType, saveMode, file.resource.contentAsByteArray)
+        saveData(dataType, saveMode, file.resource.contentAsByteArray)
     }
 
-    override fun saveData(fileType: FileType, saveMode: SaveMode, vararg content: ByteArray) {
-        workers[fileType]?.let {
-            log.info("Recognized as $fileType data file")
+    override fun saveData(dataType: DataType, saveMode: SaveMode, vararg content: ByteArray) {
+        workers[dataType]?.let {
+            log.info("Recognized as $dataType data file")
             it.saveData(saveMode, *content)
-            log.info("$fileType data file was successfully saved")
+            log.info("$dataType data file was successfully saved")
         }
     }
 
     override fun load() =
         ByteArrayResource(financePmFileWorker.retrieveData())
 
-    private fun detectFileType(file: MultipartFile): FileType {
+    private fun detectDataType(file: MultipartFile): DataType {
         if (isFinancePm(file)) {
             return FINANCE_PM
         }

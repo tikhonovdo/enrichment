@@ -16,7 +16,7 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
         this.dataSource = dataSource
         sql = """
             SELECT id as draft_transaction_id,
-                data->>'operationDate' as operation_date,
+                date,
                 data->>'paymentDate' as payment_date,
                 data->>'cardNumber' as card_number,
                 data->>'accountNumber' as account_number,
@@ -39,7 +39,7 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
         setRowMapper { rs, _ ->
             TinkoffRecord(
                 draftTransactionId = rs.getLong("draft_transaction_id"),
-                operationDate = TinkoffRecord.parseOperationDate(rs.getString("operation_date")),
+                operationDate = rs.getTimestamp("date").toLocalDateTime(),
                 paymentDate = rs.getString("payment_date")?.let {
                     dateFormatter.parse(it, LocalDate::from)
                 },

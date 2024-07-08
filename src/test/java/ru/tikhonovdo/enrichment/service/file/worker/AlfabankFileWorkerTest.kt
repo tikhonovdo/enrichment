@@ -19,7 +19,7 @@ class AlfabankFileWorkerTest : DatabaseAwareTest() {
 
     @Test
     fun stableOrderingTest() {
-        val worker = AlfabankFileWorker(draftTransactionRepository)
+        val worker = AlfabankDataWorker(draftTransactionRepository)
         val sourceUrl = AlfabankFileWorkerTest::class.java.getResource("../alfa/Statement 08.02.2023 - 03.04.2023.xlsx")
         val source = Paths.get(sourceUrl!!.toURI()).toFile()
 
@@ -33,7 +33,7 @@ class AlfabankFileWorkerTest : DatabaseAwareTest() {
 
     @Test
     fun alfaDeletionObsoleteTest() {
-        val worker = AlfabankFileWorker(draftTransactionRepository)
+        val worker = AlfabankDataWorker(draftTransactionRepository)
         val sourceUrl = AlfabankFileWorkerTest::class.java.getResource("../alfa/Statement 08.02.2023 - 03.04.2023.xlsx")
         val source = Paths.get(sourceUrl!!.toURI()).toFile()
 

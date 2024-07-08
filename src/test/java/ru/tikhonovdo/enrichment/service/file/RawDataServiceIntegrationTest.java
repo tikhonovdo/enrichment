@@ -21,10 +21,10 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
-public class FileServiceIntegrationTest extends DatabaseAwareTest {
+public class RawDataServiceIntegrationTest extends DatabaseAwareTest {
 
     @Autowired
-    FileService fileService;
+    RawDataService rawDataService;
 
     @Autowired
     DraftTransactionRepository draftTransactionRepository;
@@ -33,7 +33,7 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
 
     @Test
     void shouldSaveFinancePMAndLoadExactlySame() throws IOException, URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("financepm/source.data");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("financepm/source.data");
         File source = Paths.get(sourceUrl.toURI()).toFile();
         FinancePmData expected = MAPPER.readValue(source, FinancePmData.class);
         bringScaleToValue(expected, 6);
@@ -45,14 +45,14 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
                 .post("/file")
                 .then()
                 .statusCode(200);
-        FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
+        FinancePmData actual = MAPPER.readValue(rawDataService.load().getContentAsByteArray(), FinancePmData.class) ;
 
         Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void shouldSaveTheSameFinancePMDataOnlyOnce() throws IOException, URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("financepm/source.data");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("financepm/source.data");
         File source = Paths.get(sourceUrl.toURI()).toFile();
         FinancePmData expected = MAPPER.readValue(source, FinancePmData.class);
         bringScaleToValue(expected, 6);
@@ -70,15 +70,15 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
                 .post("/file")
                 .then()
                 .statusCode(200);
-        FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
+        FinancePmData actual = MAPPER.readValue(rawDataService.load().getContentAsByteArray(), FinancePmData.class) ;
 
         Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void shouldSaveTheSameFinancePMDataOnlyOnceAndAppendNew() throws IOException, URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("financepm/source.data");
-        URL modifiedUrl = FileServiceIntegrationTest.class.getResource("financepm/modified.data");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("financepm/source.data");
+        URL modifiedUrl = RawDataServiceIntegrationTest.class.getResource("financepm/modified.data");
         File source = Paths.get(sourceUrl.toURI()).toFile();
         File modified = Paths.get(modifiedUrl.toURI()).toFile();
         FinancePmData expected = MAPPER.readValue(modified, FinancePmData.class);
@@ -97,16 +97,16 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
                 .post("/file")
                 .then()
                 .statusCode(200);
-        FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
+        FinancePmData actual = MAPPER.readValue(rawDataService.load().getContentAsByteArray(), FinancePmData.class) ;
 
         Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void shouldSaveModifiedFinancePMDataResolvingCollisionInNewData() throws IOException, URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("financepm/source.data");
-        URL modifiedUrl = FileServiceIntegrationTest.class.getResource("financepm/collision/sequential-ids-overlap.data");
-        URL resultUrl = FileServiceIntegrationTest.class.getResource("financepm/modified.data");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("financepm/source.data");
+        URL modifiedUrl = RawDataServiceIntegrationTest.class.getResource("financepm/collision/sequential-ids-overlap.data");
+        URL resultUrl = RawDataServiceIntegrationTest.class.getResource("financepm/modified.data");
         File source = Paths.get(sourceUrl.toURI()).toFile();
         File modifiedCollision = Paths.get(modifiedUrl.toURI()).toFile();
         File result = Paths.get(resultUrl.toURI()).toFile();
@@ -126,16 +126,16 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
                 .post("/file")
                 .then()
                 .statusCode(200);
-        FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
+        FinancePmData actual = MAPPER.readValue(rawDataService.load().getContentAsByteArray(), FinancePmData.class) ;
 
         Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void shouldSaveModifiedFinancePMDataResolvingSpacesBetweenIdsCollisionInNewData() throws IOException, URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("financepm/spaces-between-ids/source.data");
-        URL modifiedUrl = FileServiceIntegrationTest.class.getResource("financepm/spaces-between-ids/modified.data");
-        URL resultUrl = FileServiceIntegrationTest.class.getResource("financepm/spaces-between-ids/result.data");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("financepm/spaces-between-ids/source.data");
+        URL modifiedUrl = RawDataServiceIntegrationTest.class.getResource("financepm/spaces-between-ids/modified.data");
+        URL resultUrl = RawDataServiceIntegrationTest.class.getResource("financepm/spaces-between-ids/result.data");
         File source = Paths.get(sourceUrl.toURI()).toFile();
         File modified = Paths.get(modifiedUrl.toURI()).toFile();
         File result = Paths.get(resultUrl.toURI()).toFile();
@@ -155,14 +155,14 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
                 .post("/file")
                 .then()
                 .statusCode(200);
-        FinancePmData actual = MAPPER.readValue(fileService.load().getContentAsByteArray(), FinancePmData.class) ;
+        FinancePmData actual = MAPPER.readValue(rawDataService.load().getContentAsByteArray(), FinancePmData.class) ;
 
         Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void shouldSaveTheSameTinkoffDataOnlyOnce() throws URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("tinkoff/operations_03.08.20-04.08.20.xls");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("tinkoff/operations_03.08.20-04.08.20.xls");
         File source = Paths.get(sourceUrl.toURI()).toFile();
 
         given()
@@ -185,7 +185,7 @@ public class FileServiceIntegrationTest extends DatabaseAwareTest {
 
     @Test
     void shouldSaveTheSameAlfaDataOnlyOnce() throws URISyntaxException {
-        URL sourceUrl = FileServiceIntegrationTest.class.getResource("alfa/Statement 06.06.2021 - 06.06.2021.xlsx");
+        URL sourceUrl = RawDataServiceIntegrationTest.class.getResource("alfa/Statement 06.06.2021 - 06.06.2021.xlsx");
         File source = Paths.get(sourceUrl.toURI()).toFile();
 
         given()

@@ -13,10 +13,10 @@ import java.util.function.Predicate
 import java.util.function.Supplier
 
 @Component
-class AlfabankFileWorker(
+class AlfabankDataWorker(
     draftTransactionRepository: DraftTransactionRepository,
     private val alfaFileWorkerResultFilter: Supplier<Predicate<DraftTransaction>> = Supplier { Predicate { true } }
-): BankFileWorker(draftTransactionRepository, Bank.ALFA) {
+): BankDataWorker(draftTransactionRepository, Bank.ALFA) {
 
     override fun readBytes(vararg content: ByteArray): List<DraftTransaction> {
         val workbook: Workbook = XSSFWorkbook(ByteArrayInputStream(content[0]))

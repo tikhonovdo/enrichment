@@ -26,7 +26,7 @@
 ### _transferComplementStep_
 
 ###### Логика работы:
-- найти в `matching.transactions` все записи, которые соответствуют перечисленным в `matching.transfer_complement` 
+- найти в `matching.transaction` все записи, которые соответствуют перечисленным в `matching.transfer_complement` 
   кортежам [source_name, source_description, source_type, source_account_id]
 - для найденных записей проверить наличие комплементарной записи в `matching.transaction` (клон исходной записи, со следующими различиями):
   * `matching.transaction.account_id` = `target_account_id` 

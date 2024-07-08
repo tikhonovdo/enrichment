@@ -9,7 +9,8 @@ import ru.tikhonovdo.enrichment.DatabaseAwareTest
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
-import ru.tikhonovdo.enrichment.service.file.worker.AlfabankFileWorker
+import ru.tikhonovdo.enrichment.repository.matching.TransferMatchingRepository
+import ru.tikhonovdo.enrichment.service.file.worker.AlfabankDataWorker
 import java.nio.file.Paths
 
 class AlfaTransactionMatchingStep(
@@ -19,8 +20,8 @@ class AlfaTransactionMatchingStep(
 
     @Test
     fun `filter out invalid transaction`() {
-        val worker = AlfabankFileWorker(draftTransactionRepository)
-        val sourceUrl = AlfaTransactionMatchingStep::class.java.getResource("Statement 03.01.2024 - 04.01.2024.xlsx")
+        val worker = AlfabankDataWorker(draftTransactionRepository)
+        val sourceUrl = AlfaTransactionMatchingStepTest::class.java.getResource("Statement 03.01.2024 - 04.01.2024.xlsx")
         val source = Paths.get(sourceUrl!!.toURI()).toFile()
         worker.saveData(source.readBytes())
 

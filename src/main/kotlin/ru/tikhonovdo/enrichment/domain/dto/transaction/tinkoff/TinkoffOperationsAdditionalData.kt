@@ -2,7 +2,6 @@ package ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import lombok.NoArgsConstructor
-import ru.tikhonovdo.enrichment.util.TinkoffOperationsAdditionalDataDeserializer
 
 @NoArgsConstructor
 class TinkoffOperationsAdditionalDataPayload(

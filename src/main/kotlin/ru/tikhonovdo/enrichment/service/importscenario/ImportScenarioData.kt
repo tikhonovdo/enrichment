@@ -9,5 +9,6 @@ class ImportScenarioData(
     var login: String? = null,
     var password: String? = null,
     var phone: String? = null,
-    var otpCode: String? = null
+    var otpCode: String? = null,
+    var cookie: String? = null
 )

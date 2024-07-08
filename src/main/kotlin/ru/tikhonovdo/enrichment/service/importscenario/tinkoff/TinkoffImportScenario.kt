@@ -2,8 +2,6 @@ package ru.tikhonovdo.enrichment.service.importscenario.tinkoff
 
 import com.codeborne.selenide.Selenide.open
 import com.codeborne.selenide.Selenide.webdriver
-import org.openqa.selenium.By
-import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -14,6 +12,7 @@ import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState.*
 import java.time.Duration
+import java.util.function.Function
 import kotlin.random.Random
 
 @Component
@@ -25,7 +24,19 @@ class TinkoffImportScenario(
     context: ImportScenarioContext
 ): AbstractImportScenario(context, waitingDuration, Bank.TINKOFF) {
 
-    override fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState {
+    init {
+        stepActions = mapOf(
+            INITIAL.stepName to Function { requestOtpCode(it) },
+            OTP_SENT.stepName to Function {
+                val newState = finishLogin(it)
+                switchState(newState)
+                performImportStep(newState.stepName, it)
+            },
+            LOGIN_SUCCEED.stepName to Function { saveData() }
+        )
+    }
+
+    fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState {
         val random = Random(System.currentTimeMillis())
 
         open(homeUrl)
@@ -33,49 +44,57 @@ class TinkoffImportScenario(
 
         val driver = webdriver().`object`()
         val wait = WebDriverWait(driver, waitingDuration)
-        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='phone-input']"))))
-            .sendKeys(scenarioData.phone)
-        wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@type='submit']"))))
-            .click()
-        random.sleep(3500, 5000)
+        screenshot("tinkoff-01", driver)
 
-        val otpInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
-        return if (otpInput != null) {
+        wait.untilAppears("//input[@automation-id='phone-input']").sendKeys(scenarioData.phone)
+        screenshot("tinkoff-02", driver)
+
+        wait.untilAppears("//button[@type='submit']").click()
+        random.sleep(1500, 2000)
+
+        screenshot("tinkoff-03", driver)
+        return if (elementPresented("//input[@automation-id='otp-input']", driver)) {
             OTP_SENT
         } else {
             INITIAL
         }
     }
 
-    override fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
+    fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
         val random = Random(System.currentTimeMillis())
         val driver = driver()
         val wait = WebDriverWait(driver, waitingDuration)
+        screenshot("tinkoff-11")
 
-        val otpInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='otp-input']"))))
+        val otpInput = wait.untilAppears("//input[@automation-id='otp-input']")
         otpInput.sendKeys(scenarioData.otpCode)
+        screenshot("tinkoff-12")
         random.sleep(4000, 6000)
 
-        val passwordInput = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//input[@automation-id='password-input']"))))
-        val buttonSubmit = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='button-submit']"))))
-        random.sleep(6000, 8000)
+        val passwordInput = wait.untilAppears("//input[@automation-id='password-input']")
+        val buttonSubmit = wait.untilAppears("//button[@automation-id='button-submit']")
+        screenshot("tinkoff-13")
+        random.sleep(4000, 6000)
 
         passwordInput.sendKeys(scenarioData.password)
         buttonSubmit.click()
+        screenshot("tinkoff-14")
         random.sleep(2500, 3500)
 
-        val cancelButton = wait.until(ExpectedConditions.presenceOfElementLocated((By.xpath("//button[@automation-id='cancel-button']"))))
-        cancelButton.click()
-        Thread.sleep(1000) // simulate navigation
+        wait.untilAppears("//button[@automation-id='cancel-button']").click()
+        screenshot("tinkoff-15")
+        Thread.sleep(5000) // simulate navigation
 
-        return if (elementPresented("//*[@data-qa-type='navigation/username']")) {
+        val usernamePresented = elementPresented("//*[@data-qa-type='navigation/username']")
+        screenshot("tinkoff-16")
+        return if (usernamePresented) {
             LOGIN_SUCCEED
         } else {
             INITIAL
         }
     }
 
-    override fun saveData(): ScenarioState {
+    fun saveData(): ScenarioState {
         try {
             val apiSession = driver().manage().getCookieNamed("api_session").value
             tinkoffService.importData(apiSession)

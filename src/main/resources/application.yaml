@@ -29,7 +29,7 @@ logging:
     liquibase: INFO
     ru.tikhonovdo.enrichment.service: TRACE
 
-selenium-waiting-period: 30s
+selenium-waiting-period: 15s
 selenoid-host-download-path: ${SELENOID_HOST_DOWNLOAD_PATH} # make sure that all users can write to this path
 
 server:
@@ -48,15 +48,12 @@ import:
     api-url: https://www.tinkoff.ru/api/common/v1
   alfa:
     home-url: https://click.alfabank.ru/
+  yandex:
+    passport: https://passport.yandex.ru/
+    url: https://bank.yandex.ru/
 
 refund:
   income-category-id: 79
-
----
-spring:
-  config.activate.on-profile: docker
-server:
-  port: 8081
 
 ---
 spring:

@@ -1,19 +1,24 @@
 package ru.tikhonovdo.enrichment.service.importscenario
 
+import com.codeborne.selenide.Selenide
+import com.codeborne.selenide.Selenide.using
 import org.openqa.selenium.By
+import org.openqa.selenium.NoSuchElementException
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.tikhonovdo.enrichment.domain.Bank
 import java.time.Duration
+import java.util.function.Function
 import kotlin.random.Random
 
 interface ImportScenario {
 
-    fun startLogin(scenarioData: ImportScenarioData): ScenarioState
+    fun performImportStep(stepName: String, scenarioData: ImportScenarioData): ScenarioState
 
-    fun confirmLoginAndImport(scenarioData: ImportScenarioData): ScenarioState
 }
 
 abstract class AbstractImportScenario(
@@ -24,58 +29,64 @@ abstract class AbstractImportScenario(
 
     protected val log: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun startLogin(scenarioData: ImportScenarioData): ScenarioState {
-        checkState(ScenarioState.INITIAL)
+    protected lateinit var stepActions: Map<String, Function<ImportScenarioData, ScenarioState>>
 
-        val newState = requestOtpCode(scenarioData)
-        switchState(newState)
+    override fun performImportStep(stepName: String, scenarioData: ImportScenarioData): ScenarioState {
+        checkState(convertToState(stepName))
 
-        return newState
+        val step = stepActions[stepName] ?: throw IllegalStateException("Step $stepName not found for $bank. Terminating...")
+
+        val currentState = step.apply(scenarioData)
+        return switchState(currentState)
     }
 
-    override fun confirmLoginAndImport(scenarioData: ImportScenarioData): ScenarioState {
-        checkState(ScenarioState.OTP_SENT)
-
-        var newState = finishLogin(scenarioData)
-        switchState(newState)
-
-        checkState(ScenarioState.LOGIN_SUCCEED)
-        newState = saveData()
-        switchState(newState)
-
-        return newState
+    private fun convertToState(stepName: String): ScenarioState {
+        return ScenarioState.entries.first { it.stepName == stepName }
     }
-
-    abstract fun saveData(): ScenarioState
-
-    abstract fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState
-
-    abstract fun finishLogin(scenarioData: ImportScenarioData): ScenarioState
 
     protected fun driver() = context.getDriver()
 
-    protected fun elementPresented(xPathExpression: String): Boolean {
+    protected fun WebDriverWait.untilAppears(xPathExpression: String): WebElement {
+        return until(ExpectedConditions.presenceOfElementLocated(By.xpath(xPathExpression)))
+    }
+
+    protected fun WebDriverWait.untilAppears(xPathExpression: String, fallbackOperation: Runnable): WebElement {
+        var attempts = 0
+        while (attempts < 3) {
+            try {
+                return until(ExpectedConditions.presenceOfElementLocated(By.xpath(xPathExpression)))
+            } catch (e: NoSuchElementException) {
+                log.error(e.message, e)
+                fallbackOperation.run()
+                attempts++
+            }
+        }
+        throw IllegalStateException("Max waiting attempts count reached")
+    }
+
+    protected fun elementPresented(xPathExpression: String, webDriver: WebDriver = driver()): Boolean {
         var presented = false
         try {
-            WebDriverWait(driver(), waitingDuration)
-                .until(ExpectedConditions.presenceOfElementLocated(By.xpath(xPathExpression)))
+            WebDriverWait(webDriver, waitingDuration, Duration.ofSeconds(1)).untilAppears(xPathExpression)
             presented = true
         } catch (e: Exception) {
             log.error("Element not presented during operation with $bank", e)
         }
         return presented
-
     }
 
     protected fun Random.sleep(from: Long, until: Long) {
         Thread.sleep(nextLong(from, until))
     }
 
-    private fun checkState(state: ScenarioState) {
+    protected fun screenshot(screenshotName: String, driver: WebDriver = driver()) {
+        using(driver) { log.debug(Selenide.screenshot(screenshotName)) }
+    }
+    fun checkState(state: ScenarioState) {
         context.checkState(state, bank)
     }
 
-    private fun switchState(state: ScenarioState) {
-        context.switchState(state, bank)
+    fun switchState(state: ScenarioState): ScenarioState {
+        return context.switchState(state, bank)
     }
 }

@@ -1,13 +1,14 @@
 package ru.tikhonovdo.enrichment.domain
 
 enum class Bank(val id: Long) {
-    TINKOFF(1), ALFA(2)
+    TINKOFF(1), ALFA(2), YANDEX(3)
 }
 
-enum class FileType(val bankId: Long?) {
+enum class DataType(val bankId: Long?) {
     FINANCE_PM(null),
     TINKOFF(Bank.TINKOFF.id),
-    ALFA(Bank.ALFA.id)
+    ALFA(Bank.ALFA.id),
+    YANDEX(Bank.YANDEX.id)
 }
 
 enum class Type(val id: Long) {

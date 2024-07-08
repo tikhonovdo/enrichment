@@ -4,12 +4,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.dto.FinancePmData
 import ru.tikhonovdo.enrichment.repository.financepm.*
-import ru.tikhonovdo.enrichment.service.file.worker.FinancePmFileWorker
+import ru.tikhonovdo.enrichment.service.file.worker.FinancePmDataWorker
 import ru.tikhonovdo.enrichment.service.file.worker.SaveMode
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
 
 @Component
-class FinancePmFileWorkerImpl(
+class FinancePmDataWorkerImpl(
     val currencyRepository: CurrencyRepository,
     val accountRepository: AccountRepository,
     val categoryRepository: CategoryRepository,
@@ -18,9 +18,9 @@ class FinancePmFileWorkerImpl(
     val arrearRepository: ArrearRepository,
     val arrearTransactionRepository: ArrearTransactionRepository,
     val importMatchingDataBuilder: ImportMatchingDataBuilder
-) : FinancePmFileWorker {
+) : FinancePmDataWorker {
 
-    private val log = LoggerFactory.getLogger(FinancePmFileWorkerImpl::class.java)
+    private val log = LoggerFactory.getLogger(FinancePmDataWorkerImpl::class.java)
 
     override fun saveData(saveMode: SaveMode, vararg content: ByteArray) {
         JSON_MAPPER.readValue(content[0], FinancePmData::class.java)?.let {

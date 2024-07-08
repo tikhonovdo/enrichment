@@ -1,0 +1,121 @@
+{
+  "resultCode": "OK",
+  "payload": [
+    {
+      "id": "999",
+      "status": "OK",
+      "loyaltyBonus": [],
+      "description": "Метро Санкт-Петербург",
+      "debitingTime": {
+        "milliseconds": 1718444096000
+      },
+      "mcc": 4111,
+      "category": {
+        "id": "45",
+        "name": "Другое"
+      },
+      "mccString": "4111",
+      "locations": [],
+      "cashbackAmount": {
+        "currency": {
+          "code": 643,
+          "name": "RUB",
+          "strCode": "643"
+        },
+        "value": 0.0000
+      },
+      "cashback": 0.0,
+      "amount": {
+        "currency": {
+          "code": 643,
+          "name": "RUB",
+          "strCode": "643"
+        },
+        "value": 70.0000
+      },
+      "operationTime": {
+        "milliseconds": 1719066905000
+      },
+      "account": "1006664321",
+      "merchant": {
+        "name": "METRO.SPB.RU",
+        "region": {
+          "country": "RUS",
+          "city": "ST PETERSBURG"
+        }
+      },
+      "card": "111115533",
+      "loyaltyPayment": [],
+      "trancheCreationAllowed": false,
+      "cardPresent": true,
+      "accountAmount": {
+        "currency": {
+          "code": 643,
+          "name": "RUB",
+          "strCode": "643"
+        },
+        "value": 70.0000
+      },
+      "isExternalCard": false,
+      "cardNumber": "777777******1234"
+    },
+    {
+      "id": "1000",
+      "status": "OK",
+      "loyaltyBonus": [],
+      "description": "Метро Санкт-Петербург",
+      "debitingTime": {
+        "milliseconds": 1718444096000
+      },
+      "mcc": 4111,
+      "category": {
+        "id": "45",
+        "name": "Другое"
+      },
+      "mccString": "4111",
+      "locations": [],
+      "cashbackAmount": {
+        "currency": {
+          "code": 643,
+          "name": "RUB",
+          "strCode": "643"
+        },
+        "value": 0.0000
+      },
+      "cashback": 0.0,
+      "amount": {
+        "currency": {
+          "code": 643,
+          "name": "RUB",
+          "strCode": "643"
+        },
+        "value": 70.0000
+      },
+      "operationTime": {
+        "milliseconds": 1719066905000
+      },
+      "account": "1006664321",
+      "merchant": {
+        "name": "METRO.SPB.RU",
+        "region": {
+          "country": "RUS",
+          "city": "ST PETERSBURG"
+        }
+      },
+      "card": "111115533",
+      "loyaltyPayment": [],
+      "trancheCreationAllowed": false,
+      "cardPresent": true,
+      "accountAmount": {
+        "currency": {
+          "code": 643,
+          "name": "RUB",
+          "strCode": "643"
+        },
+        "value": 70.0000
+      },
+      "isExternalCard": false,
+      "cardNumber": "777777******1234"
+    }
+  ]
+}

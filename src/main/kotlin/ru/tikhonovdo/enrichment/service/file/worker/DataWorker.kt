@@ -6,20 +6,20 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 
-interface FileWorker {
+interface DataWorker {
     fun saveData(saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
 }
 
-interface FinancePmFileWorker : FileWorker {
+interface FinancePmDataWorker : DataWorker {
     fun retrieveData(): ByteArray
 }
 
-abstract class BankFileWorker(
+abstract class BankDataWorker(
     private val draftTransactionRepository: DraftTransactionRepository,
     private val bank: Bank
-): FileWorker {
+): DataWorker {
 
-    private val log = LoggerFactory.getLogger(BankFileWorker::class.java)
+    protected val log = LoggerFactory.getLogger(BankDataWorker::class.java)
 
     @Transactional
     override fun saveData(saveMode: SaveMode, vararg content: ByteArray) {

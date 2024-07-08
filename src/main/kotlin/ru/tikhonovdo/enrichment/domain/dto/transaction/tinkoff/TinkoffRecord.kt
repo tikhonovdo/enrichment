@@ -1,6 +1,7 @@
 package ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff
 
 import ru.tikhonovdo.enrichment.domain.dto.transaction.BaseRecord
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -8,7 +9,7 @@ import java.time.format.DateTimeFormatter
 
 data class TinkoffRecord(
     override var draftTransactionId: Long? = null,
-    override val operationDate: LocalDateTime,      // Дата операции
+    override val operationDate: LocalDateTime,      // Дата операции (в UTC с 2024-05-05)
     val paymentDate: LocalDate?,                    // Дата платежа
     val accountNumber: String?,                     // Номер счета
     val cardNumber: String?,                        // Номер карты
@@ -29,13 +30,13 @@ data class TinkoffRecord(
 ): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
     companion object {
-        private val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy[ HH:mm:ss]")
+        val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss[.SSS]")
         fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDateTime::from)
 
-        fun parseOperationDateToEpochMillis(value: String): Long = parseOperationDate(value).toEpochSecond(ZoneOffset.ofHours(3)) * 1000
+        fun parseOperationDateToInstant(value: String, offset: ZoneOffset = ZoneOffset.ofHours(3)): Instant = parseOperationDate(value).toInstant(offset)
     }
 
-    class Raw(
+    data class Raw(
         var operationDate: String? = null,
         var paymentDate: String? = null,
         var accountNumber: String? = null,

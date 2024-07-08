@@ -47,12 +47,3 @@
 | name                        | значение по умолчанию: "Перевод"                                                                                                                              |
 | transaction_id_from         | `financepm.transaction.id` такой, что `financepm.draft_transaction_id = matching.draft_transfer.draft_transaction_id_from` И `financepm.transaction.type = 2` |
 | transaction_id_to           | `financepm.transaction.id` такой, что `financepm.draft_transaction_id = matching.draft_transfer.draft_transaction_id_to`   И `financepm.transaction.type = 1` |
-
-
-```
-Возможно в Тинькофф сделают новый столбец "Комментарий" и тогда получится создать
-правила матчинга переводов и компенсаций в рамках групповых трат (например в ресторанах 
-или при совместной покупке билетов).
- 
-В Альфе такое поле уже есть, но я его не проверял - давно не пользовался их дебетовкой.
-```

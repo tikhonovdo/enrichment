@@ -35,9 +35,10 @@ class ImportScenarioContext {
         }
     }
 
-    fun switchState(nextState: ScenarioState, bank: Bank?): Boolean {
+    fun switchState(nextState: ScenarioState, bank: Bank?): ScenarioState {
         if (!isAvailableMove(nextState, bank)) {
-            return false
+            log.warn("Cannot switch to state $nextState for bank $bank: current state is $currentState and current bank is $currentBank")
+            return currentState.get()
         }
 
         log.info("Changing state $currentState to $nextState, bank = $bank")
@@ -54,7 +55,7 @@ class ImportScenarioContext {
             }
             else -> { }
         }
-        return true
+        return nextState
     }
 
     fun getDriver(): WebDriver {
