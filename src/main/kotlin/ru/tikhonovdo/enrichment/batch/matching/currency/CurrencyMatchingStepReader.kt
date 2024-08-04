@@ -5,18 +5,10 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
 import javax.sql.DataSource
 
-class AlfaCurrencyMatchingStepReader(dataSource: DataSource): AbstractCurrencyMatchingStepReader(dataSource, Bank.ALFA)
-class TinkoffCurrencyMatchingStepReader(dataSource: DataSource): AbstractCurrencyMatchingStepReader(dataSource, Bank.TINKOFF)
-
-abstract class AbstractCurrencyMatchingStepReader(dataSource: DataSource, bank: Bank): JdbcCursorItemReader<CurrencyMatching>() {
+class CurrencyMatchingStepReader(dataSource: DataSource, bank: Bank, sql: String = defaultSql(bank)): JdbcCursorItemReader<CurrencyMatching>() {
     init {
         this.dataSource = dataSource
-        sql = """
-            SELECT DISTINCT ON (data->>'paymentCurrency') 
-                data->>'paymentCurrency' as currency
-            FROM matching.draft_transaction
-            WHERE bank_id = ${bank.id};
-        """.trimIndent()
+        this.sql = sql
         setRowMapper { rs, _ ->
             CurrencyMatching(
                 bankId = bank.id,
@@ -25,3 +17,11 @@ abstract class AbstractCurrencyMatchingStepReader(dataSource: DataSource, bank: 
         }
     }
 }
+
+private fun defaultSql(bank: Bank) =
+    """
+        SELECT DISTINCT ON (data->>'paymentCurrency') 
+            data->>'paymentCurrency' as currency
+        FROM matching.draft_transaction
+        WHERE bank_id = ${bank.id};
+    """.trimIndent()

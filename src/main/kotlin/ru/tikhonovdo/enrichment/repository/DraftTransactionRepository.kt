@@ -88,6 +88,7 @@ class DraftTransactionRepositoryImpl(
             DELETE FROM matching.draft_transaction 
             WHERE (bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK'))
                 OR (bank_id = ${Bank.ALFA.id} AND ((data->>'paymentDate') IS NULL OR ((data->>'status') != 'Выполнен' AND (data->>'category') != 'Пополнения')))
+                OR (bank_id = ${Bank.YANDEX.id} AND data#>>'{status,code}' != 'CLEAR')
             """.trimIndent())
         jdbcTemplate.execute("SELECT setval('matching.draft_transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.draft_transaction), false)")
         return deleted
@@ -95,8 +96,10 @@ class DraftTransactionRepositoryImpl(
 
     override fun getLastUpdateDate(bank: Bank): LocalDateTime? {
         var sql = "SELECT max(date) FROM matching.draft_transaction WHERE bank_id = :bankId"
-        if (bank == Bank.TINKOFF) {
-            sql += " AND data->>'status' = 'OK'"
+        sql += when (bank) {
+            Bank.TINKOFF -> " AND data->>'status' = 'OK'"
+            Bank.YANDEX -> " AND data#>>'{status,code}' = 'CLEAR'"
+            else -> ""
         }
 
         return namedParameterJdbcTemplate.queryForObject(sql, MapSqlParameterSource(mapOf("bankId" to bank.id)), LocalDateTime::class.java)

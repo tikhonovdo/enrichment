@@ -11,12 +11,13 @@ import org.springframework.context.annotation.Import
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
-import ru.tikhonovdo.enrichment.batch.matching.account.AlfaAccountMatchingStepReader
-import ru.tikhonovdo.enrichment.batch.matching.category.AlfaCategoryMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
-import ru.tikhonovdo.enrichment.batch.matching.currency.AlfaCurrencyMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaTransactionStepProcessor
+import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
@@ -70,7 +71,7 @@ class AlfaMatchingJobConfig(
 
     @Bean
     fun alfaCategoryMatchingStepReader(): ItemReader<CategoryMatching> =
-        AlfaCategoryMatchingStepReader(dataSource)
+        CategoryMatchingStepReader(dataSource, Bank.ALFA)
     
     @Bean
     fun alfaCurrencyMatchingStep(
@@ -87,7 +88,7 @@ class AlfaMatchingJobConfig(
 
     @Bean
     fun alfaCurrencyMatchingStepReader(): ItemReader<CurrencyMatching> =
-        AlfaCurrencyMatchingStepReader(dataSource)
+        CurrencyMatchingStepReader(dataSource, Bank.ALFA)
 
     @Bean
     fun alfaAccountMatchingStep(
@@ -104,7 +105,7 @@ class AlfaMatchingJobConfig(
 
     @Bean
     fun alfaAccountMatchingStepReader(): ItemReader<AccountMatching> =
-        AlfaAccountMatchingStepReader(dataSource)
+        AccountMatchingStepReader(dataSource, Bank.ALFA)
 
     @Bean
     fun alfaTransactionMatchingStep(

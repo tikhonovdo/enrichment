@@ -5,10 +5,9 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import javax.sql.DataSource
 
-class AlfaAccountMatchingStepReader(dataSource: DataSource): AbstractAccountMatchingStepReader(dataSource, Bank.ALFA, "accountNumber")
-class TinkoffDirectAccountMatchingStepReader(dataSource: DataSource): AbstractAccountMatchingStepReader(dataSource, Bank.TINKOFF, "accountNumber")
-
-abstract class AbstractAccountMatchingStepReader(dataSource: DataSource, bank: Bank, fieldName: String): JdbcCursorItemReader<AccountMatching>() {
+class AccountMatchingStepReader(dataSource: DataSource,
+                                bank: Bank,
+                                fieldName: String = "accountNumber"): JdbcCursorItemReader<AccountMatching>() {
     init {
         this.dataSource = dataSource
         this.sql = """

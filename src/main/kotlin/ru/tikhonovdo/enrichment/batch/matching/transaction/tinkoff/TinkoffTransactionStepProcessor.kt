@@ -12,7 +12,7 @@ import ru.tikhonovdo.enrichment.repository.matching.TinkoffAccountMatchingReposi
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import kotlin.math.sign
 
-class TinkoffTransactionStepProcessor(
+open class TinkoffTransactionStepProcessor(
     draftTransactionRepository: DraftTransactionRepository,
     categoryMatchingRepository: CategoryMatchingRepository,
     private val transactionMatchingRepository: TransactionMatchingRepository,

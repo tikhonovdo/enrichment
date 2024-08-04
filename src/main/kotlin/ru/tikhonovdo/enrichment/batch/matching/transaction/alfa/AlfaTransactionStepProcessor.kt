@@ -9,7 +9,7 @@ import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 
-class AlfaTransactionStepProcessor(
+open class AlfaTransactionStepProcessor(
     draftTransactionRepository: DraftTransactionRepository,
     categoryMatchingRepository: CategoryMatchingRepository,
     private val transactionMatchingRepository: TransactionMatchingRepository,

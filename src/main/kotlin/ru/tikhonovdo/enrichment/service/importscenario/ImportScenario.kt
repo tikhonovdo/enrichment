@@ -19,17 +19,21 @@ interface ImportScenario {
 
     fun performImportStep(stepName: String, scenarioData: ImportScenarioData): ScenarioState
 
+    fun getBank(): Bank
+
 }
 
 abstract class AbstractImportScenario(
     private val context: ImportScenarioContext,
     protected val waitingDuration: Duration,
-    val bank: Bank
+    private val bank: Bank
 ): ImportScenario {
 
     protected val log: Logger = LoggerFactory.getLogger(this::class.java)
 
     protected lateinit var stepActions: Map<String, Function<ImportScenarioData, ScenarioState>>
+
+    override fun getBank() = bank
 
     override fun performImportStep(stepName: String, scenarioData: ImportScenarioData): ScenarioState {
         checkState(convertToState(stepName))

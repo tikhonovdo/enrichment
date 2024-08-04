@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import ru.tikhonovdo.enrichment.domain.DataType
 import ru.tikhonovdo.enrichment.domain.DataType.*
-import ru.tikhonovdo.enrichment.service.file.worker.*
+import ru.tikhonovdo.enrichment.service.file.worker.DataWorker
+import ru.tikhonovdo.enrichment.service.file.worker.FinancePmDataWorker
+import ru.tikhonovdo.enrichment.service.file.worker.SaveMode
 
 interface RawDataService {
     fun saveData(file: MultipartFile, saveMode: SaveMode)
@@ -16,22 +18,10 @@ interface RawDataService {
 }
 
 @Service
-class RawDataServiceImpl(
-    private val financePmFileWorker: FinancePmDataWorker,
-    tinkoffFileWorker: TinkoffDataWorker,
-    alfabankFileWorker: AlfabankDataWorker,
-    yandexFileWorker: YandexDataWorker
-) : RawDataService {
+class RawDataServiceImpl(dataWorkers: List<DataWorker>) : RawDataService {
 
     private val log = LoggerFactory.getLogger(RawDataServiceImpl::class.java)
-    private val workers = mutableMapOf<DataType, DataWorker>()
-
-    init {
-        workers[FINANCE_PM] = financePmFileWorker
-        workers[TINKOFF] = tinkoffFileWorker
-        workers[ALFA] = alfabankFileWorker
-        workers[YANDEX] = yandexFileWorker
-    }
+    private val workers = dataWorkers.associateBy { it.getDataType() }
 
     override fun saveData(file: MultipartFile, saveMode: SaveMode) {
         val dataType = detectDataType(file)
@@ -48,7 +38,7 @@ class RawDataServiceImpl(
     }
 
     override fun load() =
-        ByteArrayResource(financePmFileWorker.retrieveData())
+        ByteArrayResource((workers[FINANCE_PM] as FinancePmDataWorker).retrieveData())
 
     private fun detectDataType(file: MultipartFile): DataType {
         if (isFinancePm(file)) {

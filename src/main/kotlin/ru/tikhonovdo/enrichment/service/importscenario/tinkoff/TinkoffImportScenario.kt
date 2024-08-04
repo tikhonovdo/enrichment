@@ -85,9 +85,9 @@ class TinkoffImportScenario(
         screenshot("tinkoff-15")
         Thread.sleep(5000) // simulate navigation
 
-        val usernamePresented = elementPresented("//*[@data-qa-type='navigation/username']")
+        val titlePresented = elementPresented("//*[@data-qa-type='desktop-ib-title']")
         screenshot("tinkoff-16")
-        return if (usernamePresented) {
+        return if (titlePresented) {
             LOGIN_SUCCEED
         } else {
             INITIAL

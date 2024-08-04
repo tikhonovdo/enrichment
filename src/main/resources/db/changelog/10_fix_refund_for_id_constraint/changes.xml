@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-on-delete-cascade-to-matching_transaction-refund_for_id" author="chitzkoy">
+        <dropForeignKeyConstraint baseTableName="transaction"
+                                  baseTableSchemaName="matching"
+                                  constraintName="fk_matching_transaction_refund_for_id"/>
+        <addForeignKeyConstraint baseTableName="transaction"
+                                 baseTableSchemaName="matching"
+                                 baseColumnNames="refund_for_id"
+                                 constraintName="fk_matching_transaction_refund_for_id"
+                                 referencedTableName="transaction"
+                                 referencedTableSchemaName="matching"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE" />
+    </changeSet>
+
+</databaseChangeLog>

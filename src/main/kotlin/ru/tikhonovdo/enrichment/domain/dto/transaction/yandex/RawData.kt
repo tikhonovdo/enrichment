@@ -34,8 +34,8 @@ data class Operation(
 data class OperationStatus(var code: String? = null, var message: String? = null)
 data class MoneyObject(var amount: Double? = null, var currency: String? = null)
 enum class Direction {
-    DEBIT,
-    CREDIT
+    DEBIT, // списание
+    CREDIT // пополнение
 }
 
 enum class OperationType {
@@ -46,4 +46,9 @@ enum class OperationType {
     TRANSFER_OUT
 }
 
-
+enum class StatusCode {
+    CLEAR, // проведена
+    HOLD, // средства заблокированы
+    CANCEL, // отмена
+    FAIL, // не выполнено
+}

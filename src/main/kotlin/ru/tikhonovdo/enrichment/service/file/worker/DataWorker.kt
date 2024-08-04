@@ -3,15 +3,20 @@ package ru.tikhonovdo.enrichment.service.file.worker
 import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.Bank
+import ru.tikhonovdo.enrichment.domain.DataType
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 
 interface DataWorker {
     fun saveData(saveMode: SaveMode = SaveMode.DEFAULT, vararg content: ByteArray)
+
+    fun getDataType(): DataType
 }
 
 interface FinancePmDataWorker : DataWorker {
     fun retrieveData(): ByteArray
+
+    override fun getDataType() = DataType.FINANCE_PM
 }
 
 abstract class BankDataWorker(
@@ -24,6 +29,10 @@ abstract class BankDataWorker(
     @Transactional
     override fun saveData(saveMode: SaveMode, vararg content: ByteArray) {
         saveData(*content)
+    }
+
+    override fun getDataType(): DataType {
+        return DataType.entries.first { it.bankId == bank.id }
     }
 
     fun saveData(vararg content: ByteArray) {

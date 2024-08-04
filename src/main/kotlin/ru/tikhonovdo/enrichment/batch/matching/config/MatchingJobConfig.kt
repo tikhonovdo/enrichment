@@ -11,12 +11,14 @@ import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
 import ru.tikhonovdo.enrichment.batch.matching.config.alfa.AlfaMatchingJobConfig
 import ru.tikhonovdo.enrichment.batch.matching.config.tinkoff.TinkoffMatchingJobConfig
+import ru.tikhonovdo.enrichment.batch.matching.config.yandex.YandexMatchingJobConfig
 
 @Configuration
 @Import(BaseMatchingJobConfig::class,
     RefundFeatureConfig::class,
     TransferManualMatchingConfig::class,
     AlfaMatchingJobConfig::class,
+    YandexMatchingJobConfig::class,
     TinkoffMatchingJobConfig::class)
 class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepository) {
 
@@ -38,6 +40,7 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
     fun matchingFlow(
         tinkoffMatchingFlow: Flow,
         alfaMatchingFlow: Flow,
+        yandexMatchingFlow: Flow,
         cleanUnmatchedTransactionsStep: Step,
         transferMatchingStep: Step,
         transferComplementStep: Step,
@@ -49,6 +52,7 @@ class MatchingJobConfig(jobRepository: JobRepository): AbstractJobConfig(jobRepo
             .addStep(cleanUnmatchedTransactionsStep)
             .addStep(flowStep(tinkoffMatchingFlow))
             .addStep(flowStep(alfaMatchingFlow))
+            .addStep(flowStep(yandexMatchingFlow))
             .addStep(transferComplementStep)
             .addStep(transferMatchingStep)
             .addStep(transferManualMatchingStep)

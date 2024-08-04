@@ -47,9 +47,8 @@ import:
     home-url: https://www.tinkoff.ru/mybank/
     api-url: https://www.tinkoff.ru/api/common/v1
   alfa:
-    home-url: https://click.alfabank.ru/
+    home-url: https://web.alfabank.ru/
   yandex:
-    passport: https://passport.yandex.ru/
     url: https://bank.yandex.ru/
 
 refund:

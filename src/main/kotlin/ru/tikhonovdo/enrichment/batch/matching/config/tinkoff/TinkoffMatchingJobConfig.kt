@@ -11,14 +11,15 @@ import org.springframework.context.annotation.Import
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
-import ru.tikhonovdo.enrichment.batch.matching.account.TinkoffDirectAccountMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.account.AccountMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.account.tinkoff.TinkoffImplicitAccountMatchingStepProcessor
 import ru.tikhonovdo.enrichment.batch.matching.account.tinkoff.TinkoffImplicitAccountMatchingStepReader
-import ru.tikhonovdo.enrichment.batch.matching.category.TinkoffCategoryMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.category.CategoryMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.config.BaseMatchingJobConfig
-import ru.tikhonovdo.enrichment.batch.matching.currency.TinkoffCurrencyMatchingStepReader
+import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.tinkoff.TinkoffTransactionStepProcessor
+import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
@@ -70,7 +71,7 @@ class TinkoffMatchingJobConfig(
 
     @Bean
     fun tinkoffCategoryMatchingStepReader(): ItemReader<CategoryMatching> =
-        TinkoffCategoryMatchingStepReader(dataSource)
+        CategoryMatchingStepReader(dataSource, Bank.TINKOFF)
     
     @Bean
     fun tinkoffCurrencyMatchingStep(
@@ -87,7 +88,7 @@ class TinkoffMatchingJobConfig(
 
     @Bean
     fun tinkoffCurrencyMatchingStepReader(): ItemReader<CurrencyMatching> =
-        TinkoffCurrencyMatchingStepReader(dataSource)
+        CurrencyMatchingStepReader(dataSource, Bank.TINKOFF)
 
     @Bean
     fun tinkoffAccountMatchingFlow(
@@ -115,7 +116,7 @@ class TinkoffMatchingJobConfig(
 
     @Bean
     fun tinkoffAccountMatchingStepReader(): ItemReader<AccountMatching> =
-        TinkoffDirectAccountMatchingStepReader(dataSource)
+        AccountMatchingStepReader(dataSource, Bank.TINKOFF)
 
     @Bean
     fun tinkoffImplicitAccountMatchingStep(
