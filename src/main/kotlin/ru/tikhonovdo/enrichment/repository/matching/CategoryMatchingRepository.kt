@@ -30,7 +30,7 @@ class CustomCategoryMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedPara
 
     override fun findAllByBankId(bankId: Long): List<CategoryMatching> {
         return namedParameterJdbcTemplate.query("""
-            SELECT mc.category_id, mc.bank_id, mc.bank_category_name, mc.mcc, mc.pattern, mc.sum, 
+            SELECT mc.category_id, mc.bank_id, mc.bank_category_name, mc.mcc, mc.pattern, mc.sum, mc.comparison_sign,
             c.name, c.type, c.parent_id, c.order_id
             FROM matching.category mc 
             JOIN financepm.category c ON mc.category_id = c.id
@@ -44,6 +44,7 @@ class CustomCategoryMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedPara
                 mcc = rs.getNullable { it.getString("mcc") },
                 pattern = rs.getNullable { it.getString("pattern") },
                 sum = rs.getNullable { it.getDouble("sum") },
+                comparisonSign = rs.getNullable { it.getString("comparison_sign") },
                 category = Category(
                     id = rs.getLong("category_id"),
                     name = rs.getString("name"),

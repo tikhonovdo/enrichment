@@ -63,11 +63,21 @@ data class CategoryMatching(
 
     var sum: Double? = null,
 
+    var comparisonSign: String? = null,
+
     @ManyToOne(targetEntity = Category::class)
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
     var category: Category? = null
 
 ) {
+    companion object {
+        const val GT = ">"
+        const val GTE = ">="
+        const val LT = "<"
+        const val LTE = "<="
+        const val EQ = "="
+    }
+
     data class CategoryMatchingId(
         var categoryId: Long? = null,
         var bankId: Long? = null

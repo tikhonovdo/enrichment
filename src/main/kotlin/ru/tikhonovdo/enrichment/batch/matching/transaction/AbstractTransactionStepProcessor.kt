@@ -5,6 +5,7 @@ import org.springframework.batch.core.StepExecution
 import org.springframework.batch.core.StepExecutionListener
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.lang.NonNull
+import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.Type
 import ru.tikhonovdo.enrichment.domain.dto.transaction.BaseRecord
@@ -29,6 +30,7 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
         matchingCategories = categoryMatchingRepository.findAllByBankId(bank.id)
     }
 
+    @Transactional
     override fun process(@NonNull item: T): TransactionMatching? {
         if (isInvalidTransaction(item)) {
             return null
@@ -89,7 +91,7 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
 
         countScore(draftCandidates.filter { it.mcc == record.mcc })
         countScore(draftCandidates.filter { it.pattern != null && record.description.contains(it.pattern!!) })
-        countScore(draftCandidates.filter { it.sum == abs(record.paymentSum) })
+        countScore(draftCandidates.filter { it.matchingSumRule(record.paymentSum) })
 
         if (scoreMap.values.size != 1 && scoreMap.values.toSet().size == 1) {
             return null
@@ -100,11 +102,27 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
         return if (
             (finalCandidate.mcc == null || finalCandidate.mcc == record.mcc)
             && (finalCandidate.pattern == null || record.description.contains(finalCandidate.pattern!!))
-            && (finalCandidate.sum == null || finalCandidate.sum == abs(record.paymentSum))
+            && (finalCandidate.sum == null || finalCandidate.matchingSumRule(record.paymentSum))
         ) {
             finalCandidate.categoryId!!
         } else {
             null
+        }
+    }
+
+    private fun CategoryMatching.matchingSumRule(recordSum: Double): Boolean {
+        return if (sum == null) {
+            false
+        } else {
+            val comparison = abs(recordSum).compareTo(sum!!)
+            when (comparisonSign) {
+                CategoryMatching.GTE -> comparison >= 0
+                CategoryMatching.GT  -> comparison > 0
+                CategoryMatching.LTE -> comparison <= 0
+                CategoryMatching.LT  -> comparison < 0
+                CategoryMatching.EQ  -> comparison == 0
+                else -> false
+            }
         }
     }
 

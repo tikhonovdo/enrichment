@@ -14,5 +14,7 @@
     <include file="./6_self_transfers_accounting/changes.xml" relativeToChangelogFile="true"/>
     <include file="./7_transfers_accounting_refactoring/changes.xml" relativeToChangelogFile="true"/>
     <include file="./8_yandex_support/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./9_fine_category_matching/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./10_fix_refund_for_id_constraint/changes.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
