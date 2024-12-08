@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import ru.tikhonovdo.enrichment.domain.Bank
+import ru.tikhonovdo.enrichment.domain.dto.ImportStepResult
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
 import ru.tikhonovdo.enrichment.service.importscenario.ImportService
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
@@ -18,9 +19,9 @@ class ImportController(private val importService: ImportService) {
 
     @PostMapping("/{bank}/{stepName}")
     fun performImportStep(@PathVariable("bank") bank: Bank,
-                          @PathVariable("stepName") stepName: String,
+                          @PathVariable("stepName") state: ScenarioState,
                           @RequestBody scenarioData: ImportScenarioData): ResponseEntity<Any> {
-         return response { importService.performImportStep(bank, stepName, scenarioData) }
+        return response { importService.performImportStep(bank, state, scenarioData) }
     }
 
     @GetMapping("/{bank}/last-update")
@@ -28,10 +29,16 @@ class ImportController(private val importService: ImportService) {
         return ResponseEntity.ok(importService.getLastUpdateDate(bank))
     }
 
-    private fun response(resultSupplier: Supplier<ScenarioState?>): ResponseEntity<Any> {
-        val state = resultSupplier.get()
-        return if (state != null) {
-            ResponseEntity.ok(state.stepName)
+    private fun response(responseSupplier: Supplier<ImportStepResult?>): ResponseEntity<Any> {
+        val response = responseSupplier.get()
+        return if (response != null) {
+            when (response.state) {
+                ScenarioState.FAILURE ->
+                    ResponseEntity.internalServerError().body(response)
+
+                else ->
+                    ResponseEntity.ok(response)
+            }
         } else {
             ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
         }

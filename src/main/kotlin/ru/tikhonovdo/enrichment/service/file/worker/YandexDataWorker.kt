@@ -2,8 +2,8 @@ package ru.tikhonovdo.enrichment.service.file.worker
 
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.Operation
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.OperationsCollection
+import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaOperation
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.util.JsonMapper.Companion.JSON_MAPPER
@@ -17,7 +17,7 @@ class YandexDataWorker(draftTransactionRepository: DraftTransactionRepository):
         return operations.items.map { toDraftTransaction(it) }
     }
 
-    private fun toDraftTransaction(operation: Operation) = DraftTransaction(
+    private fun toDraftTransaction(operation: YaOperation) = DraftTransaction(
         bankId = Bank.YANDEX.id,
         date = operation.datetime.toLocalDateTime(),
         sum = operation.money.amount.toString(),

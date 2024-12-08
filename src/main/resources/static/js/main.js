@@ -61,9 +61,10 @@ function initBankForm(form) {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    currentState = xhr.response
+                    let response = JSON.parse(xhr.response)
+                    currentState = response.state
                     setLoading(form, button, false)
-                    updateFormState(form, button)
+                    updateFormState(form, button, response.payload)
                 } else {
                     console.log(xhr.response)
                 }
@@ -76,7 +77,7 @@ function initBankForm(form) {
         destroySession()
     }
 
-    updateFormState(form, null)
+    updateFormState(form, null, null)
 }
 
 function setLoading(form, button, loading) {
@@ -91,12 +92,22 @@ function setLoading(form, button, loading) {
     button.classList.toggle("disabled", loading)
 }
 
-function updateFormState(form, button) {
+function updateYaQr(responsePayload) {
+    let qrElement = document.getElementById("ya-qr");
+    if (currentBank === "yandex" && currentState.toUpperCase() === "OTP_SENT") {
+        qrElement.style.background = responsePayload;
+    } else {
+        qrElement.style.background = "";
+    }
+}
+
+function updateFormState(form, button, responsePayload) {
     disableAllBlocks(form)
     enableCurrentStateBlock(form)
     if (button) {
         updateButtonState(button)
     }
+    updateYaQr(responsePayload)
 }
 
 function disableAllBlocks(form) {

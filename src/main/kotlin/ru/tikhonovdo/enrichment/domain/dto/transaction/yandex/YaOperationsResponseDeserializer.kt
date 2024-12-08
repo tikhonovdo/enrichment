@@ -8,18 +8,18 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import ru.tikhonovdo.enrichment.util.JsonMapper
 import java.io.IOException
 
-class OperationsResponseDeserializer(vc: Class<*>?) : StdDeserializer<OperationsResponse>(vc) {
+class YaOperationsResponseDeserializer(vc: Class<*>?) : StdDeserializer<YaOperationsResponse>(vc) {
 
     constructor() : this(null)
 
     @Throws(IOException::class, JsonProcessingException::class)
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): OperationsResponse {
+    override fun deserialize(parser: JsonParser, context: DeserializationContext): YaOperationsResponse {
         val recordNode: JsonNode = parser.codec.readTree(parser)
         val operations = JsonMapper.JSON_MAPPER.readValue(
             recordNode.get("data").get("bankUser").get("operations").toString(),
             OperationsCollection::class.java
         )
-        return OperationsResponse(operations)
+        return YaOperationsResponse(operations)
     }
 
 }

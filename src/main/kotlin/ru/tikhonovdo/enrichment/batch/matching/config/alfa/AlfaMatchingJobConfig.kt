@@ -18,7 +18,7 @@ import ru.tikhonovdo.enrichment.batch.matching.currency.CurrencyMatchingStepRead
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaRecordReader
 import ru.tikhonovdo.enrichment.batch.matching.transaction.alfa.AlfaTransactionStepProcessor
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.alfa.AlfaRecord
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CategoryMatching
 import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching

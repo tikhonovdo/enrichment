@@ -32,7 +32,11 @@ class RawDataServiceImpl(dataWorkers: List<DataWorker>) : RawDataService {
     override fun saveData(dataType: DataType, saveMode: SaveMode, vararg content: ByteArray) {
         workers[dataType]?.let {
             log.info("Recognized as $dataType data file")
-            it.saveData(saveMode, *content)
+            if (it is FinancePmDataWorker && saveMode == SaveMode.FULL_RESET) {
+                it.saveDataWithReset(*content)
+            } else {
+                it.saveData(*content)
+            }
             log.info("$dataType data file was successfully saved")
         }
     }

@@ -1,6 +1,9 @@
 package ru.tikhonovdo.enrichment.service.importscenario
 
+import com.browserup.bup.BrowserUpProxy
+import com.browserup.bup.proxy.CaptureType
 import com.codeborne.selenide.Selenide
+import com.codeborne.selenide.WebDriverRunner
 import jakarta.annotation.PreDestroy
 import org.openqa.selenium.WebDriver
 import org.slf4j.LoggerFactory
@@ -17,7 +20,8 @@ class ImportScenarioContext {
     private val log = LoggerFactory.getLogger(ImportScenarioContext::class.java)
 
     private val driver: AtomicReference<WebDriver?> = AtomicReference<WebDriver?>()
-    private var currentState: AtomicReference<ScenarioState> = AtomicReference(INITIAL)
+    private val proxy: AtomicReference<BrowserUpProxy?> = AtomicReference<BrowserUpProxy?>()
+    private var currentState: AtomicReference<ScenarioState> = AtomicReference(START)
     private var currentBank: AtomicReference<Bank?> = AtomicReference<Bank?>(null)
 
     @PreDestroy
@@ -47,19 +51,34 @@ class ImportScenarioContext {
         when (nextState) {
             OTP_SENT -> {
                 driver.set(Selenide.webdriver().`object`())
+                if (setOf(Bank.ALFA, Bank.YANDEX).contains(bank)) {
+                    proxy.set(initProxy())
+                }
             }
             DATA_SAVED,
             FAILURE -> {
                 log.info("Terminal state reached. Commit reset to initial state")
-                resetContextWithState(INITIAL)
+                resetContextWithState(START)
             }
             else -> { }
         }
         return nextState
     }
 
+    private fun initProxy(): BrowserUpProxy {
+        val proxy = WebDriverRunner.getSelenideProxy().proxy
+        proxy.setHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES)
+        proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES)
+        proxy.newHar()
+        return proxy
+    }
+
     fun getDriver(): WebDriver {
         return driver.get() ?: throw IllegalStateException("Oops! It seems that method called in wrong state. Current state: $currentState")
+    }
+
+    fun getProxy(): BrowserUpProxy {
+        return proxy.get() ?: throw IllegalStateException("Oops! It seems that method called in wrong state. Current state: $currentState")
     }
 
     private fun isAvailableMove(nextState: ScenarioState, bank: Bank?) =
@@ -73,7 +92,9 @@ class ImportScenarioContext {
 
     private fun destroyDriver() {
         driver.get()?.quit()
+        proxy.get()?.stop()
         driver.set(null)
+        proxy.set(null)
         log.info("Session Chrome Driver destroyed")
     }
 

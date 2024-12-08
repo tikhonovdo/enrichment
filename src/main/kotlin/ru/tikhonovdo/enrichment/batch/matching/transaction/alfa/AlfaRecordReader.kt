@@ -2,7 +2,7 @@ package ru.tikhonovdo.enrichment.batch.matching.transaction.alfa
 
 import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.transaction.AlfaRecord
+import ru.tikhonovdo.enrichment.domain.dto.transaction.alfa.AlfaRecord
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.sql.DataSource
@@ -34,7 +34,7 @@ class AlfaRecordReader(dataSource: DataSource): JdbcCursorItemReader<AlfaRecord>
         setRowMapper { rs, _ ->
             AlfaRecord(
                 draftTransactionId = rs.getLong("draft_transaction_id"),
-                operationDate = AlfaRecord.parseOperationDate(rs.getString("operation_date")),
+                operationDate = AlfaRecord.parseDate(rs.getString("operation_date")),
                 paymentDate = rs.getString("payment_date")?.takeIf { it.isNotBlank() }?.let {
                     dateFormatter.parse(it, LocalDate::from)
                 },

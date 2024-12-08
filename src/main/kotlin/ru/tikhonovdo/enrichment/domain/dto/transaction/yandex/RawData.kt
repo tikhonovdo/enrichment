@@ -3,17 +3,17 @@ package ru.tikhonovdo.enrichment.domain.dto.transaction.yandex
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.ZonedDateTime
 
-@JsonDeserialize(using = OperationsResponseDeserializer::class)
-class OperationsResponse(
+@JsonDeserialize(using = YaOperationsResponseDeserializer::class)
+class YaOperationsResponse(
     var operations: OperationsCollection
 )
 
 class OperationsCollection(
-    var items: List<Operation>,
+    var items: List<YaOperation>,
     var cursor: String? = null
 )
 
-data class Operation(
+data class YaOperation(
     var id: String,
     var status: OperationStatus,    // Статус
     var type: String,               // Тип транзакции: пополнение/входящий перевод/покупка/

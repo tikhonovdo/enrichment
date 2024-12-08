@@ -19,7 +19,7 @@ class SessionController {
     @DeleteMapping
     fun invalidateSession(session: HttpSession, scenarioContext: ImportScenarioContext) {
         log.info("Session ${session.id} invalidation requested")
-        scenarioContext.resetContextWithState(ScenarioState.INITIAL)
+        scenarioContext.resetContextWithState(ScenarioState.START)
         session.invalidate()
     }
 }

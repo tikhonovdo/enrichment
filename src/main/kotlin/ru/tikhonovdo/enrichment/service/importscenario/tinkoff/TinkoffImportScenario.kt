@@ -6,10 +6,10 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ru.tikhonovdo.enrichment.domain.Bank
+import ru.tikhonovdo.enrichment.domain.dto.ImportStepResult
 import ru.tikhonovdo.enrichment.service.importscenario.AbstractImportScenario
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioContext
 import ru.tikhonovdo.enrichment.service.importscenario.ImportScenarioData
-import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState
 import ru.tikhonovdo.enrichment.service.importscenario.ScenarioState.*
 import java.time.Duration
 import java.util.function.Function
@@ -26,17 +26,16 @@ class TinkoffImportScenario(
 
     init {
         stepActions = mapOf(
-            INITIAL.stepName to Function { requestOtpCode(it) },
-            OTP_SENT.stepName to Function {
-                val newState = finishLogin(it)
-                switchState(newState)
-                performImportStep(newState.stepName, it)
+            START to Function { requestOtpCode(it) },
+            OTP_SENT to Function {
+                val stepResult = finishLogin(it)
+                performImportStep(processStepResult(stepResult), it)
             },
-            LOGIN_SUCCEED.stepName to Function { saveData() }
+            LOGIN_SUCCEED to Function { saveData() }
         )
     }
 
-    fun requestOtpCode(scenarioData: ImportScenarioData): ScenarioState {
+    fun requestOtpCode(scenarioData: ImportScenarioData): ImportStepResult {
         val random = Random(System.currentTimeMillis())
 
         open(homeUrl)
@@ -53,17 +52,18 @@ class TinkoffImportScenario(
         random.sleep(1500, 2000)
 
         screenshot("tinkoff-03", driver)
-        return if (elementPresented("//input[@automation-id='otp-input']", driver)) {
-            OTP_SENT
-        } else {
-            INITIAL
-        }
+        return ImportStepResult(
+            if (elementPresented("//input[@automation-id='otp-input']", driver)) {
+                OTP_SENT
+            } else {
+                START
+            }
+        )
     }
 
-    fun finishLogin(scenarioData: ImportScenarioData): ScenarioState {
+    fun finishLogin(scenarioData: ImportScenarioData): ImportStepResult {
         val random = Random(System.currentTimeMillis())
-        val driver = driver()
-        val wait = WebDriverWait(driver, waitingDuration)
+        val wait = WebDriverWait(driver(), waitingDuration)
         screenshot("tinkoff-11")
 
         val otpInput = wait.untilAppears("//input[@automation-id='otp-input']")
@@ -87,22 +87,20 @@ class TinkoffImportScenario(
 
         val titlePresented = elementPresented("//*[@data-qa-type='desktop-ib-title']")
         screenshot("tinkoff-16")
-        return if (titlePresented) {
-            LOGIN_SUCCEED
-        } else {
-            INITIAL
-        }
+        return ImportStepResult(
+            if (titlePresented) {
+                LOGIN_SUCCEED
+            } else {
+                START
+            }
+        )
     }
 
-    fun saveData(): ScenarioState {
-        try {
-            val apiSession = driver().manage().getCookieNamed("api_session").value
-            tinkoffService.importData(apiSession)
-        } catch (e: Throwable) {
-            log.warn("Error during import", e)
-            return FAILURE
-        }
-        return DATA_SAVED
+    fun saveData(): ImportStepResult {
+        val apiSession = driver().manage().getCookieNamed("api_session").value
+        tinkoffService.importData(apiSession)
+
+        return ImportStepResult(DATA_SAVED)
     }
 
 }
