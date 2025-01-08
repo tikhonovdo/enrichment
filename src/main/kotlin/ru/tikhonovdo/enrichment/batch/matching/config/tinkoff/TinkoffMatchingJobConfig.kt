@@ -5,9 +5,12 @@ import org.springframework.batch.core.job.flow.Flow
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Scope
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
@@ -27,6 +30,9 @@ import ru.tikhonovdo.enrichment.domain.enitity.CurrencyMatching
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import ru.tikhonovdo.enrichment.repository.matching.*
+import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
+import java.time.LocalDateTime
+import java.time.Period
 import javax.sql.DataSource
 
 @Configuration
@@ -154,8 +160,14 @@ class TinkoffMatchingJobConfig(
     }
 
     @Bean
-    fun tinkoffTransactionMatchingStepReader(): ItemReader<TinkoffRecord> =
-        TinkoffRecordReader(dataSource)
+    @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    fun tinkoffTransactionMatchingStepReader(
+        @Value("\${import.last-transaction-default-period}") lastTransactionDefaultPeriod: Period
+    ): ItemReader<TinkoffRecord> = TinkoffRecordReader(dataSource, tinkoffDateThreshold(lastTransactionDefaultPeriod))
+
+    fun tinkoffDateThreshold(lastTransactionDefaultPeriod: Period): LocalDateTime = transactionMatchingRepository
+        .findLastValidatedTransactionDateByBank(Bank.TINKOFF.id)
+        .orElse(periodAgo(lastTransactionDefaultPeriod))
 
     @Bean
     fun tinkoffTransactionMatchingStepProcessor(): ItemProcessor<TinkoffRecord, TransactionMatching> =

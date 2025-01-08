@@ -6,9 +6,12 @@ import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.support.IteratorItemReader
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Scope
 import org.springframework.transaction.PlatformTransactionManager
 import ru.tikhonovdo.enrichment.batch.common.AbstractJobConfig
 import ru.tikhonovdo.enrichment.batch.common.CustomFlowBuilder
@@ -28,6 +31,9 @@ import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CurrencyMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
+import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
+import java.time.LocalDateTime
+import java.time.Period
 import javax.sql.DataSource
 
 @Configuration
@@ -42,15 +48,6 @@ class YandexMatchingJobConfig(
     private val currencyMatchingRepository: CurrencyMatchingRepository,
     private val transactionMatchingRepository: TransactionMatchingRepository,
 ): AbstractJobConfig(jobRepository) {
-
-    /**
-     * todo:
-     * 1) реализовать YandexImportScenario и проверить алгоритм импорта данных
-     *  1.1)
-     * 2) реализовать маппинг транзакций в YandexRecordReader и YandexTransactionStepProcessor
-     * 3) реализовать остальные шаги матчинга
-     * 4)
-     */
 
     @Bean
     fun yandexMatchingFlow(
@@ -152,8 +149,14 @@ class YandexMatchingJobConfig(
     }
 
     @Bean
-    fun yandexTransactionMatchingStepReader(): ItemReader<YandexRecord> =
-        YandexRecordReader(dataSource)
+    @Scope(scopeName = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    fun yandexTransactionMatchingStepReader(
+        @Value("\${import.last-transaction-default-period}") lastTransactionDefaultPeriod: Period
+    ): ItemReader<YandexRecord> = YandexRecordReader(dataSource, yandexDateThreshold(lastTransactionDefaultPeriod))
+
+    fun yandexDateThreshold(lastTransactionDefaultPeriod: Period): LocalDateTime = transactionMatchingRepository
+        .findLastValidatedTransactionDateByBank(Bank.YANDEX.id)
+        .orElse(periodAgo(lastTransactionDefaultPeriod))
 
     @Bean
     fun yandexTransactionMatchingStepProcessor(): ItemProcessor<YandexRecord, TransactionMatching> =

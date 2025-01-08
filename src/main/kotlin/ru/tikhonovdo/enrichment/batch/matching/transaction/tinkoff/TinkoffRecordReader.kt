@@ -5,12 +5,15 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.util.getNullable
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.sql.DataSource
 
-class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffRecord>() {
+class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): JdbcCursorItemReader<TinkoffRecord>() {
 
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+    private val operationDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
 
     init {
         this.dataSource = dataSource
@@ -34,7 +37,8 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
                 data->>'sumWithRoundingForInvestKopilka' as sum_with_rounding_for_invest_kopilka,
                 data->>'message' as message,
                 data->>'brandName' as brand_name
-            FROM matching.draft_transaction WHERE bank_id = ${Bank.TINKOFF.id};
+            FROM matching.draft_transaction 
+            WHERE bank_id = ${Bank.TINKOFF.id} AND date > '${operationDateFormatter.format(thresholdDate)}';
         """.trimIndent()
         setRowMapper { rs, _ ->
             TinkoffRecord(

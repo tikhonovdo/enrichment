@@ -1,6 +1,7 @@
 package ru.tikhonovdo.enrichment.repository.matching
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import ru.tikhonovdo.enrichment.domain.enitity.AccountMatching
@@ -11,6 +12,13 @@ interface AccountMatchingRepository:
     JpaRepository<AccountMatching, AccountMatching.AccountMatchingId>,
     CustomAccountMatchingRepository {
     fun findByBankAccountCodeAndBankId(bankAccountCode: String, bankId: Long): AccountMatching
+
+    @Query("""
+       select (account_id is null)
+       from matching.account 
+       where bank_account_code = :bankAccountCode and bank_id = :bankId
+    """, nativeQuery = true)
+    fun needToSkipAccount(bankAccountCode: String, bankId: Long): Boolean
 }
 
 interface CustomAccountMatchingRepository: BatchRepository<AccountMatching> {

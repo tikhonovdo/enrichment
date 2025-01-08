@@ -29,7 +29,7 @@ logging:
     liquibase: INFO
     ru.tikhonovdo.enrichment.service: TRACE
 
-selenium-waiting-period: 15s
+selenium-waiting-period: 30s
 selenoid-host-download-path: ${SELENOID_HOST_DOWNLOAD_PATH} # make sure that all users can write to this path
 
 server:

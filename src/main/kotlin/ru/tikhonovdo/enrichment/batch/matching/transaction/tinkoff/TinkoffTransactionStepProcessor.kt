@@ -48,7 +48,12 @@ open class TinkoffTransactionStepProcessor(
             tinkoffAccountMatchingRepository.findAccountId(record.paymentCurrency, record.description)
         } else {
             val bankAccountCode = record.accountNumber ?: record.cardNumber
-            accountMatchingRepository.findByBankAccountCodeAndBankId(bankAccountCode!!, bank.id).accountId!!
+
+            if (accountMatchingRepository.needToSkipAccount(bankAccountCode!!, bank.id)) {
+                null
+            } else {
+                accountMatchingRepository.findByBankAccountCodeAndBankId(bankAccountCode, bank.id).accountId
+            }
         }
 
 }

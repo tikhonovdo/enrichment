@@ -28,7 +28,7 @@ interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long
                 (account_id IS NULL) -- не задан счет
                 OR ((category_id IS NOT NULL AND event_id IS NOT NULL) -- обозначено как событие и задана категория
                 OR (category_id IS NULL AND event_id IS NULL)) -- не является событием и не задана категория
-                OR (tr_t.id != cat_t.id) -- тип категории не соответвует типу транзацкии)
+                OR (tr_t.id != cat_t.id) -- тип категории не соответствует типу транзакции)
             ) OR validated)
         ORDER BY mt.date DESC LIMIT 1
     """, nativeQuery = true)

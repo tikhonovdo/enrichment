@@ -39,12 +39,12 @@ class TinkoffAccountMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedPara
         val result = namedParameterJdbcTemplate.query("""
             SELECT a.account_id FROM matching.account a
             JOIN matching.account_tinkoff at on a.bank_account_code = at.bank_account_code --AND at.bank_account_code IS NOT NULL
-            WHERE a.bank_id = :bankId AND at.bank_currency_code = :bankCurrencyCode AND at.pattern LIKE :pattern
+            WHERE a.bank_id = :bankId AND at.bank_currency_code = :bankCurrencyCode AND lower(at.pattern) LIKE :pattern
         """.trimIndent(),
             MapSqlParameterSource(mapOf(
                 "bankId" to Bank.TINKOFF.id,
                 "bankCurrencyCode" to bankCurrencyCode,
-                "pattern" to "%$pattern%"
+                "pattern" to "%${pattern.lowercase()}%"
             ))
         ) { rs, _ -> rs.getLong("account_id") }
 

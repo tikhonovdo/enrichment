@@ -5,9 +5,13 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.Direction
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YandexRecord
 import ru.tikhonovdo.enrichment.util.getNullable
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.sql.DataSource
 
-class YandexRecordReader(dataSource: DataSource): JdbcCursorItemReader<YandexRecord>() {
+class YandexRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): JdbcCursorItemReader<YandexRecord>() {
+
+    private val operationDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
 
     init {
         this.dataSource = dataSource
@@ -21,7 +25,8 @@ class YandexRecordReader(dataSource: DataSource): JdbcCursorItemReader<YandexRec
                 data->>'description' as category,
                 data->>'direction' as direction,
                 data->>'comment' as comment
-            FROM matching.draft_transaction WHERE bank_id = ${Bank.YANDEX.id};
+            FROM matching.draft_transaction 
+            WHERE bank_id = ${Bank.YANDEX.id} AND date > '${operationDateFormatter.format(thresholdDate)}';
         """.trimIndent()
         setRowMapper { rs, _ ->
             YandexRecord(

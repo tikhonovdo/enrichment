@@ -1,13 +1,15 @@
 package ru.tikhonovdo.enrichment.domain.dto.transaction.alfa
 
 import ru.tikhonovdo.enrichment.domain.dto.transaction.BaseRecord
-import java.time.*
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 data class AlfaRecord(
     override var draftTransactionId: Long? = null,
     override val operationDate: LocalDateTime, // Дата операции (в UTC с 27-09-2024)
-    val paymentDate: LocalDate?, // Дата проводки
     val accountName: String, // Название счета
     val accountNumber: String, // Номер счета
     val cardName: String?, // Название карты

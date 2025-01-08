@@ -1,5 +1,6 @@
 package ru.tikhonovdo.enrichment.batch.matching.transaction
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.StepExecution
 import org.springframework.batch.core.StepExecutionListener
@@ -23,7 +24,7 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
     private val categoryMatchingRepository: CategoryMatchingRepository,
 ) : ItemProcessor<T, TransactionMatching>, StepExecutionListener {
 
-    private val log = LoggerFactory.getLogger(this::class.java)
+    protected val log: Logger = LoggerFactory.getLogger(this::class.java)
     private var matchingCategories = listOf<CategoryMatching>()
 
     override fun beforeStep(stepExecution: StepExecution) {
@@ -46,7 +47,7 @@ abstract class AbstractTransactionStepProcessor<T: BaseRecord>(
         }
 
         val categoryId = getCategoryId(item)
-        val accountId = getAccountId(item)
+        val accountId = getAccountId(item) ?: return null
         val resultEntity = TransactionMatching(
             draftTransactionId = item.draftTransactionId,
             name = item.description,

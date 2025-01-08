@@ -159,7 +159,7 @@ function requestLastUpdateDate(bank) {
     xhr.send();
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            document.getElementById(bank + "-last-update").innerText = xhr.response
+            document.getElementById(bank + "-last-update").innerText = JSON.parse(xhr.response)
         }
     }
     return false;
