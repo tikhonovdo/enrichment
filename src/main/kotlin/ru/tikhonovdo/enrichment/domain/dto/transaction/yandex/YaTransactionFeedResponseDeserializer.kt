@@ -8,18 +8,18 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import ru.tikhonovdo.enrichment.util.JsonMapper
 import java.io.IOException
 
-class YaOperationsResponseDeserializer(vc: Class<*>?) : StdDeserializer<YaOperationsResponse>(vc) {
+class YaTransactionFeedResponseDeserializer(vc: Class<*>?) : StdDeserializer<YaTransactionFeedResponse>(vc) {
 
     constructor() : this(null)
 
     @Throws(IOException::class, JsonProcessingException::class)
-    override fun deserialize(parser: JsonParser, context: DeserializationContext): YaOperationsResponse {
+    override fun deserialize(parser: JsonParser, context: DeserializationContext): YaTransactionFeedResponse {
         val recordNode: JsonNode = parser.codec.readTree(parser)
-        val operations = JsonMapper.JSON_MAPPER.readValue(
-            recordNode.get("data").get("bankUser").get("operations").toString(),
-            OperationsCollection::class.java
-        )
-        return YaOperationsResponse(operations)
+        val data = recordNode.get("data").get("getTransactionsFeedView")
+        val cursor = data.get("cursor").textValue()
+        val arrayNode = data.get("items")
+        val items: List<YaTransaction> = JsonMapper.JSON_MAPPER.readerForListOf(YaTransaction::class.java).readValue(arrayNode)
+        return YaTransactionFeedResponse(items, cursor);
     }
 
 }

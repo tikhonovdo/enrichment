@@ -7,15 +7,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import java.io.IOException
 
-class CommentDeserializer(vc: Class<*>?) : StdDeserializer<String>(vc) {
-
-    constructor() : this(null)
+class TitleDeserializer(vc: Class<*>? = null) : StdDeserializer<String>(vc) {
 
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(parser: JsonParser, context: DeserializationContext): String {
         val recordNode: JsonNode = parser.codec.readTree(parser)
 
-        return recordNode.get("text")?.asText() ?: recordNode.asText()
+        return recordNode.get("plain")?.textValue() ?: recordNode.textValue()
     }
 
 }

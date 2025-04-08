@@ -6,6 +6,7 @@ import feign.okhttp.OkHttpClient
 import feign.slf4j.Slf4jLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import ru.tikhonovdo.enrichment.config.ImportDataProperties
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.DataType
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
@@ -21,7 +22,7 @@ interface TinkoffService {
 
 @Service
 class TinkoffServiceImpl(
-    @Value("\${import.tinkoff.api-url}") private val tinkoffApiUrl: String,
+    tinkoffProperties: ImportDataProperties,
     @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
     private val transactionMatchingRepository: TransactionMatchingRepository,
     private val rawDataService: RawDataService
@@ -31,7 +32,7 @@ class TinkoffServiceImpl(
         .client(OkHttpClient())
         .logger(Slf4jLogger(TinkoffClient::class.java))
         .logLevel(Logger.Level.FULL)
-        .target(TinkoffClient::class.java, tinkoffApiUrl)
+        .target(TinkoffClient::class.java, tinkoffProperties.apiUrl)
 
     override fun importData(sessionId: String) {
         val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.TINKOFF.id)

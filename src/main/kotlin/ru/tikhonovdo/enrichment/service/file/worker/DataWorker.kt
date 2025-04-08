@@ -35,7 +35,7 @@ abstract class BankDataWorker(
 
     @Transactional
     override fun saveData(vararg content: ByteArray) {
-        val deleted = draftTransactionRepository.deleteObsoleteDraft()
+        val deleted = draftTransactionRepository.deleteObsoleteDraft(bank)
         log.info("$deleted drafts are obsolete and has been deleted")
 
         val drafts = readBytes(*content)

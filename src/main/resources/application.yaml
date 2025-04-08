@@ -44,14 +44,14 @@ server:
 import:
   last-transaction-default-period: P6M
   tinkoff:
-    home-url: https://www.tbank.ru/mybank/
+    start-url: https://www.tbank.ru/mybank/
     api-url: https://www.tbank.ru/api/common/v1
   alfa:
-    home-url: https://web.alfabank.ru/
+    start-url: https://web.alfabank.ru/
     api-url: https://web.alfabank.ru/api/v1/
   yandex:
-    login-url: https://passport.yandex.ru/auth?origin=user_id&retpath=https%3A%2F%2Fbank.yandex.ru%2F%3Fchange_yandex_session%3Dtrue
-    url: https://bank.yandex.ru/
+    start-url: https://passport.yandex.ru/auth?origin=user_id&retpath=https%3A%2F%2Fbank.yandex.ru%2F%3Fchange_yandex_session%3Dtrue
+    api-url: https://bank.yandex.ru
 
 refund:
   income-category-id: 79

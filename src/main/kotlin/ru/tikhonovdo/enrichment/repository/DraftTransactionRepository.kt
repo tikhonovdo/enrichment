@@ -21,9 +21,9 @@ interface CustomDraftTransactionRepository {
 
     fun findAllByBankIdAndDateBetween(bankId: Long, start: LocalDateTime?, end: LocalDateTime?): List<DraftTransaction>
 
-    fun deleteObsoleteDraft(): Int
+    fun deleteObsoleteDraft(bank: Bank): Int
 
-    fun getLastUpdateDate(bank: Bank): LocalDateTime?
+    fun getLastUploadDate(bank: Bank): LocalDateTime?
 }
 @Repository
 class DraftTransactionRepositoryImpl(
@@ -83,23 +83,53 @@ class DraftTransactionRepositoryImpl(
         }
     }
 
-    override fun deleteObsoleteDraft(): Int {
-        val deleted = jdbcTemplate.update("""
-            DELETE FROM matching.draft_transaction 
-            WHERE (bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK'))
-                OR (bank_id = ${Bank.ALFA.id} AND ((data->>'paymentDate') IS NULL OR ((data->>'status') != 'Выполнен' AND (data->>'category') != 'Пополнения')) 
-                    OR ((data->>'operationDate') IS NULL OR ((data->>'status') != 'SUCCESS' AND (data->>'category') != 'Пополнения')))
-                OR (bank_id = ${Bank.YANDEX.id} AND data#>>'{status,code}' != 'CLEAR')
-            """.trimIndent())
+    override fun deleteObsoleteDraft(bank: Bank): Int {
+        val deleted = when (bank) {
+            Bank.TINKOFF -> deleteObsoleteDraftTinkoff()
+            Bank.ALFA -> deleteObsoleteDraftAlfa()
+            Bank.YANDEX -> deleteObsoleteDraftYandex()
+        }
         jdbcTemplate.execute("SELECT setval('matching.draft_transaction_id_seq', (SELECT coalesce(MAX(id) + 1, 1) FROM matching.draft_transaction), false)")
         return deleted
     }
 
-    override fun getLastUpdateDate(bank: Bank): LocalDateTime? {
+    private fun deleteObsoleteDraftTinkoff(): Int {
+        return jdbcTemplate.update("""
+            DELETE FROM matching.draft_transaction
+            WHERE bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK')
+            """.trimIndent())
+    }
+
+    private fun deleteObsoleteDraftAlfa(): Int {
+        return jdbcTemplate.update("""
+            DELETE FROM matching.draft_transaction
+            WHERE bank_id = ${Bank.ALFA.id} 
+                AND (
+                    length(data->>'operationDate') = 10 AND ( -- условие для старого формата записей
+                        (data->>'paymentDate') IS NULL -- операция в обработке
+                        OR ((data->>'status') != 'Выполнен' AND (data->>'category') != 'Пополнения') -- пополнения выполняются сразу - paymentDate всегда null
+                    )
+                    OR 
+                    length(data->>'operationDate') > 10 AND ( -- условие для нового формата записей 
+                        (data->>'operationDate') IS NULL -- операция в обработке
+                        OR ((data->>'status') != 'SUCCESS' AND (data->>'category') != 'Пополнения') -- пополнения выполняются сразу - paymentDate всегда null
+                    )
+                )
+            """.trimIndent())
+    }
+
+    private fun deleteObsoleteDraftYandex(): Int {
+        return jdbcTemplate.update("""
+            DELETE FROM matching.draft_transaction
+            WHERE bank_id = ${Bank.YANDEX.id} AND (data#>>'{status,code}' = 'CLEAR' OR data#>>'{statusCode}' = 'CLEAR')'
+            """.trimIndent())
+    }
+
+    override fun getLastUploadDate(bank: Bank): LocalDateTime? {
         var sql = "SELECT max(date) FROM matching.draft_transaction WHERE bank_id = :bankId"
         sql += when (bank) {
             Bank.TINKOFF -> " AND data->>'status' = 'OK'"
-            Bank.YANDEX -> " AND data#>>'{status,code}' = 'CLEAR'"
+            Bank.YANDEX -> " AND (data#>>'{status,code}' = 'CLEAR' OR data#>>'{statusCode}' = 'CLEAR')"
             else -> ""
         }
 

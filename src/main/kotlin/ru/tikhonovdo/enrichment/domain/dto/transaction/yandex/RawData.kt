@@ -1,38 +1,63 @@
 package ru.tikhonovdo.enrichment.domain.dto.transaction.yandex
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.ZonedDateTime
 
-@JsonDeserialize(using = YaOperationsResponseDeserializer::class)
-class YaOperationsResponse(
-    var operations: OperationsCollection
+data class YaOperationRequest(
+    var operationName: String,
+    var extensions: Extensions?,
+    var variables: Variables? = null
+) {
+
+    val operationId: String?
+        get() = extensions?.persistedQuery?.sha256Hash
+
+    data class Extensions(
+        var persistedQuery: PersistedQuery?
+    )
+
+    data class PersistedQuery(
+        var version: Int = 1,
+        var sha256Hash: String?
+    )
+
+    data class Variables(
+        val size: Int = 30,
+        val cursor: String?
+    )
+
+    fun withCursor(cursor: String?): YaOperationRequest {
+        this.variables = Variables(cursor = cursor)
+        return this
+    }
+
+}
+
+@JsonDeserialize(using = YaTransactionFeedResponseDeserializer::class)
+class YaTransactionFeedResponse(
+    var items: List<YaTransaction>,
+    var cursor: String? = null,
+    var isEmptyByFilter: Boolean? = null
 )
 
-class OperationsCollection(
-    var items: List<YaOperation>,
-    var cursor: String? = null
-)
-
-data class YaOperation(
+data class YaTransaction(
     var id: String,
-    var status: OperationStatus,    // Статус
-    var type: String,               // Тип транзакции: пополнение/входящий перевод/покупка/
+    var statusCode: String,    // Статус
+    @JsonProperty("date")
     var datetime: ZonedDateTime,    // Дата операции
+    @JsonProperty("title")
+    @JsonDeserialize(using = TitleDeserializer::class)
     var name: String,               // Описание
-    var listName: String?,          // ???
     var description: String?,        // Категория
+    @JsonProperty("directionV2")
     var direction: Direction,       // Направление транзакции (дебет/кредит)
-    var cashback: Any?,             // Кэшбэк?
-    var money: MoneyObject,         // Сумма и валюта платежа
-
-    @JsonDeserialize(using = CommentDeserializer::class)
+    var amount: Amount,             // Сумма и валюта платежа
     var comment: String?,          // Сообщение (актуально для переводов)
-    var additionalInfo: Any?,       // ???
-    var splitOperation: Any?        // ???
 )
 
-data class OperationStatus(var code: String? = null, var message: String? = null)
-data class MoneyObject(var amount: Double? = null, var currency: String? = null)
+data class Amount(var money: Money? = null, var plus: String? = null)
+data class Money(var amount: Double? = null, var currency: String? = null)
 enum class Direction {
     DEBIT, // списание
     CREDIT // пополнение

@@ -5,6 +5,7 @@ import com.codeborne.selenide.Selenide.webdriver
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import ru.tikhonovdo.enrichment.config.ImportDataProperties
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.ImportStepResult
 import ru.tikhonovdo.enrichment.service.importscenario.AbstractImportScenario
@@ -17,7 +18,7 @@ import kotlin.random.Random
 
 @Component
 class TinkoffImportScenario(
-    @Value("\${import.tinkoff.home-url}") private val homeUrl: String,
+    private val tinkoffProperties: ImportDataProperties,
     private val tinkoffService: TinkoffService,
 
     @Value("\${selenium-waiting-period:5s}") waitingDuration: Duration,
@@ -38,7 +39,7 @@ class TinkoffImportScenario(
     fun requestOtpCode(scenarioData: ImportScenarioData): ImportStepResult {
         val random = Random(System.currentTimeMillis())
 
-        open(homeUrl)
+        open(tinkoffProperties.startUrl)
         random.sleep(2000, 5000)
 
         val driver = webdriver().`object`()

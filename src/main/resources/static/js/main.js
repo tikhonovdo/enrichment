@@ -154,14 +154,30 @@ function destroySession() {
 }
 
 function requestLastUpdateDate(bank) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', '/import/' + bank + "/last-update")
-    xhr.send();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            document.getElementById(bank + "-last-update").innerText = JSON.parse(xhr.response)
+    let xhrUpdate = new XMLHttpRequest();
+    xhrUpdate.open('GET', '/import/' + bank + "/last/upload")
+    xhrUpdate.send();
+    let updated = null;
+    xhrUpdate.onreadystatechange = function () {
+        if (xhrUpdate.readyState === XMLHttpRequest.DONE) {
+            updated = xhrUpdate.response;
+            document.getElementById(bank + "-last-upload").innerText = JSON.parse(updated);
         }
     }
+
+    let xhrMatched = new XMLHttpRequest();
+    xhrMatched.open('GET', '/import/' + bank + "/last/matched")
+    xhrMatched.send();
+    xhrMatched.onreadystatechange = function () {
+        if (xhrMatched.readyState === XMLHttpRequest.DONE) {
+            if (xhrMatched.response !== updated) {
+                let element = document.getElementById(bank + "-last-upload");
+                element.title += " (matched until " + JSON.parse(xhrMatched.response) + ")"
+                element.classList.add("red");
+            }
+        }
+    }
+
     return false;
 }
 

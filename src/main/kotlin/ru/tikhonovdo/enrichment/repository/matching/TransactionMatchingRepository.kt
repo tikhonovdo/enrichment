@@ -38,6 +38,14 @@ interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long
 
     fun findAllByDateBetweenAndTypeIdEquals(dateStart: LocalDateTime, dateEnd: LocalDateTime, type: Long): List<TransactionMatching>
 
+    @Query("""
+        SELECT max(mt.date)
+        FROM matching.transaction mt
+        JOIN matching.account ma on ma.account_id = mt.account_id
+        WHERE ma.bank_id = :bankId
+    """, nativeQuery = true)
+    fun getLastMatchedDate(bankId: Long): LocalDateTime?
+
 }
 
 interface CustomTransactionMatchingRepository {

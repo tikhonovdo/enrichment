@@ -24,9 +24,14 @@ class ImportController(private val importService: ImportService) {
         return response { importService.performImportStep(bank, state, scenarioData) }
     }
 
-    @GetMapping("/{bank}/last-update")
+    @GetMapping("/{bank}/last/upload")
     fun getLastUpdateDate(@PathVariable("bank") bank: Bank): ResponseEntity<LocalDateTime> {
-        return ResponseEntity.ok(importService.getLastUpdateDate(bank))
+        return ResponseEntity.ok(importService.getDraftTransactionLastUploadDate(bank))
+    }
+
+    @GetMapping("/{bank}/last/matched")
+    fun getLastMatchedDate(@PathVariable("bank") bank: Bank): ResponseEntity<LocalDateTime> {
+        return ResponseEntity.ok(importService.getTransactionLastMatchedDate(bank))
     }
 
     private fun response(responseSupplier: Supplier<ImportStepResult?>): ResponseEntity<Any> {

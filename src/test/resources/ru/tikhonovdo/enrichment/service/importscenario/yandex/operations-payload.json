@@ -1,116 +1,221 @@
 {
   "data": {
-    "bankUser": {
-      "id": "bankUserId",
-      "operations": {
-        "cursor": "cursor",
-        "items": [
-          {
-            "id": "31265731178446848",
-            "status": {
-              "code": "CLEAR",
-              "message": "Выполнено"
-            },
-            "type": "PURCHASE",
-            "datetime": "2024-01-11T13:21:39.232806Z",
-            "name": "KOMENDANTSKIJ",
-            "description": "Фастфуд",
-            "direction": "DEBIT",
-            "money": {
-              "amount": 798,
-              "currency": "RUB"
-            },
-            "comment": {
-              "text": "Коммент"
-            }
+    "getTransactionsFeedView": {
+      "cursor": "cursor",
+      "items": [
+        {
+          "id": "STATEMENT::UNQ_OHIO_YANDEX_ACCOUNT::::payment_05268f1223b64853af4d97d21230580a::::678d2cd305f8dca78149741c::false::",
+          "date": "2025-01-19T16:48:19.000Z",
+          "statusCode": "CLEAR",
+          "title": {
+            "compound": null,
+            "plain": "Лавка",
+            "__typename": "OperationTitle"
           },
-          {
-            "id": "31265728805256960",
-            "status": {
-              "code": "CLEAR",
-              "message": "Выполнено"
-            },
-            "type": "TOPUP",
-            "datetime": "2024-01-11T13:21:30.180852Z",
-            "name": "Пополнение",
-            "description": "Со счёта в другом банке",
-            "direction": "CREDIT",
-            "money": {
-              "amount": 400,
-              "currency": "RUB"
-            },
-            "comment": null
+          "amount": {
+            "money": null,
+            "plus": "1338.9",
+            "__typename": "OperationAmount"
           },
-          {
-            "id": "31265724122054656",
-            "status": {
-              "code": "FAIL",
-              "message": "Ошибка проведения платежа"
+          "directionV2": "DEBIT",
+          "image": {
+            "firstImage": {
+              "light": "https://avatars.mds.yandex.net/get-fintech/6146621/lavka.png/optimize",
+              "dark": "https://avatars.mds.yandex.net/get-fintech/6146621/lavka.png/optimize",
+              "__typename": "ThemedImage"
             },
-            "type": "PURCHASE",
-            "datetime": "2024-01-11T13:21:12.313773Z",
-            "name": "KOMENDANTSKIJ",
-            "description": "Фастфуд",
-            "direction": "DEBIT",
-            "money": {
-              "amount": 798,
-              "currency": "RUB"
-            },
-            "comment": null
+            "secondImage": null,
+            "__typename": "OperationImage"
           },
-          {
-            "id": "31265720719687680",
-            "status": {
-              "code": "CLEAR",
-              "message": "Выполнено"
-            },
-            "type": "TOPUP",
-            "datetime": "2024-01-11T13:20:59.336420Z",
-            "name": "Пополнение",
-            "description": "Со счёта в другом банке",
-            "direction": "CREDIT",
-            "money": {
-              "amount": 398,
-              "currency": "RUB"
-            },
-            "comment": null
+          "comment": null,
+          "__typename": "OperationV2",
+          "isMultipleCashback": null,
+          "summaryCashback": null,
+          "rightSubTitle": null,
+          "rightSubTitleImage": null,
+          "description": "Списание баллов"
+        },
+        {
+          "id": "STATEMENT::UNLINKED::WALLET::::39241694147297024::::false::",
+          "date": "2024-12-28T16:59:43.360Z",
+          "statusCode": "CLEAR",
+          "title": {
+            "compound": null,
+            "plain": "Kopchenye kosti",
+            "__typename": "OperationTitle"
           },
-          {
-            "id": "31243773736698112",
-            "status": {
-              "code": "CLEAR",
-              "message": "Выполнено"
-            },
-            "type": "PURCHASE",
-            "datetime": "2024-01-10T14:05:38.239344Z",
-            "name": "Лавка",
-            "description": "Яндекс",
-            "direction": "DEBIT",
+          "amount": {
             "money": {
-              "amount": 2017,
-              "currency": "RUB"
+              "amount": 2044,
+              "currency": "RUB",
+              "__typename": "MoneyObject"
             },
-            "comment": null
+            "plus": null,
+            "__typename": "OperationAmount"
           },
-          {
-            "id": "31243762564907264",
-            "status": {
-              "code": "CANCEL",
-              "message": "Отмена"
+          "directionV2": "DEBIT",
+          "image": {
+            "firstImage": {
+              "light": "https://avatars.mds.yandex.net/get-fintech/6059143/kafe-i-restorany/optimize",
+              "dark": "https://avatars.mds.yandex.net/get-fintech/6059143/kafe-i-restorany/optimize",
+              "__typename": "ThemedImage"
             },
-            "type": "PURCHASE",
-            "datetime": "2024-01-10T14:04:55.622783Z",
-            "name": "YANDEX*5411*YANDEX LAV",
-            "description": "Яндекс",
-            "direction": "DEBIT",
+            "secondImage": null,
+            "__typename": "OperationImage"
+          },
+          "comment": null,
+          "__typename": "OperationV2",
+          "isMultipleCashback": null,
+          "summaryCashback": null,
+          "rightSubTitle": null,
+          "rightSubTitleImage": null,
+          "description": "Фастфуд"
+        },
+        {
+          "id": "STATEMENT::UNQ_YABANK::WALLET::::39671923691277312::::false::",
+          "date": "2025-01-16T16:52:58.827Z",
+          "statusCode": "CLEAR",
+          "title": {
+            "compound": null,
+            "plain": "Дмитрий Т.",
+            "__typename": "OperationTitle"
+          },
+          "amount": {
             "money": {
-              "amount": 11,
-              "currency": "RUB"
+              "amount": 1500,
+              "currency": "RUB",
+              "__typename": "MoneyObject"
             },
-            "comment": null
-          }
-        ]
-      }
+            "plus": null,
+            "__typename": "OperationAmount"
+          },
+          "directionV2": "CREDIT",
+          "image": {
+            "firstImage": {
+              "light": "https://avatars.mds.yandex.net/get-fintech/6146621/tinkoff2/optimize",
+              "dark": "https://avatars.mds.yandex.net/get-fintech/6146621/tinkoff2/optimize",
+              "__typename": "ThemedImage"
+            },
+            "secondImage": null,
+            "__typename": "OperationImage"
+          },
+          "comment": null,
+          "__typename": "OperationV2",
+          "isMultipleCashback": null,
+          "summaryCashback": null,
+          "rightSubTitle": null,
+          "rightSubTitleImage": null,
+          "description": "Автопополнение"
+        },
+        {
+          "id": "STATEMENT::UNQ_YABANK::WALLET::::39347200151571456::::false::",
+          "date": "2025-01-02T08:47:36.827Z",
+          "statusCode": "CLEAR",
+          "title": {
+            "compound": null,
+            "plain": "Анастасия М.",
+            "__typename": "OperationTitle"
+          },
+          "amount": {
+            "money": {
+              "amount": 1500,
+              "currency": "RUB",
+              "__typename": "MoneyObject"
+            },
+            "plus": null,
+            "__typename": "OperationAmount"
+          },
+          "directionV2": "CREDIT",
+          "image": {
+            "firstImage": {
+              "light": "https://avatars.mds.yandex.net/get-fintech/6146621/tinkoff2/optimize",
+              "dark": "https://avatars.mds.yandex.net/get-fintech/6146621/tinkoff2/optimize",
+              "__typename": "ThemedImage"
+            },
+            "secondImage": null,
+            "__typename": "OperationImage"
+          },
+          "comment": "Джесс",
+          "__typename": "OperationV2",
+          "isMultipleCashback": null,
+          "summaryCashback": null,
+          "rightSubTitle": null,
+          "rightSubTitleImage": null,
+          "description": "Перевод"
+        },
+        {
+          "id": "STATEMENT::UNQ_YABANK::WALLET::::84e85dd6-93cb-4c6d-905d-00d39b4244ed::::false::",
+          "date": "2024-12-30T11:33:50.904Z",
+          "statusCode": "FAIL",
+          "title": {
+            "compound": null,
+            "plain": "Автопополнение",
+            "__typename": "OperationTitle"
+          },
+          "amount": {
+            "money": {
+              "amount": 7999,
+              "currency": "RUB",
+              "__typename": "MoneyObject"
+            },
+            "plus": null,
+            "__typename": "OperationAmount"
+          },
+          "directionV2": "CREDIT",
+          "image": {
+            "firstImage": {
+              "light": "https://avatars.mdst.yandex.net/get-fintech/1401668/mcc_replenishment.png/optimize",
+              "dark": "https://avatars.mdst.yandex.net/get-fintech/1401668/mcc_replenishment.png/optimize",
+              "__typename": "ThemedImage"
+            },
+            "secondImage": null,
+            "__typename": "OperationImage"
+          },
+          "comment": null,
+          "__typename": "OperationV2",
+          "isMultipleCashback": null,
+          "summaryCashback": null,
+          "rightSubTitle": null,
+          "rightSubTitleImage": null,
+          "description": "Автопополнение"
+        },
+        {
+          "id": "STATEMENT::UNQ_YABANK::WALLET::::39308708811950592::::false::",
+          "date": "2024-12-31T16:00:24.019Z",
+          "statusCode": "CLEAR",
+          "title": {
+            "compound": null,
+            "plain": "Дмитрий Т.",
+            "__typename": "OperationTitle"
+          },
+          "amount": {
+            "money": {
+              "amount": 7000,
+              "currency": "RUB",
+              "__typename": "MoneyObject"
+            },
+            "plus": null,
+            "__typename": "OperationAmount"
+          },
+          "directionV2": "CREDIT",
+          "image": {
+            "firstImage": {
+              "light": "https://avatars.mds.yandex.net/get-fintech/6146621/tinkoff2/optimize",
+              "dark": "https://avatars.mds.yandex.net/get-fintech/6146621/tinkoff2/optimize",
+              "__typename": "ThemedImage"
+            },
+            "secondImage": null,
+            "__typename": "OperationImage"
+          },
+          "comment": null,
+          "__typename": "OperationV2",
+          "isMultipleCashback": null,
+          "summaryCashback": null,
+          "rightSubTitle": null,
+          "rightSubTitleImage": null,
+          "description": "Пополнение"
+        }
+      ]
     }
   }
 }

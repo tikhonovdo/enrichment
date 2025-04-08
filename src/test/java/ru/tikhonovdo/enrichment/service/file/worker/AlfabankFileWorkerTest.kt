@@ -39,7 +39,7 @@ class AlfabankFileWorkerTest : DatabaseAwareTest() {
 
         worker.saveData(source.readBytes())
 
-        val deleted = draftTransactionRepository.deleteObsoleteDraft()
+        val deleted = draftTransactionRepository.deleteObsoleteDraft(Bank.ALFA)
         val actual = draftTransactionRepository.findAll().onEach { draft ->
             draft.data = ""
         }

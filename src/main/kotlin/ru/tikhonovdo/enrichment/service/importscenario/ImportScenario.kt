@@ -87,8 +87,8 @@ abstract class AbstractImportScenario(
         return presented
     }
 
-    protected fun Random.sleep(from: Long, until: Long) {
-        Thread.sleep(nextLong(from, until))
+    protected fun Random.sleep(from: Long, until: Long? = null) {
+        Thread.sleep(if (until != null) nextLong(from, until) else from)
     }
 
     protected fun screenshot(screenshotName: String, driver: WebDriver = driver()) {

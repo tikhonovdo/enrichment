@@ -5,6 +5,7 @@ import com.codeborne.selenide.Selenide.webdriver
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import ru.tikhonovdo.enrichment.config.ImportDataProperties
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.ImportStepResult
 import ru.tikhonovdo.enrichment.service.importscenario.AbstractImportScenario
@@ -18,15 +19,14 @@ import kotlin.random.Random
 
 @Component
 class AlfabankImportScenario(
-    @Value("\${import.alfa.home-url}") private val homeUrl: String,
-    @Value("\${import.alfa.api-url}") private val apiUrl: String,
+    private val alfaProperties: ImportDataProperties,
     private val alfaService: AlfaService,
 
     @Value("\${selenium-waiting-period:5s}") waitingDuration: Duration,
     context: ImportScenarioContext
 ): AbstractImportScenario(context, waitingDuration, Bank.ALFA) {
 
-    private val targetRequestUrl = apiUrl + "operations-history/operations"
+    private val targetRequestUrl = alfaProperties.apiUrl + "operations-history/operations"
 
     init {
         stepActions = mapOf(
@@ -42,13 +42,14 @@ class AlfabankImportScenario(
     fun requestOtpCode(scenarioData: ImportScenarioData): ImportStepResult {
         val random = Random(System.currentTimeMillis())
 
-        open(homeUrl)
+        open(alfaProperties.startUrl)
         random.sleep(2000, 5000)
 
         val driver = webdriver().`object`()
         val wait = WebDriverWait(driver, waitingDuration)
         screenshot("alfa-01", driver)
 
+        wait.untilAppears("//*[@data-test-id='login-auth-button']").click()
         wait.untilAppears("//input[@type='text']").sendKeys(scenarioData.login)
         wait.untilAppears("//input[@type='password']").sendKeys(scenarioData.password)
         screenshot("alfa-02", driver)
@@ -95,7 +96,8 @@ class AlfabankImportScenario(
 
     fun saveData(): ImportStepResult {
         log.trace("Open history page")
-        driver().get(URI.create(driver().currentUrl).resolve("history").toString())
+        proxy().newHar()
+        driver().get(URI.create(driver().currentUrl!!).resolve("history").toString())
         screenshot("alfa-21")
 
         val operationsRequestEntry = proxy().endHar().log.entries.first { it.request.url == targetRequestUrl }

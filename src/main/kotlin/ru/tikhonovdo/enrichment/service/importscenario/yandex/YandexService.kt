@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.DataType
-import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.OperationsCollection
-import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaOperation
-import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaOperationsResponse
+import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaOperationRequest
+import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaTransaction
+import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaTransactionFeedResponse
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import ru.tikhonovdo.enrichment.service.file.RawDataService
 import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
@@ -21,12 +21,12 @@ import java.time.Period
 import java.time.ZoneOffset
 
 interface YandexService {
-    fun importData(cookie: String)
+    fun importData(cookie: String, operationRequest: YaOperationRequest)
 }
 
 @Service
 class YandexServiceImpl(
-    @Value("\${import.yandex.url}") private val yandexApiUrl: String,
+    @Value("\${import.yandex.api-url}") private val yandexApiUrl: String,
     @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
     private val transactionMatchingRepository: TransactionMatchingRepository,
     private val rawDataService: RawDataService
@@ -40,34 +40,34 @@ class YandexServiceImpl(
         .decoder(GsonDecoder())
         .target(YandexClient::class.java, yandexApiUrl)
 
-    override fun importData(cookie: String) {
+    override fun importData(cookie: String, operationRequest: YaOperationRequest) {
         val fromDateTime = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.YANDEX.id)
             .orElse(periodAgo(lastTransactionDefaultPeriod))
             .atZone(ZoneOffset.UTC).toOffsetDateTime()
             .withOffsetSameInstant(ZoneOffset.UTC) // yandex uses UTC format
             .toZonedDateTime()
 
-        val operationsToSave = mutableListOf<YaOperation>()
+        val operationsToSave = mutableListOf<YaTransaction>()
         var cursor: String? = null
 
         do {
-            val variables = GraphQLRequest.Variables(cursor)
-            val response = yandexClient.graphql(cookie, GraphQLRequest(variables))
-            val responseBytes = response.body().asInputStream().readAllBytes()
-            val operations = JsonMapper.JSON_MAPPER.readValue(responseBytes, YaOperationsResponse::class.java).operations
-            val neededOperations = operations.items.filter {
+            val request = operationRequest.withCursor(cursor)
+            val responseRaw = yandexClient.graphql(request, cookie, request.operationId!!)
+            val responseBytes = responseRaw.body().asInputStream().readAllBytes()
+            val response = JsonMapper.JSON_MAPPER.readValue(responseBytes, YaTransactionFeedResponse::class.java)
+            val neededOperations = response.items.filter {
                 it.datetime.isAfter(fromDateTime)
             }
             cursor = if (neededOperations.isNotEmpty()) {
                 operationsToSave.addAll(neededOperations)
-                operations.cursor
+                response.cursor
             } else {
                 null
             }
         } while (cursor != null)
 
         rawDataService.saveData(DataType.YANDEX, content = arrayOf(
-            JsonMapper.JSON_MAPPER.writeValueAsString(OperationsCollection(operationsToSave)).toByteArray()
+            JsonMapper.JSON_MAPPER.writeValueAsString(operationsToSave).toByteArray()
         ))
     }
 

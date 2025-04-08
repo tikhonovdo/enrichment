@@ -67,9 +67,8 @@ class ImportScenarioContext {
 
     private fun initProxy(): BrowserUpProxy {
         val proxy = WebDriverRunner.getSelenideProxy().proxy
-        proxy.setHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES)
-        proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES)
-        proxy.newHar()
+        proxy.setHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES, CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT)
+        proxy.enableHarCaptureTypes(CaptureType.REQUEST_HEADERS, CaptureType.REQUEST_COOKIES, CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT)
         return proxy
     }
 
