@@ -2,6 +2,7 @@ package ru.tikhonovdo.enrichment.service.importscenario.tinkoff
 
 import com.codeborne.selenide.Selenide.open
 import com.codeborne.selenide.Selenide.webdriver
+import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -32,7 +33,7 @@ class TinkoffImportScenario(
                 val stepResult = finishLogin(it)
                 performImportStep(processStepResult(stepResult), it)
             },
-            LOGIN_SUCCEED to Function { saveData() }
+            LOGIN_SUCCEED to Function { saveData(driver()) }
         )
     }
 
@@ -97,8 +98,8 @@ class TinkoffImportScenario(
         )
     }
 
-    fun saveData(): ImportStepResult {
-        val apiSession = driver().manage().getCookieNamed("api_session").value
+    fun saveData(driver: WebDriver): ImportStepResult {
+        val apiSession = driver.manage().getCookieNamed("old_session_id")!!.value
         tinkoffService.importData(apiSession)
 
         return ImportStepResult(DATA_SAVED)
