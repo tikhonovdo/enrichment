@@ -10,6 +10,8 @@ import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
 class CategoryMatchingStepProcessor(private val categoryMatchingRepository: CategoryMatchingRepository):
     ItemProcessor<CategoryMatching, CategoryMatching> {
 
+    private val MAX_PATTERN_CHARS: Int = 127
+
     override fun process(item: CategoryMatching): CategoryMatching? {
         val probe = CategoryMatching(
             bankId = item.bankId,
@@ -31,10 +33,19 @@ class CategoryMatchingStepProcessor(private val categoryMatchingRepository: Cate
 
         val query = categoryMatchingRepository.findAll(Example.of(probe, matcher), Pageable.unpaged())
 
+        item.retainPatternToMaxSize()
         return if (query.isEmpty) {
             item
         } else {
             null
+        }
+    }
+
+    private fun CategoryMatching.retainPatternToMaxSize() {
+        pattern?.let {
+            if (it.length > MAX_PATTERN_CHARS) {
+                pattern = it.substring(0..MAX_PATTERN_CHARS)
+            }
         }
     }
 }
