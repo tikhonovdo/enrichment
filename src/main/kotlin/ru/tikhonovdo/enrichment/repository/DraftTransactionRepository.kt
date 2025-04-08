@@ -121,7 +121,7 @@ class DraftTransactionRepositoryImpl(
     private fun deleteObsoleteDraftYandex(): Int {
         return jdbcTemplate.update("""
             DELETE FROM matching.draft_transaction
-            WHERE bank_id = ${Bank.YANDEX.id} AND (data#>>'{status,code}' = 'CLEAR' OR data#>>'{statusCode}' = 'CLEAR')'
+            WHERE bank_id = ${Bank.YANDEX.id} AND (data#>>'{status,code}' = 'CLEAR' OR data#>>'{statusCode}' = 'CLEAR')
             """.trimIndent())
     }
 

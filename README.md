@@ -16,13 +16,12 @@
 2) Собрать приложение, запустить контейнеры postgres и selenoid,
 ```shell
 docker network create selenoid
-mvn clean package && docker compose build && docker compose up postgres selenoid
+mvn clean package && docker compose build && docker compose up postgres
 ```
 3) Запустить приложение в дебаге, явно указав значения env_vars:
    - DB_URL
    - DB_USER
    - DB_PASSWORD
-   - SELENOID_HOST_DOWNLOAD_PATH (должны быть права на запись в указанную директорию)
 
 #### Запуск приложения в докер-контейнере
 1) создать `.env.docker` файл, в котором указать `ACTIVE_PROFILES=docker`

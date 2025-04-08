@@ -4,8 +4,8 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: ${DB_URL}
-    username: enrichment
-    password: enrichment
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     hikari:
       connection-timeout: 5000
       leak-detection-threshold: 30000
@@ -30,7 +30,6 @@ logging:
     ru.tikhonovdo.enrichment.service: TRACE
 
 selenium-waiting-period: 30s
-selenoid-host-download-path: ${SELENOID_HOST_DOWNLOAD_PATH} # make sure that all users can write to this path
 
 server:
   port: 8081

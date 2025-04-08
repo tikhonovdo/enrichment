@@ -11,9 +11,9 @@ class WebDriverConfig {
 
     companion object {
         init {
+            Configuration.browser = "chrome"
             Configuration.browserCapabilities = ChromeOptions().apply {
-                browserVersion = "117.0"
-                addArguments("--disable-blink-features=AutomationControlled")
+                addArguments("--disable-blink-features=AutomationControlled", "--accept_lang=ru")
             }
         }
     }
