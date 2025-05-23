@@ -43,7 +43,6 @@ class TinkoffServiceImpl(
         val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.TINKOFF.id)
             .orElse(periodAgo(lastTransactionDefaultPeriod)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         val end = ZonedDateTime.now().toInstant().toEpochMilli()
-//        val operationsReport = tinkoffClient.getOperationsReport(sessionId, start, end)
         val operationsRaw = tinkoffClient.getOperations(sessionId, start, end)
 
         operationsRaw.payload.forEach {
@@ -53,7 +52,6 @@ class TinkoffServiceImpl(
         }
 
         rawDataService.saveData(DataType.TINKOFF, content = arrayOf(
-//            operationsReport.body().asInputStream().readAllBytes(),
             JsonMapper.JSON_MAPPER.writeValueAsString(operationsRaw).toByteArray()
         ))
     }

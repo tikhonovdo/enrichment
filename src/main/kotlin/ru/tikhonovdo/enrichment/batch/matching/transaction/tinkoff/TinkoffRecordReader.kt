@@ -65,7 +65,6 @@ class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime):
                 message = rs.getNullable { it.getString("message") },
                 brandName = rs.getNullable { it.getString("brand_name") },
                 type = TinkoffRecord.Type.valueOf(rs.getString("type").uppercase())
-
             )
         }
     }
