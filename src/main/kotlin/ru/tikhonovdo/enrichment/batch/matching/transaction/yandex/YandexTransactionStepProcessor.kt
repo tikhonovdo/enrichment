@@ -3,7 +3,6 @@ package ru.tikhonovdo.enrichment.batch.matching.transaction.yandex
 import ru.tikhonovdo.enrichment.batch.matching.transaction.AbstractTransactionStepProcessor
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.Type
-import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.Direction
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YandexRecord
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
@@ -31,10 +30,7 @@ open class YandexTransactionStepProcessor(
     }
 
     override fun getType(item: YandexRecord): Type {
-        return when (item.direction) {
-            Direction.CREDIT -> Type.INCOME
-            Direction.DEBIT -> Type.OUTCOME
-        }
+        return item.direction.toDomainType()
     }
 
     override fun getAccountId(record: YandexRecord): Long? =

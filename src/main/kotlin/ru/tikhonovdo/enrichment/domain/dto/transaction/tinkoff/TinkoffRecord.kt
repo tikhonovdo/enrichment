@@ -1,11 +1,8 @@
 package ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff
 
 import ru.tikhonovdo.enrichment.domain.dto.transaction.BaseRecord
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 data class TinkoffRecord(
     override var draftTransactionId: Long? = null,
@@ -27,34 +24,19 @@ data class TinkoffRecord(
     val sumWithRoundingForInvestKopilka: Double,    // Сумма операции с округлением
     val message: String? = null,                    // Сообщение (актуально для переводов)
     val brandName: String? = null,                  // Название бренда
+    val type: Type
 ): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
-    companion object {
-        val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss[.SSS]")
-        fun parseOperationDate(value: String): LocalDateTime = operationDateTimeFormatter.parse(value, LocalDateTime::from)
+    enum class Type {
+        DEBIT, // списание
+        CREDIT; // пополнение
 
-        fun parseOperationDateToInstant(value: String, offset: ZoneOffset = ZoneOffset.ofHours(3)): Instant = parseOperationDate(value).toInstant(offset)
+        fun toDomainType(): ru.tikhonovdo.enrichment.domain.Type {
+            return when (this) {
+                CREDIT -> ru.tikhonovdo.enrichment.domain.Type.INCOME
+                DEBIT -> ru.tikhonovdo.enrichment.domain.Type.OUTCOME
+            }
+        }
     }
-
-    data class Raw(
-        var operationDate: String? = null,
-        var paymentDate: String? = null,
-        var accountNumber: String? = null,
-        var cardNumber: String? = null,
-        var status: String? = null,
-        var operationSum: Double? = null,
-        var operationCurrency: String? = null,
-        var paymentSum: Double? = null,
-        var paymentCurrency: String? = null,
-        var cashback: Double? = null,
-        var category: String? = null,
-        var mcc: Int? = null,
-        var description: String? = null,
-        var totalBonuses: Double? = null,
-        var roundingForInvestKopilka: Double? = null,
-        var sumWithRoundingForInvestKopilka: Double? = null,
-
-        var message: String? = null,               // Сообщение (актуально для переводов)
-        var brandName: String? = null,             // Название бренда
-    )
 }
+

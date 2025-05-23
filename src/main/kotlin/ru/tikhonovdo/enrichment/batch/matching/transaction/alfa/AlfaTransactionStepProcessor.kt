@@ -22,13 +22,7 @@ open class AlfaTransactionStepProcessor(
     }
 
     override fun getType(item: AlfaRecord): Type {
-        return when (item.type) {
-            "INCOME",
-            "Пополнение" -> { Type.INCOME }
-            "EXPENSE",
-            "Списание" -> { Type.OUTCOME }
-            else -> { throw IllegalStateException("Unknown type in AlfaRecord: ${item.type}") }
-        }
+        return item.type.toDomainType()
     }
 
     override fun getAccountId(record: AlfaRecord): Long? =

@@ -3,13 +3,14 @@ package ru.tikhonovdo.enrichment.service.importscenario.tinkoff
 import feign.Param
 import feign.RequestLine
 import feign.Response
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffOperationsDataPayload
+import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffReceiptData
 
-internal interface TinkoffClient {
+interface TinkoffClient {
 
     @Deprecated("get rid of this method -- stop using xls report as primary source")
-    @RequestLine("GET /export_operations/?format={format}&sessionid={sessionId}&start={start}&end={end}")
-    fun getOperationsReport(@Param("format") format: Format,
-                            @Param("sessionId") sessionId: String,
+    @RequestLine("GET /export_operations/?format=xls&sessionid={sessionId}&start={start}&end={end}")
+    fun getOperationsReport(@Param("sessionId") sessionId: String,
                             @Param("start") start: Long,
                             @Param("end") end: Long): Response
 
@@ -17,9 +18,11 @@ internal interface TinkoffClient {
     @RequestLine("GET /operations/?sessionid={sessionId}&start={start}&end={end}")
     fun getOperations(@Param("sessionId") sessionId: String,
                       @Param("start") start: Long,
-                      @Param("end") end: Long): Response
-}
+                      @Param("end") end: Long): TinkoffOperationsDataPayload
 
-enum class Format {
-    xls, csv, ofx
+    @RequestLine("GET /shopping_receipt?operationId={operationId}&account={account}&sessionid={sessionId}")
+    fun getReceiptData(@Param("operationId") operationId: String,
+                       @Param("account") account: String,
+                       @Param("sessionId") sessionId: String): TinkoffReceiptData
+
 }

@@ -5,10 +5,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import ru.tikhonovdo.enrichment.DatabaseAwareTest
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 import java.nio.file.Paths
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class TinkoffDataWorkerTest : DatabaseAwareTest() {
 
@@ -34,17 +35,19 @@ class TinkoffDataWorkerTest : DatabaseAwareTest() {
             DraftTransaction(
                 id = 1L,
                 bankId = Bank.TINKOFF.id,
-                date = TinkoffRecord.parseOperationDate("15.06.2024 12:34:56.000"),
+                date = operationDateTimeFormatter.parse("15.06.2024 12:34:56.000", LocalDateTime::from),
                 sum = "-70.0",
                 data = ""
             ),
             DraftTransaction(
                 id = 2L,
                 bankId = Bank.TINKOFF.id,
-                date = TinkoffRecord.parseOperationDate("15.06.2024 12:34:56.001"),
+                date = operationDateTimeFormatter.parse("15.06.2024 12:34:56.001", LocalDateTime::from),
                 sum = "-70.0",
                 data = ""
             )
         )
+
+    val operationDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss[.SSS]")
 
 }

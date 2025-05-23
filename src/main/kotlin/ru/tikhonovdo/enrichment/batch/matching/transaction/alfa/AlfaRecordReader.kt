@@ -4,8 +4,6 @@ import org.springframework.batch.item.database.JdbcCursorItemReader
 import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.alfa.AlfaRecord
 import ru.tikhonovdo.enrichment.util.getNullable
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.sql.DataSource
 
 class AlfaRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): JdbcCursorItemReader<AlfaRecord>() {
@@ -38,17 +36,17 @@ class AlfaRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): Jd
                 operationDate = AlfaRecord.parseDate(rs.getString("operation_date")),
                 accountName = rs.getString("account_name"),
                 accountNumber = rs.getString("account_number"),
-                cardName = rs.getString("card_name"),
-                cardNumber = rs.getString("card_number"),
+                cardName = rs.getNullable { it.getString("card_name") },
+                cardNumber = rs.getNullable { it.getString("card_number") },
                 description = rs.getString("description"),
                 paymentSum = rs.getDouble("payment_sum"),
                 paymentCurrency = rs.getString("payment_currency"),
-                status = rs.getString("status"),
+                status = rs.getNullable { it.getString("status") },
                 category = rs.getString("category"),
                 mcc = rs.getInt("mcc").let {
                     return@let if (it == 0) null else it
                 }?.toString(),
-                type = rs.getString("type"),
+                type = AlfaRecord.Type.valueOf(rs.getString("type").uppercase()),
                 comment = rs.getNullable { it.getString("comment") }.orEmpty()
             )
         }

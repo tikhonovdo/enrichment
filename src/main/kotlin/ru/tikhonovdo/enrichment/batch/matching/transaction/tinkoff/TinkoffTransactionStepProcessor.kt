@@ -10,7 +10,6 @@ import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CategoryMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TinkoffAccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
-import kotlin.math.sign
 
 open class TinkoffTransactionStepProcessor(
     draftTransactionRepository: DraftTransactionRepository,
@@ -36,12 +35,9 @@ open class TinkoffTransactionStepProcessor(
         return exists || item.status != "OK" || item.paymentDate == null
     }
 
-    override fun getType(item: TinkoffRecord): Type =
-        if (item.paymentSum.sign > 0) {
-            Type.INCOME
-        } else {
-            Type.OUTCOME
-        }
+    override fun getType(item: TinkoffRecord): Type {
+        return item.type.toDomainType()
+    }
 
     override fun getAccountId(record: TinkoffRecord): Long? =
         if (record.cardNumber == null && record.accountNumber == null) {

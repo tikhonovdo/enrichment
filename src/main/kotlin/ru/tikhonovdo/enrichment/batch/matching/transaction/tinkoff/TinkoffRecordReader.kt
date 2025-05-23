@@ -36,7 +36,8 @@ class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime):
                 data->>'roundingForInvestKopilka' as rounding_for_invest_kopilka,
                 data->>'sumWithRoundingForInvestKopilka' as sum_with_rounding_for_invest_kopilka,
                 data->>'message' as message,
-                data->>'brandName' as brand_name
+                data->>'brandName' as brand_name,
+                data->>'type' as type
             FROM matching.draft_transaction 
             WHERE bank_id = ${Bank.TINKOFF.id} AND date > '${operationDateFormatter.format(thresholdDate)}';
         """.trimIndent()
@@ -44,7 +45,7 @@ class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime):
             TinkoffRecord(
                 draftTransactionId = rs.getLong("draft_transaction_id"),
                 operationDate = rs.getTimestamp("date").toLocalDateTime(),
-                paymentDate = rs.getString("payment_date")?.let {
+                paymentDate = rs.getNullable { it.getString("payment_date") }?.let {
                     dateFormatter.parse(it, LocalDate::from)
                 },
                 accountNumber = rs.getNullable { it.getString("account_number") },
@@ -62,7 +63,9 @@ class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime):
                 roundingForInvestKopilka = rs.getDouble("rounding_for_invest_kopilka"),
                 sumWithRoundingForInvestKopilka = rs.getDouble("sum_with_rounding_for_invest_kopilka"),
                 message = rs.getNullable { it.getString("message") },
-                brandName = rs.getNullable { it.getString("brand_name") }
+                brandName = rs.getNullable { it.getString("brand_name") },
+                type = TinkoffRecord.Type.valueOf(rs.getString("type").uppercase())
+
             )
         }
     }

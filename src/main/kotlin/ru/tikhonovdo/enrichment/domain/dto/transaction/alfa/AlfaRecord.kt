@@ -20,7 +20,7 @@ data class AlfaRecord(
     override val status: String?, // Статус
     override val category: String, // Категория
     override val mcc: String?, // MCC код
-    val type: String, // Тип (списание/начисление)
+    val type: Type, // Тип (списание/начисление)
     val comment: String // Комментарий
 ): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 
@@ -46,4 +46,16 @@ data class AlfaRecord(
         var type: String? = null,
         var comment: String? = null,
     )
+
+    enum class Type {
+        INCOME, // списание
+        EXPENSE; // пополнение
+
+        fun toDomainType(): ru.tikhonovdo.enrichment.domain.Type {
+            return when (this) {
+                INCOME -> ru.tikhonovdo.enrichment.domain.Type.INCOME
+                EXPENSE -> ru.tikhonovdo.enrichment.domain.Type.OUTCOME
+            }
+        }
+    }
 }

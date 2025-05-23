@@ -2,6 +2,7 @@ package ru.tikhonovdo.enrichment.domain.dto.transaction.yandex
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import ru.tikhonovdo.enrichment.domain.Type
 import java.time.ZonedDateTime
 
 data class YaOperationRequest(
@@ -60,7 +61,14 @@ data class Amount(var money: Money? = null, var plus: String? = null)
 data class Money(var amount: Double? = null, var currency: String? = null)
 enum class Direction {
     DEBIT, // списание
-    CREDIT // пополнение
+    CREDIT; // пополнение
+
+    fun toDomainType(): Type {
+        return when (this) {
+            CREDIT -> Type.INCOME
+            DEBIT -> Type.OUTCOME
+        }
+    }
 }
 
 enum class OperationType {
