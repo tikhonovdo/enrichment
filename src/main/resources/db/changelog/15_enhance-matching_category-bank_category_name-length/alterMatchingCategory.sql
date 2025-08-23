@@ -1,0 +1,1 @@
+ALTER TABLE matching.category ALTER COLUMN bank_category_name TYPE varchar(128);
