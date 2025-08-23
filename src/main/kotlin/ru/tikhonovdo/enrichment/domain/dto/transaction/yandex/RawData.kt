@@ -25,11 +25,13 @@ data class YaOperationRequest(
 
     data class Variables(
         val size: Int = 30,
-        val cursor: String?
+        val cursor: String?,
+        val filterType: String? = "PAY_CARD",
+        val agreementId: String?
     )
 
     fun withCursor(cursor: String?): YaOperationRequest {
-        this.variables = Variables(cursor = cursor)
+        this.variables = this.variables?.copy(cursor = cursor)
         return this
     }
 
@@ -50,8 +52,8 @@ data class YaTransaction(
     @JsonProperty("title")
     @JsonDeserialize(using = TitleDeserializer::class)
     var name: String,               // Описание
-    var description: String?,        // Категория
-    @JsonProperty("directionV2")
+    @JsonProperty("description")
+    var category: String?,        // Категория
     var direction: Direction,       // Направление транзакции (дебет/кредит)
     var amount: Amount,             // Сумма и валюта платежа
     var comment: String?,          // Сообщение (актуально для переводов)

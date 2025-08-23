@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class YandexRecord(
+    val id: String,
     override var draftTransactionId: Long? = null,
     override val operationDate: LocalDateTime, // Дата операции в UTC
     val paymentDate: LocalDate?, // Дата проводки

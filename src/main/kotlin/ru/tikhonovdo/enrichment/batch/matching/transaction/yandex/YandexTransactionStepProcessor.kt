@@ -19,7 +19,10 @@ open class YandexTransactionStepProcessor(
 
     override fun isInvalidTransaction(item: YandexRecord): Boolean {
         val exists = transactionMatchingRepository.existsByDraftTransactionId(item.draftTransactionId!!)
-        return exists || item.status != "CLEAR"
+        return exists
+                || item.status != "CLEAR"
+                || item.id.contains("OHIO")
+                || item.id.contains("EXTERNAL", true)
     }
 
     override fun postProcess(item: YandexRecord, entity: TransactionMatching): TransactionMatching {

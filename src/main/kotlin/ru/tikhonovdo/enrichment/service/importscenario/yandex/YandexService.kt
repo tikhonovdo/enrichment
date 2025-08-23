@@ -9,12 +9,11 @@ import feign.slf4j.Slf4jLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.DataType
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaOperationRequest
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaTransaction
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YaTransactionFeedResponse
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
-import ru.tikhonovdo.enrichment.service.file.RawDataService
+import ru.tikhonovdo.enrichment.service.file.worker.YandexDataWorker
 import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
 import ru.tikhonovdo.enrichment.util.JsonMapper
 import java.time.Period
@@ -29,7 +28,7 @@ class YandexServiceImpl(
     @Value("\${import.yandex.api-url}") private val yandexApiUrl: String,
     @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
     private val transactionMatchingRepository: TransactionMatchingRepository,
-    private val rawDataService: RawDataService
+    private val yandexDataWorker: YandexDataWorker
 ): YandexService {
 
     private val yandexClient = Feign.builder()
@@ -41,11 +40,15 @@ class YandexServiceImpl(
         .target(YandexClient::class.java, yandexApiUrl)
 
     override fun importData(cookie: String, operationRequest: YaOperationRequest) {
-        val fromDateTime = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.YANDEX.id)
-            .orElse(periodAgo(lastTransactionDefaultPeriod))
-            .atZone(ZoneOffset.UTC).toOffsetDateTime()
-            .withOffsetSameInstant(ZoneOffset.UTC) // yandex uses UTC format
-            .toZonedDateTime()
+        val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.YANDEX.id)
+                .flatMap { transactionMatchingRepository.findMinInvalidTransactionDateAfterLastValidated(Bank.YANDEX, it) }
+                .orElseGet {
+                    transactionMatchingRepository.getLastImportedDraftDate(Bank.YANDEX.id)
+                        .orElse(periodAgo(lastTransactionDefaultPeriod))
+                }
+                .atZone(ZoneOffset.UTC).toOffsetDateTime()
+                .withOffsetSameInstant(ZoneOffset.UTC) // yandex uses UTC format
+                .toZonedDateTime()
 
         val operationsToSave = mutableListOf<YaTransaction>()
         var cursor: String? = null
@@ -56,7 +59,7 @@ class YandexServiceImpl(
             val responseBytes = responseRaw.body().asInputStream().readAllBytes()
             val response = JsonMapper.JSON_MAPPER.readValue(responseBytes, YaTransactionFeedResponse::class.java)
             val neededOperations = response.items.filter {
-                it.datetime.isAfter(fromDateTime)
+                it.datetime.isAfter(start)
             }
             cursor = if (neededOperations.isNotEmpty()) {
                 operationsToSave.addAll(neededOperations)
@@ -66,9 +69,7 @@ class YandexServiceImpl(
             }
         } while (cursor != null)
 
-        rawDataService.saveData(DataType.YANDEX, content = arrayOf(
-            JsonMapper.JSON_MAPPER.writeValueAsString(operationsToSave).toByteArray()
-        ))
+        yandexDataWorker.saveDrafts(JsonMapper.JSON_MAPPER.writeValueAsString(operationsToSave))
     }
 
 }

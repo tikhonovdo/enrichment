@@ -5,31 +5,35 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.Direction
 import ru.tikhonovdo.enrichment.domain.dto.transaction.yandex.YandexRecord
 import ru.tikhonovdo.enrichment.util.getNullable
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.sql.DataSource
 
-class YandexRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): JdbcCursorItemReader<YandexRecord>() {
-
-    private val operationDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
+class YandexRecordReader(dataSource: DataSource): JdbcCursorItemReader<YandexRecord>() {
 
     init {
         this.dataSource = dataSource
         sql = """
-            SELECT id as draft_transaction_id,
-                date,
-                data->>'name' as description,
-                data#>>'{money,amount}' as amount,
-                data#>>'{money,currency}' as amount_currency,
-                data#>>'{status,code}' as status_code,
-                data->>'description' as category,
-                data->>'direction' as direction,
-                data->>'comment' as comment
-            FROM matching.draft_transaction 
-            WHERE bank_id = ${Bank.YANDEX.id} AND date > '${operationDateFormatter.format(thresholdDate)}';
+            SELECT data->>'id' as id,
+                   id as draft_transaction_id,
+                   date,
+                   data->>'title' as description,
+                   data#>>'{amount,money,amount}' as amount,
+                   data#>>'{amount,money,currency}' as amount_currency,
+                   data#>>'{statusCode}' as status_code,
+                   data->>'description' as category,
+                   case
+                       when data->>'direction' is not null then data->>'direction'  -- new
+                       else data->>'directionV2'
+                       end as direction,
+                   data->>'comment' as comment
+            FROM matching.draft_transaction
+            WHERE bank_id = ${Bank.YANDEX.id} 
+            AND lower(data->>'id') LIKE 'statement%'
+            AND data#>>'{amount,money,amount}' IS NOT NULL
+            AND id NOT IN (SELECT draft_transaction_id FROM matching.transaction WHERE draft_transaction_id IS NOT NULL);
         """.trimIndent()
         setRowMapper { rs, _ ->
             YandexRecord(
+                id = rs.getString("id"),
                 draftTransactionId = rs.getLong("draft_transaction_id"),
                 operationDate = rs.getTimestamp("date").toLocalDateTime(),
                 paymentDate = rs.getTimestamp("date").toLocalDateTime().toLocalDate(),

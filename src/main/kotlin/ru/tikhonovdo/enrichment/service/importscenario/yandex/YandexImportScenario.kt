@@ -3,8 +3,8 @@ package ru.tikhonovdo.enrichment.service.importscenario.yandex
 import com.codeborne.selenide.Selenide
 import de.sstoehr.harreader.model.HarRequest
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -33,6 +33,7 @@ class YandexImportScenario(
 
     private val targetRequestUrl = "${yandexProperties.apiUrl}/graphql"
     private val historyUrl = "${yandexProperties.apiUrl}/pay/history"
+    private val otpInputXpath = "//input[@data-testid='DottedCodeInput_input']"
 
     init {
         stepActions = mapOf(
@@ -58,13 +59,15 @@ class YandexImportScenario(
 
         val qr = wait.untilAppears("//div[@class='MagicField-qr']")
 
-        GlobalScope.launch { async {
+        GlobalScope.launch (Dispatchers.IO) {
             requestOtpCode(driver)
-        } }
+            resendOtpCodeRoutine(driver)
+        }
+        log.info("OTP sent")
         return ImportStepResult(OTP_SENT, qr.getCssValue("background"))
     }
 
-    suspend fun requestOtpCode(driver: WebDriver): ImportStepResult {
+    suspend fun requestOtpCode(driver: WebDriver) {
         log.info("Requesting OTP code in coroutine")
 
         val random = Random(System.currentTimeMillis())
@@ -75,8 +78,6 @@ class YandexImportScenario(
         // click on Login button
         wait.untilAppears("(//button[@class='UserID-Account']/ancestor::nav)//child::button").click()
         screenshot("ya-12", driver)
-
-        return ImportStepResult(OTP_SENT)
     }
 
     fun finishLoginAndSave(scenarioData: ImportScenarioData): ImportStepResult {
@@ -84,23 +85,50 @@ class YandexImportScenario(
         val wait = WebDriverWait(driver(), waitingDuration)
         screenshot("ya-21")
 
-        val otpInput = wait.untilAppears("//input[@data-testid='DottedCodeInput_input']")
-        otpInput.sendKeys(scenarioData.otpCode)
+        wait.untilAppears(otpInputXpath).sendKeys(scenarioData.otpCode)
         screenshot("ya-22")
         random.sleep(4000, 6000)
 
         screenshot("ya-23")
         return if (elementPresented("//a[contains(@href,'history')]")) {
-            saveData(random)
+            saveData(random, wait)
         } else {
             ImportStepResult(FAILURE)
         }
     }
 
-    fun saveData(random: Random): ImportStepResult {
-        proxy().newHar()
+    suspend fun resendOtpCodeRoutine(driver: WebDriver) {
+        log.info("Resend OTP code routine started...")
+        val timeout = Duration.ofSeconds(10)
+
+        // fix broken auto sms sending
+        var attempt = 1
+        while (!elementPresented("//a[contains(@href,'history')]", driver, timeout)) {
+            log.info("Trying to resend code: attempt #$attempt...")
+            screenshot("ya-13-$attempt", driver)
+            val wait = WebDriverWait(driver, waitingDuration)
+
+            val resendButtonXpath = "$otpInputXpath/ancestor::div[5]//child::button[2]"
+            val resendButton = wait.untilAppears(resendButtonXpath, suppressException = true)
+            if (resendButton != null) {
+                resendButton.click()
+                log.info("Code resend success!")
+                screenshot("ya-14", driver)
+            }
+
+            attempt++
+        }
+        log.info("Login succeed. Resend OTP code routine finished.")
+    }
+
+    fun saveData(random: Random, wait: WebDriverWait): ImportStepResult {
         driver().get(historyUrl)
-        random.sleep(1500)
+        proxy().newHar()
+
+        val payTransactions = wait.untilAppears("//button[contains(@title,'Карта Пэй')]")
+        payTransactions.click()
+        random.sleep(1000)
+        screenshot("ya-24")
 
         val har = proxy().endHar()
         val transactionFeedRequestEntry = har.log.entries.last { isRequiredHar(it.request) }
@@ -118,7 +146,7 @@ class YandexImportScenario(
     private fun isRequiredHar(harRequest: HarRequest): Boolean {
         return try {
             val requestData = JsonMapper.JSON_MAPPER.readValue(harRequest.postData.text, YaOperationRequest::class.java)
-            harRequest.url.startsWith(targetRequestUrl) && requestData.operationName == "GetTransactionFeedView"
+            harRequest.url.startsWith(targetRequestUrl) && requestData.operationName == "GetTransactionFeedView" && requestData.variables?.filterType == "PAY_CARD"
         } catch (ignored: Throwable) {
             false
         }

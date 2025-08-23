@@ -32,6 +32,8 @@ abstract class AbstractImportScenario(
 
     protected val log: Logger = LoggerFactory.getLogger(this::class.java)
 
+    private val EMPTY_FALLBACK: Runnable = Runnable {}
+
     protected lateinit var stepActions: Map<ScenarioState, Function<ImportScenarioData, ImportStepResult>>
 
     override fun getBank() = bank
@@ -62,9 +64,10 @@ abstract class AbstractImportScenario(
         return until(ExpectedConditions.presenceOfElementLocated(By.xpath(xPathExpression)))
     }
 
-    protected fun WebDriverWait.untilAppears(xPathExpression: String, fallbackOperation: Runnable): WebElement {
+    protected fun WebDriverWait.untilAppears(xPathExpression: String, fallbackOperation: Runnable = EMPTY_FALLBACK, suppressException: Boolean = false): WebElement? {
+        val maxAttempts = if (fallbackOperation == EMPTY_FALLBACK) 1 else 3
         var attempts = 0
-        while (attempts < 3) {
+        while (attempts < maxAttempts) {
             try {
                 return until(ExpectedConditions.presenceOfElementLocated(By.xpath(xPathExpression)))
             } catch (e: NoSuchElementException) {
@@ -73,16 +76,20 @@ abstract class AbstractImportScenario(
                 attempts++
             }
         }
-        throw IllegalStateException("Max waiting attempts count reached")
+        if (!suppressException) {
+            throw IllegalStateException("Max waiting attempts count reached")
+        } else {
+            return null;
+        }
     }
 
-    protected fun elementPresented(xPathExpression: String, webDriver: WebDriver = driver()): Boolean {
+    protected fun elementPresented(xPathExpression: String, webDriver: WebDriver = driver(), timeout: Duration = waitingDuration): Boolean {
         var presented = false
         try {
-            WebDriverWait(webDriver, waitingDuration, Duration.ofSeconds(1)).untilAppears(xPathExpression)
+            WebDriverWait(webDriver, timeout, Duration.ofSeconds(1)).untilAppears(xPathExpression)
             presented = true
         } catch (e: Exception) {
-            log.error("Element not presented during operation with $bank", e)
+            log.warn("Element not presented during operation with $bank", e)
         }
         return presented
     }
