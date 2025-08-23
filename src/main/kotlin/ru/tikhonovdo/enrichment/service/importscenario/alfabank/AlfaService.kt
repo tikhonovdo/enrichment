@@ -9,11 +9,9 @@ import feign.slf4j.Slf4jLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.tikhonovdo.enrichment.domain.Bank
-import ru.tikhonovdo.enrichment.domain.DataType
 import ru.tikhonovdo.enrichment.domain.dto.transaction.alfa.AlfaOperation
-import ru.tikhonovdo.enrichment.domain.dto.transaction.alfa.AlfaOperationsResponse
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
-import ru.tikhonovdo.enrichment.service.file.RawDataService
+import ru.tikhonovdo.enrichment.service.file.worker.AlfabankDataWorker
 import ru.tikhonovdo.enrichment.service.importscenario.periodAgo
 import ru.tikhonovdo.enrichment.util.JsonMapper
 import java.time.Period
@@ -29,7 +27,7 @@ class AlfaServiceImpl(
     @Value("\${import.alfa.api-url}") private val alfaApiUrl: String,
     @Value("\${import.last-transaction-default-period}") private val lastTransactionDefaultPeriod: Period,
     private val transactionMatchingRepository: TransactionMatchingRepository,
-    private val rawDataService: RawDataService
+    private val alfaDataWorker: AlfabankDataWorker
 ): AlfaService {
 
     private fun createClient(cookies: String, xsrf: String): AlfaClient {
@@ -48,7 +46,12 @@ class AlfaServiceImpl(
 
     override fun importData(cookies: String, xsrf: String) {
         val start = transactionMatchingRepository.findLastValidatedTransactionDateByBank(Bank.ALFA.id)
-            .orElse(periodAgo(lastTransactionDefaultPeriod)).toLocalDate()
+                .flatMap { transactionMatchingRepository.findMinInvalidTransactionDateAfterLastValidated(Bank.ALFA, it) }
+                .orElseGet {
+                    transactionMatchingRepository.getLastImportedDraftDate(Bank.ALFA.id)
+                            .orElse(periodAgo(lastTransactionDefaultPeriod))
+                }
+
         val end = ZonedDateTime.now().toLocalDate()
 
         val alfaClient = createClient(cookies, xsrf)
@@ -78,9 +81,7 @@ class AlfaServiceImpl(
             } while (response.operations.isNotEmpty())
         }
 
-        rawDataService.saveData(DataType.ALFA, content = arrayOf(
-            JsonMapper.JSON_MAPPER.writeValueAsString(AlfaOperationsResponse(operations)).toByteArray()
-        ))
+        alfaDataWorker.saveDrafts(JsonMapper.JSON_MAPPER.writeValueAsString(operations))
     }
 
 }

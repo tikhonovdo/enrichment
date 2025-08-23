@@ -31,7 +31,8 @@ data class AlfaRecord(
     }
 
     class Raw(
-        var operationDate: String? = null,
+        var id: String,
+        var operationDate: String,
         var paymentDate: String? = null,
         var accountName: String? = null,
         var accountNumber: String? = null,
@@ -42,6 +43,7 @@ data class AlfaRecord(
         var paymentCurrency: String? = null,
         var status: String? = null,
         var category: String? = null,
+        var categoryId: String? = null,
         var mcc: Int? = null,
         var type: String? = null,
         var comment: String? = null,

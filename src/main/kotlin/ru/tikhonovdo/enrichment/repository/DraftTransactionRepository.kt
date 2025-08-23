@@ -106,17 +106,10 @@ class DraftTransactionRepositoryImpl(
         return jdbcTemplate.update("""
             DELETE FROM matching.draft_transaction
             WHERE bank_id = ${Bank.ALFA.id} 
-                AND (
-                    length(data->>'operationDate') = 10 AND ( -- условие для старого формата записей
-                        (data->>'paymentDate') IS NULL -- операция в обработке
-                        OR ((data->>'status') != 'Выполнен' AND (data->>'category') != 'Пополнения') -- пополнения выполняются сразу - paymentDate всегда null
-                    )
-                    OR 
-                    length(data->>'operationDate') > 10 AND ( -- условие для нового формата записей 
-                        (data->>'operationDate') IS NULL -- операция в обработке
-                        OR ((data->>'status') != 'SUCCESS' AND (data->>'category') != 'Пополнения') -- пополнения выполняются сразу - paymentDate всегда null
-                    )
-                )
+            AND length(data->>'operationDate') > 10 -- условие для нового формата записей
+            AND ((data->>'operationDate') IS NULL -- операция в обработке
+                OR ((data->>'status') != 'SUCCESS' AND (data->>'category') != 'Пополнения') -- пополнения выполняются сразу - paymentDate всегда null
+            );
             """.trimIndent())
     }
 

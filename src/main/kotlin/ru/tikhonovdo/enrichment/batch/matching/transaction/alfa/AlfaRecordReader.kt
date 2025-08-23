@@ -6,15 +6,13 @@ import ru.tikhonovdo.enrichment.domain.dto.transaction.alfa.AlfaRecord
 import ru.tikhonovdo.enrichment.util.getNullable
 import javax.sql.DataSource
 
-class AlfaRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): JdbcCursorItemReader<AlfaRecord>() {
-
-    private val operationDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
+class AlfaRecordReader(dataSource: DataSource): JdbcCursorItemReader<AlfaRecord>() {
 
     init {
         this.dataSource = dataSource
         sql = """
             SELECT id as draft_transaction_id,
-                data->>'operationDate' as operation_date,
+                date,
                 data->>'cardNumber' as card_number,
                 data->>'status' as status,
                 data->>'paymentSum' as payment_sum,
@@ -28,12 +26,13 @@ class AlfaRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): Jd
                 data->>'type' as type,
                 data->>'comment' as comment
             FROM matching.draft_transaction 
-            WHERE bank_id = ${Bank.ALFA.id} AND date > '${operationDateFormatter.format(thresholdDate)}';
+            WHERE bank_id = ${Bank.ALFA.id} 
+            AND id NOT IN (SELECT draft_transaction_id FROM matching.transaction WHERE draft_transaction_id IS NOT NULL);
         """.trimIndent()
         setRowMapper { rs, _ ->
             AlfaRecord(
                 draftTransactionId = rs.getLong("draft_transaction_id"),
-                operationDate = AlfaRecord.parseDate(rs.getString("operation_date")),
+                operationDate = rs.getTimestamp("date").toLocalDateTime(),
                 accountName = rs.getString("account_name"),
                 accountNumber = rs.getString("account_number"),
                 cardName = rs.getNullable { it.getString("card_name") },
