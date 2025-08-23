@@ -33,7 +33,11 @@ class TinkoffImportScenario(
                 val stepResult = finishLogin(it)
                 performImportStep(processStepResult(stepResult), it)
             },
-            LOGIN_SUCCEED to Function { saveData(driver()) }
+            LOGIN_SUCCEED to Function { saveData(driver()) },
+            COOKIE_RECEIVED to Function {
+                tinkoffService.importData(it.cookie!!)
+                ImportStepResult(DATA_SAVED)
+            }
         )
     }
 

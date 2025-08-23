@@ -98,7 +98,7 @@ class DraftTransactionRepositoryImpl(
     private fun deleteObsoleteDraftTinkoff(): Int {
         return jdbcTemplate.update("""
             DELETE FROM matching.draft_transaction
-            WHERE bank_id = ${Bank.TINKOFF.id} AND ((data->>'paymentDate') IS NULL OR (data->>'status') != 'OK')
+            WHERE bank_id = ${Bank.TINKOFF.id} AND data->>'status' != 'OK'
             """.trimIndent())
     }
 

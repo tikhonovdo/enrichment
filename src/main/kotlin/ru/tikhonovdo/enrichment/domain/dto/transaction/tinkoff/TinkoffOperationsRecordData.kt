@@ -8,12 +8,13 @@ class TinkoffOperationsDataPayload(
     var resultCode: String,
     var payload: List<TinkoffOperationsRecord>
 ) {
-    constructor(): this("", emptyList())
+    constructor() : this("", emptyList())
 }
 
 @JsonDeserialize(using = TinkoffOperationsRecordDeserializer::class)
 class TinkoffOperationsRecord(
-        var authorizationId: String,
+        var id: String,
+        var authorizationId: String?,
 
         var operationTime: Long,           // Unix-time операции (millis)
         var debitingTime: Long?,           // Unix-time даты списания (millis)
@@ -29,8 +30,8 @@ class TinkoffOperationsRecord(
         var loyaltyBonusSummary: Double,
 
         var account: String,                // Номер счета
-        var paymentSum: Double,          // Сумма операции в валюте счета
-        var paymentCurrencyCode: String,    // Код валюты счета
+        var paymentSum: Double,             // Сумма операции в валюте счета
+        var paymentCurrency: String,        // Код валюты счета
         var description: String,            // Описание
         var message: String?,               // Сообщение (актуально для переводов)
         var brandName: String?,             // Название бренда
@@ -38,7 +39,7 @@ class TinkoffOperationsRecord(
         var hasReceipt: Boolean,
         var receipt: Any?
 ) {
-    constructor() : this("", 0L, null, "","", "", Double.NaN,
+    constructor() : this("", null, 0L, null, "","", "", Double.NaN,
             "", "","", null, Double.NaN, "", Double.NaN, "",
             "", null, null, null, false, null)
 }

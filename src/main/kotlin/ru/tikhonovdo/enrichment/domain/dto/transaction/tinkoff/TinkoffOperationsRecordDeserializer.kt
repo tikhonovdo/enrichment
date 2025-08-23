@@ -18,10 +18,11 @@ class TinkoffOperationsRecordDeserializer(vc: Class<*>?) :
         val recordNode: JsonNode = parser.codec.readTree(parser)
         val record = TinkoffOperationsRecord()
 
+        record.id = recordNode.getTextValue("id")
         record.type = recordNode.getTextValue("type")
         record.account = recordNode.getTextValue("account")
         record.paymentSum = recordNode.getDoubleValue("accountAmount.value")
-        record.paymentCurrencyCode = recordNode.getTextValue("accountAmount.currency.name")
+        record.paymentCurrency = recordNode.getTextValue("accountAmount.currency.name")
         record.operationTime = recordNode.getLongValue("operationTime.milliseconds")
         record.debitingTime = recordNode.getLongValue("debitingTime.milliseconds")
         record.status = recordNode.getTextValue("status")

@@ -5,24 +5,31 @@ import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.dto.transaction.tinkoff.TinkoffRecord
 import ru.tikhonovdo.enrichment.util.getNullable
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import javax.sql.DataSource
 
-class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime): JdbcCursorItemReader<TinkoffRecord>() {
+class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffRecord>() {
 
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
-    private val operationDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]")
+    private val newDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     init {
         this.dataSource = dataSource
         sql = """
             SELECT id as draft_transaction_id,
                 date,
-                data->>'paymentDate' as payment_date,
+                case
+                    when data->>'paymentDate' is not null
+                    then data->>'paymentDate'
+                    else to_timestamp((data->>'debitingTime')::bigint / 1000)::date::text
+                end as payment_date,
                 data->>'cardNumber' as card_number,
-                data->>'accountNumber' as account_number,
+                case
+                    when data->>'accountNumber' is not null
+                    then data->>'accountNumber'
+                    else data->>'account'
+                end as account_number,
                 data->>'status' as status,
                 data->>'operationSum' as operation_sum,
                 data->>'operationCurrency' as operation_currency,
@@ -33,25 +40,35 @@ class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime):
                 data->>'mcc' as mcc,
                 data->>'description' as description,
                 data->>'totalBonuses' as total_bonuses,
-                data->>'roundingForInvestKopilka' as rounding_for_invest_kopilka,
-                data->>'sumWithRoundingForInvestKopilka' as sum_with_rounding_for_invest_kopilka,
                 data->>'message' as message,
                 data->>'brandName' as brand_name,
-                data->>'type' as type
+                case
+                    when data->>'type' is not null then upper(data ->>'type')
+                else
+                    case
+                        when (data->>'paymentSum')::numeric > 0 then 'CREDIT' else 'CREDIT'
+                    end
+                end as type
             FROM matching.draft_transaction 
-            WHERE bank_id = ${Bank.TINKOFF.id} AND date > '${operationDateFormatter.format(thresholdDate)}';
+            WHERE bank_id = ${Bank.TINKOFF.id} 
+            AND id NOT IN (SELECT draft_transaction_id FROM matching.transaction WHERE draft_transaction_id IS NOT NULL);
         """.trimIndent()
         setRowMapper { rs, _ ->
+            val operationSum = rs.getDouble("operation_sum")
             TinkoffRecord(
                 draftTransactionId = rs.getLong("draft_transaction_id"),
                 operationDate = rs.getTimestamp("date").toLocalDateTime(),
                 paymentDate = rs.getNullable { it.getString("payment_date") }?.let {
-                    dateFormatter.parse(it, LocalDate::from)
+                    try {
+                        dateFormatter.parse(it, LocalDate::from)
+                    } catch (e: DateTimeParseException) {
+                        newDateFormatter.parse(it, LocalDate::from)
+                    }
                 },
                 accountNumber = rs.getNullable { it.getString("account_number") },
                 cardNumber = rs.getNullable { it.getString("card_number") },
                 status = rs.getString("status"),
-                operationSum = rs.getDouble("operation_sum"),
+                operationSum = operationSum,
                 operationCurrency = rs.getString("operation_currency"),
                 paymentSum = rs.getDouble("payment_sum"),
                 paymentCurrency = rs.getString("payment_currency"),
@@ -60,11 +77,9 @@ class TinkoffRecordReader(dataSource: DataSource, thresholdDate: LocalDateTime):
                 mcc = rs.getNullable { it.getString("mcc") },
                 description = rs.getString("description"),
                 totalBonuses = rs.getDouble("total_bonuses"),
-                roundingForInvestKopilka = rs.getDouble("rounding_for_invest_kopilka"),
-                sumWithRoundingForInvestKopilka = rs.getDouble("sum_with_rounding_for_invest_kopilka"),
                 message = rs.getNullable { it.getString("message") },
                 brandName = rs.getNullable { it.getString("brand_name") },
-                type = TinkoffRecord.Type.valueOf(rs.getString("type").uppercase())
+                type = TinkoffRecord.Type.valueOf(rs.getString("type"))
             )
         }
     }

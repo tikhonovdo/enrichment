@@ -16,16 +16,20 @@ import java.time.ZoneId
 class TinkoffDataWorker(draftTransactionRepository: DraftTransactionRepository):
     BankDataWorker(draftTransactionRepository, Bank.TINKOFF) {
 
-    override fun readBytes(vararg content: ByteArray): List<DraftTransaction> {
-        val operations = Gson().fromJson(String(content[0]), TinkoffOperationsDataPayload::class.java).payload
-        return operations.map { toDraftTransaction(it) }
+    override fun toDraftTransactionList(json: String): List<DraftTransaction> {
+        val operations = Gson().fromJson(json, TinkoffOperationsDataPayload::class.java).payload
+
+        val importDate = LocalDateTime.now()
+        return operations.map { toDraftTransaction(it, importDate) }
     }
 
-    private fun toDraftTransaction(record: TinkoffOperationsRecord) = DraftTransaction(
+    private fun toDraftTransaction(record: TinkoffOperationsRecord, importDate: LocalDateTime) = DraftTransaction(
         bankId = Bank.TINKOFF.id,
+        innerBankId = record.id,
         date = LocalDateTime.ofInstant(Instant.ofEpochMilli(record.operationTime), ZoneId.of("UTC")),
         sum = record.paymentSum.toString(),
-        data = JSON_MAPPER.writeValueAsString(record)
+        data = JSON_MAPPER.writeValueAsString(record),
+        importDate = importDate
     )
 
 }

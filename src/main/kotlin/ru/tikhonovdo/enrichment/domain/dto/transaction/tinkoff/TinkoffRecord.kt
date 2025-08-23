@@ -20,8 +20,6 @@ data class TinkoffRecord(
     override val mcc: String?,                      // MCC
     override val description: String,               // Описание
     val totalBonuses: Double,                       // Бонусы (включая кэшбэк)
-    val roundingForInvestKopilka: Double,           // Округление на инвесткопилку
-    val sumWithRoundingForInvestKopilka: Double,    // Сумма операции с округлением
     val message: String? = null,                    // Сообщение (актуально для переводов)
     val brandName: String? = null,                  // Название бренда
     val type: Type

@@ -54,8 +54,7 @@ class ImportScenarioContext {
             }
             DATA_SAVED,
             FAILURE -> {
-                log.info("Terminal state reached. Commit reset to initial state")
-                resetContextWithState(START)
+                log.info("Terminal state reached. Next action will begin from $START state")
             }
             else -> { }
         }
@@ -78,7 +77,8 @@ class ImportScenarioContext {
     }
 
     private fun isAvailableMove(nextState: ScenarioState, bank: Bank?) =
-        currentState.get().weight < nextState.weight && (currentBank.get().let { it == null || it == bank })
+        currentState.get().weight < nextState.weight && currentBank.get().let { it == null || it == bank } ||
+       (currentState.get().weight > TERMINATE.weight && currentBank.get().let { it != null && it != bank })
 
     fun resetContextWithState(state: ScenarioState) {
         currentState.set(state)

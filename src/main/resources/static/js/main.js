@@ -52,6 +52,10 @@ function initBankForm(form) {
         let bank = form.id.split("-")[1]
         currentBank = bank;
 
+        if (formData.has("cookie")) {
+            currentState = 'cookie_received'
+        }
+
         xhr.open('POST', '/import/' + bank + '/' + currentState);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(JSON.stringify(Object.fromEntries(formData)));

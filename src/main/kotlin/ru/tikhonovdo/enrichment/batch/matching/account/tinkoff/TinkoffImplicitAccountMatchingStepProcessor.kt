@@ -14,6 +14,10 @@ class TinkoffImplicitAccountMatchingStepProcessor(
 
     override fun beforeStep(stepExecution: StepExecution) {
         accountMatchingCandidates = tinkoffAccountMatchingRepository.findAll()
+            .map { AccountMatching.Tinkoff(
+                bankCurrencyCode = it.bankCurrencyCode,
+                pattern = it.pattern
+            ) }
     }
 
     override fun process(item: AccountMatching.Tinkoff): AccountMatching.Tinkoff? {
