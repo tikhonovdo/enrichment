@@ -30,7 +30,8 @@ class DraftTransactionRepositoryImpl(
     namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 ): CustomDraftTransactionRepository, AbstractBatchRepository<DraftTransaction>(
     namedParameterJdbcTemplate,
-    "INSERT INTO matching.draft_transaction (bank_id, date, sum, data) VALUES (:bankId, :date, :sum, :data::json)"
+    "INSERT INTO matching.draft_transaction (bank_id, inner_bank_id, date, sum, data, import_date) " +
+                "VALUES (:bankId, :innerBankId, :date, :sum, :data::json, :importDate)"
 ) {
     override fun findAllCategoryMatchingCandidates(bank: Bank): List<CategoryMatching> {
         return namedParameterJdbcTemplate.query("""
@@ -69,13 +70,14 @@ class DraftTransactionRepositoryImpl(
         }
         return namedParameterJdbcTemplate.query(
             """
-                SELECT date, sum, data
+                SELECT inner_bank_id, date, sum, data
                 FROM matching.draft_transaction
                 WHERE bank_id = :bankId $betweenCondition""".trimIndent(),
             MapSqlParameterSource(params)
         ) { rs, _ ->
             DraftTransaction(
                 bankId = bankId,
+                innerBankId = rs.getString("inner_bank_id"),
                 date = rs.getTimestamp("date").toLocalDateTime(),
                 sum = rs.getString("sum"),
                 data = rs.getString("data")

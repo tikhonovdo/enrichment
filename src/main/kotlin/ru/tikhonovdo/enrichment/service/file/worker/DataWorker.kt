@@ -8,14 +8,12 @@ import ru.tikhonovdo.enrichment.domain.enitity.DraftTransaction
 import ru.tikhonovdo.enrichment.repository.DraftTransactionRepository
 
 interface DataWorker {
-    fun saveData(vararg content: ByteArray)
-
     fun getDataType(): DataType
 }
 
 interface FinancePmDataWorker : DataWorker {
 
-    fun saveDataWithReset(vararg content: ByteArray)
+    fun saveData(saveMode: SaveMode, vararg content: ByteArray)
 
     fun retrieveData(): ByteArray
 
@@ -29,20 +27,21 @@ abstract class BankDataWorker(
 
     protected val log = LoggerFactory.getLogger(BankDataWorker::class.java)
 
-    override fun getDataType(): DataType {
-        return DataType.entries.first { it.bankId == bank.id }
-    }
+    override fun getDataType() =  DataType.fromBank(bank)
+
+    protected abstract fun toDraftTransactionList(json: String): List<DraftTransaction>
 
     @Transactional
-    override fun saveData(vararg content: ByteArray) {
+    open fun saveDrafts(json: String) {
+        val drafts = toDraftTransactionList(json)
+
+        val minDate = drafts.minBy { it.date }.date
+        val maxDate = drafts.maxBy { it.date }.date
+
         val deleted = draftTransactionRepository.deleteObsoleteDraft(bank)
         log.info("$deleted drafts are obsolete and has been deleted")
 
-        val drafts = readBytes(*content)
-        val minDate = drafts.minBy { it.date }.date
-        val maxDate = drafts.maxBy { it.date }.date
         val existingDrafts = draftTransactionRepository.findAllByBankIdAndDateBetween(bank.id, minDate, maxDate)
-
         drafts.filter {
             !existingDrafts.contains(it)
         }.let {
@@ -53,7 +52,5 @@ abstract class BankDataWorker(
             log.info("Upload success. $inserted records was inserted")
         }
     }
-
-    protected abstract fun readBytes(vararg content: ByteArray): List<DraftTransaction>
 
 }

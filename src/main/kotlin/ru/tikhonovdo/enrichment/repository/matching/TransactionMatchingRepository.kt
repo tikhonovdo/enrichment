@@ -8,9 +8,11 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import ru.tikhonovdo.enrichment.batch.matching.transfer.complement.TransferComplementInfo
+import ru.tikhonovdo.enrichment.domain.Bank
 import ru.tikhonovdo.enrichment.domain.enitity.TransactionMatching
 import ru.tikhonovdo.enrichment.repository.AbstractBatchRepository
 import ru.tikhonovdo.enrichment.repository.BatchRepository
+import ru.tikhonovdo.enrichment.util.getNullable
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -18,6 +20,11 @@ import kotlin.math.abs
 
 interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long>,
     BatchRepository<TransactionMatching>, CustomTransactionMatchingRepository {
+
+    /**
+     * Находит дату наиболее поздней транзакции, которая встречается в матчинге
+     * и которая по условиям мастер-таблицы является валидной.
+     */
     @Query("""
         SELECT mt.date FROM matching.transaction mt
         JOIN matching.draft_transaction mdt on mt.draft_transaction_id = mdt.id
@@ -46,6 +53,13 @@ interface TransactionMatchingRepository: JpaRepository<TransactionMatching, Long
     """, nativeQuery = true)
     fun getLastMatchedDate(bankId: Long): LocalDateTime?
 
+    @Query("""
+        SELECT max(date)
+        FROM matching.draft_transaction mdt
+        WHERE bank_id = :bankId
+    """, nativeQuery = true)
+    fun getLastImportedDraftDate(bankId: Long): Optional<LocalDateTime>
+
 }
 
 interface CustomTransactionMatchingRepository {
@@ -62,6 +76,14 @@ interface CustomTransactionMatchingRepository {
     fun markValidated(ids: Collection<Long>)
 
     fun findTransferCandidatesToCreateComplement(transferInfo: TransferComplementInfo): Collection<TransactionMatching>
+
+    /**
+     * Находит дату наиболее ранней транзакции в драфтах, которая не встречается в таблице matching.transaction
+     * и которая по условиям для выбранного банка является невалидной и находится после.
+     *
+     * @see TransactionMatching
+     */
+    fun findMinInvalidTransactionDateAfterLastValidated(bank: Bank, lastValidated: LocalDateTime): Optional<LocalDateTime>
 }
 
 @Repository
@@ -180,5 +202,25 @@ class TransactionMatchingRepositoryImpl(namedParameterJdbcTemplate: NamedParamet
         }
 
         return result.toList()
+    }
+
+    override fun findMinInvalidTransactionDateAfterLastValidated(bank: Bank, lastValidated: LocalDateTime): Optional<LocalDateTime> {
+        val invalidCondition = when (bank) {
+            Bank.TINKOFF -> "data->>'status' != 'OK'"
+            Bank.ALFA -> "data->>'status' = 'HOLD'"
+            Bank.YANDEX -> "data#>>'{status,code}' != 'CLEAR' OR data#>>'{statusCode}' != 'CLEAR'"
+        }
+        return namedParameterJdbcTemplate.query(
+            """
+                select min(date) as date from matching.draft_transaction
+                where id not in (select draft_transaction_id from matching.transaction where draft_transaction_id is not NULL)
+                and bank_id = :bankId
+                and ($invalidCondition)
+                and date > :lastValidated
+            """.trimIndent(),
+            MapSqlParameterSource(mapOf("bankId" to bank.id, "lastValidated" to lastValidated))
+        ) { rs, _ -> Optional.ofNullable(
+            rs.getNullable { it.getTimestamp("date") }?.toLocalDateTime()
+        ) }.first()
     }
 }

@@ -15,7 +15,7 @@ class SearchRefundStepProcessor(private val transactionMatchingRepository: Trans
         )
         val refundCandidate = refundCandidates
             .sortedByDescending { it.date }
-            .firstOrNull { it.accountId == item.accountId && it.name.equals(item.description, true) }
+            .firstOrNull { it.accountId == item.accountId && it.name.lowercase().contains(item.description.lowercase()) }
 
         return if (refundCandidate == null) {
             null

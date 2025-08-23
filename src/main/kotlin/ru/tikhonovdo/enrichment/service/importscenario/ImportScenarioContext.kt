@@ -31,9 +31,6 @@ class ImportScenarioContext {
     }
 
     fun checkState(expected: ScenarioState, bank: Bank?) {
-        if (currentState.get() != expected) {
-            throw IllegalStateException("Expected state '$expected', but current '$currentState'")
-        }
         if (currentBank.get().let { it != null && it != bank }) {
             throw IllegalStateException("You trying process $bank, but current is $currentBank")
         }

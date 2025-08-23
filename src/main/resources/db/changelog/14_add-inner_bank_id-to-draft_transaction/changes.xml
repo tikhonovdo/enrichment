@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-inner_bank_id-to-draft_transaction" author="chitzkoy">
+        <addColumn tableName="draft_transaction" schemaName="matching">
+            <column name="inner_bank_id" type="varchar(255)" remarks="Идентификатор транзакции, используемый банком"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="update-unique-index-in-draft_transaction" author="chitzkoy">
+        <dropIndex schemaName="matching"
+                   tableName="draft_transaction"
+                   indexName="idx_matching_draft_transaction_bank_id_date_sum"/>
+
+        <createIndex schemaName="matching" tableName="draft_transaction"
+                     unique="true"
+                     indexName="idx_matching_draft_transaction_bank_id_inner_bank_id_date_sum">
+            <column name="bank_id" />
+            <column name="inner_bank_id" />
+            <column name="date" />
+            <column name="sum" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

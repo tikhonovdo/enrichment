@@ -13,6 +13,7 @@ class WebDriverConfig {
         init {
             Configuration.browser = "chrome"
             Configuration.browserCapabilities = ChromeOptions().apply {
+                addArguments("--headless")
                 addArguments("--disable-blink-features=AutomationControlled", "--accept_lang=ru")
             }
         }

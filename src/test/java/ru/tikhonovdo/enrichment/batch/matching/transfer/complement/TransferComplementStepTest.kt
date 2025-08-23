@@ -172,6 +172,7 @@ class TransferComplementStepTest(
             DraftTransaction(
                 1,
                 Bank.TINKOFF.id,
+                null,
                 LocalDateTime.now(),
                 "0.00",
                 "{}"

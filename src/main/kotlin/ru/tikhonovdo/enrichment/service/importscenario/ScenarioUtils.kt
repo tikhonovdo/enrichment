@@ -7,4 +7,4 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 val format: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSZ]")
-fun periodAgo(period: Period): LocalDateTime = LocalDateTime.of(LocalDate.now().minus(period), LocalTime.MIN)
+fun periodAgo(period: Period, start: LocalDate = LocalDate.now()): LocalDateTime = LocalDateTime.of(start.minus(period), LocalTime.MIN)

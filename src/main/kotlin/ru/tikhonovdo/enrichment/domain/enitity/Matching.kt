@@ -95,12 +95,16 @@ data class DraftTransaction(
 
     var bankId: Long,
 
+    var innerBankId: String? = null,
+
     // хранит время в UTC, если есть информация о времени
     var date: LocalDateTime,
 
     var sum: String,
 
-    var data: String
+    var data: String,
+
+    var importDate: LocalDateTime? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -109,6 +113,7 @@ data class DraftTransaction(
         other as DraftTransaction
 
         if (bankId != other.bankId) return false
+        if (innerBankId != other.innerBankId) return false
         if (date != other.date) return false
         if (sum != other.sum) return false
 
@@ -117,6 +122,7 @@ data class DraftTransaction(
 
     override fun hashCode(): Int {
         var result = bankId.hashCode()
+        result = 31 * result + innerBankId.hashCode()
         result = 31 * result + date.hashCode()
         result = 31 * result + sum.hashCode()
         return result

@@ -11,7 +11,6 @@ fun <T> JsonNode.getField(fieldPath: String, defaultValue: T, function: Function
         if (!currentNode.isNull && currentNode.has(fieldName)) {
             currentNode = currentNode.get(fieldName)
         } else {
-            println("cannot lookup $fieldName. Return default value $defaultValue")
             return defaultValue
         }
     }

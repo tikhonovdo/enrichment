@@ -8,7 +8,17 @@ enum class DataType(val bankId: Long?) {
     FINANCE_PM(null),
     TINKOFF(Bank.TINKOFF.id),
     ALFA(Bank.ALFA.id),
-    YANDEX(Bank.YANDEX.id)
+    YANDEX(Bank.YANDEX.id);
+
+    companion object {
+        fun fromBank(bank: Bank): DataType {
+            return when (bank) {
+                Bank.ALFA -> ALFA
+                Bank.TINKOFF -> TINKOFF
+                Bank.YANDEX -> YANDEX
+            }
+        }
+    }
 }
 
 enum class Type(val id: Long) {

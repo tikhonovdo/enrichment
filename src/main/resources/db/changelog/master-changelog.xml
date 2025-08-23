@@ -16,5 +16,9 @@
     <include file="./8_yandex_support/changes.xml" relativeToChangelogFile="true"/>
     <include file="./9_fine_category_matching/changes.xml" relativeToChangelogFile="true"/>
     <include file="./10_fix_refund_for_id_constraint/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./11_add_invalid_export_transactions_view/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./12_add_import_date_into_draft_transaction_table/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./13_add_enhanced_invalid_export_transactions_view/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./14_add-inner_bank_id-to-draft_transaction/changes.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -29,7 +29,7 @@ logging:
     liquibase: INFO
     ru.tikhonovdo.enrichment.service: TRACE
 
-selenium-waiting-period: 30s
+selenium-waiting-period: 60s
 
 server:
   port: 8081
