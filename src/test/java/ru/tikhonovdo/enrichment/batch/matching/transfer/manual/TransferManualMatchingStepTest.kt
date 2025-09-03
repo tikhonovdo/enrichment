@@ -17,6 +17,7 @@ import ru.tikhonovdo.enrichment.repository.matching.AccountMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.CurrencyMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransactionMatchingRepository
 import ru.tikhonovdo.enrichment.repository.matching.TransferMatchingRepository
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -82,6 +83,30 @@ class TransferManualMatchingStepTest(
         Assertions.assertEquals(mtIdByDtId[1L] to mtIdByDtId[2L], transfers[0].matchingTransactionIdFrom to transfers[0].matchingTransactionIdTo)
         Assertions.assertEquals(mtIdByDtId[3L] to mtIdByDtId[4L], transfers[1].matchingTransactionIdFrom to transfers[1].matchingTransactionIdTo)
         Assertions.assertEquals(mtIdByDtId[5L] to mtIdByDtId[6L], transfers[2].matchingTransactionIdFrom to transfers[2].matchingTransactionIdTo)
+    }
+
+    @Test
+    fun `transfer-like transactions without specified categories will be matched for only earliest transaction in time order`() {
+        val transactions = listOf(
+            TransactionMatching(id = 1, name = "Бабагануш", typeId = 2, date = LocalDateTime.parse("2025-08-31T12:19:39.745000"), sum = BigDecimal(720.0),accountId = 4, description = "Расход"),
+            TransactionMatching(id = 2, name = "Дмитрий Т.", typeId = 1, date = LocalDateTime.parse("2025-08-31T12:19:39.137000"),sum = BigDecimal(720.0),accountId = 4, description = "Тинькофф"),
+            TransactionMatching(id = 3, name = "Перевод по запросу самому себе",typeId = 2, date = LocalDateTime.parse("2025-08-31T12:19:35.000000"),sum = BigDecimal(720.0), accountId = 2, description = "Яндекс"),
+            TransactionMatching(id = 4, name = "EREMEEV K.V,",typeId = 2, date = LocalDateTime.parse("2025-08-31T12:16:53.208000"),sum = BigDecimal(1140.0),accountId = 4, description = "Расход"),
+            TransactionMatching(id = 5, name = "Дмитрий Т.",typeId = 1, date = LocalDateTime.parse("2025-08-31T12:16:52.642000"),sum = BigDecimal(1140.0),accountId = 4, description = "Тинькофф"),
+            TransactionMatching(id = 6, name = "Перевод по запросу самому себе",typeId = 2, date = LocalDateTime.parse("2025-08-31T12:16:49.000000"),sum = BigDecimal(1140.0), accountId = 2 , description = "Яндекс")
+        )
+        matchingTransactionRepository.insertBatch(transactions)
+
+        RestAssured.post("/matching?includedSteps=transferMatchingStep").then().assertThat().statusCode(200)
+
+        val matchingTransactions = matchingTransactionRepository.findAll()
+        val transfers = transferMatchingRepository.findAll()
+        transfers.sortBy { it.matchingTransactionIdFrom }
+        Assertions.assertEquals(4, matchingTransactions.filter { it.eventId == 1L }.size)
+        Assertions.assertEquals(3, transfers[0].matchingTransactionIdFrom)
+        Assertions.assertEquals(2, transfers[0].matchingTransactionIdTo)
+        Assertions.assertEquals(6, transfers[1].matchingTransactionIdFrom)
+        Assertions.assertEquals(5, transfers[1].matchingTransactionIdTo)
     }
 
     private fun prefillData() {

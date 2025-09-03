@@ -209,7 +209,7 @@ data class TransactionMatching(
 
 @Entity
 @Table(schema = "matching", name = "transfer")
-class TransferMatching (
+data class TransferMatching (
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transfer_id_seq")
     @SequenceGenerator(schema = "matching", sequenceName = "transfer_id_seq", allocationSize = 1, name = "transfer_id_seq")
     @Id

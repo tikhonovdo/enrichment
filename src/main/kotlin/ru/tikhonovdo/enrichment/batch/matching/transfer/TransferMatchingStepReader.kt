@@ -13,7 +13,7 @@ class TransferMatchingStepReader(dataSource: DataSource): JdbcCursorItemReader<T
         sql = """
             SELECT mt1.name, mt1.id as id_from, mt2.id id_to
             FROM matching.transaction mt1           
-                JOIN matching.transaction mt2 ON ((mt1.date - INTERVAL '2s') < mt2.date AND mt2.date < (mt1.date + INTERVAL '5s')) AND mt2.type = ${Type.INCOME.id}
+                JOIN matching.transaction mt2 ON ((mt1.date - INTERVAL '5s') < mt2.date AND mt2.date < (mt1.date + INTERVAL '10s')) AND mt2.type = ${Type.INCOME.id}
                 JOIN financepm.account a1 ON mt1.account_id = a1.id
                 JOIN financepm.account a2 ON mt2.account_id = a2.id
             WHERE mt1.type = ${Type.OUTCOME.id}
