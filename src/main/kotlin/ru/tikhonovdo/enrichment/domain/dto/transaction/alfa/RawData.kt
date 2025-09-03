@@ -26,7 +26,7 @@ data class AlfaOperation(
 ) {
     val paymentSum: Double get() {
         val sign = if (direction == Direction.EXPENSE) { -1 } else { 1 }
-        return sign * (amount.value / amount.minorUnits).toDouble()
+        return sign * amount.value.toDouble() / amount.minorUnits
     }
 }
 
