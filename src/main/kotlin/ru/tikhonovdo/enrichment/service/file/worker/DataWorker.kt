@@ -41,9 +41,11 @@ abstract class BankDataWorker(
         val deleted = draftTransactionRepository.deleteObsoleteDraft(bank)
         log.info("$deleted drafts are obsolete and has been deleted")
 
-        val existingDrafts = draftTransactionRepository.findAllByBankIdAndDateBetween(bank.id, minDate, maxDate)
+        val existingDraftsIds = draftTransactionRepository.findAllByBankIdAndDateBetween(bank.id, minDate, maxDate)
+            .map { it.innerBankId }
+            .toSet()
         drafts.filter {
-            !existingDrafts.contains(it)
+            !existingDraftsIds.contains(it.innerBankId)
         }.let {
             var inserted = 0
             if (it.isNotEmpty()) {
