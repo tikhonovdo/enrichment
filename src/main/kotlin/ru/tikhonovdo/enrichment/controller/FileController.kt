@@ -27,7 +27,7 @@ class FileController(private val rawDataService: RawDataService) {
         val resource = rawDataService.load()
 
         val headers = HttpHeaders()
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=financePM_${now()}.data")
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=financePM_${now()}_enriched.data")
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate")
         headers.add("Pragma", "no-cache")
         headers.add("Expires", "0")
@@ -39,6 +39,6 @@ class FileController(private val rawDataService: RawDataService) {
     }
 
     private fun now(): String =
-        LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss"))
 
 }

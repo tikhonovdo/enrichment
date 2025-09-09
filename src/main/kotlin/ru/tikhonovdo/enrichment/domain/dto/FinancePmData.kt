@@ -2,8 +2,6 @@ package ru.tikhonovdo.enrichment.domain.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import ru.tikhonovdo.enrichment.domain.enitity.*
-import ru.tikhonovdo.enrichment.domain.enitity.Currency
-import java.util.*
 
 data class FinancePmData(
     val version: Int = 2,

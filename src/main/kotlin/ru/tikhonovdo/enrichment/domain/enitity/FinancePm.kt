@@ -341,9 +341,12 @@ data class ArrearTransaction(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "arrear_transaction_id_seq")
     @SequenceGenerator(sequenceName = "arrear_transaction_id_seq", allocationSize = 1, name = "arrear_transaction_id_seq")
     @Id
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     var id: Long? = null,
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     var arrearId: Long,
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     var transactionId: Long
 )

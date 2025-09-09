@@ -1,16 +1,12 @@
 package ru.tikhonovdo.enrichment.repository.financepm
 
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Query
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import ru.tikhonovdo.enrichment.domain.enitity.Transaction
 import java.util.function.Function
 
 interface TransactionRepository: JpaRepository<Transaction, Long>, FinancePmRepository<Transaction> {
-    @Query("SELECT * FROM financepm.transaction WHERE matching_transaction_id IS NOT NULL ORDER BY date DESC LIMIT 1", nativeQuery = true)
-    fun findLastMatchedTransactionByDate(): Transaction
-
     fun findByMatchingTransactionId(matchingTransactionId: Long): Transaction?
 }
 
