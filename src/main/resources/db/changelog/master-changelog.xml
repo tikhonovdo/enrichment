@@ -21,5 +21,6 @@
     <include file="./13_add_enhanced_invalid_export_transactions_view/changes.xml" relativeToChangelogFile="true"/>
     <include file="./14_add-inner_bank_id-to-draft_transaction/changes.xml" relativeToChangelogFile="true"/>
     <include file="./15_enhance-matching_category-bank_category_name-length/changes.xml" relativeToChangelogFile="true"/>
+    <include file="./16_finance-pm_arrear-tx_schema_fix/changes.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

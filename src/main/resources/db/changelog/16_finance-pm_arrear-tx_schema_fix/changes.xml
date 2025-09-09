@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="16_finance-pm_arrear-tx_schema_fix" author="chitzkoy">
+        <createIndex indexName="idx_arrear_transaction_unique"
+                     schemaName="financepm" tableName="arrear_transaction" unique="true">
+            <column name="arrear_id" />
+            <column name="transaction_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
