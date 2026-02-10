@@ -22,6 +22,7 @@ data class TinkoffRecord(
     val totalBonuses: Double,                       // Бонусы (включая кэшбэк)
     val message: String? = null,                    // Сообщение (актуально для переводов)
     val brandName: String? = null,                  // Название бренда
+    val nomination: String? = null,                 // Назначение платежа
     val type: Type
 ): BaseRecord(draftTransactionId, operationDate, status, paymentSum, category, mcc, description) {
 

@@ -34,11 +34,13 @@ class TinkoffOperationsRecordDeserializer(vc: Class<*>?) :
         record.loyaltyBonusSummary = recordNode.getDoubleValue("loyaltyBonusSummary.amount")
         record.description = recordNode.getTextValue("description")
         record.cardNumber = recordNode.getTextValue("cardNumber")
-        record.message = recordNode.getField("message", null) { it.textValue() }
-        record.brandName = recordNode.getField("brand.name", null) { it.textValue() }
-        record.senderDetails = recordNode.getField("senderDetails", null) { it.textValue() }
+        record.message = recordNode.getNullableTextValue("message")
+            ?: recordNode.getNullableTextValue("payment.fieldsValues.comment")
+        record.brandName = recordNode.getNullableTextValue("brand.name")
+        record.senderDetails = recordNode.getNullableTextValue("senderDetails")
         record.authorizationId = recordNode.getTextValue("authorizationId")
         record.hasReceipt = recordNode.getBooleanValue("hasShoppingReceipt")
+        record.nomination = recordNode.getNullableTextValue("nomination")
 
         return record
     }

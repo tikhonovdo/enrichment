@@ -20,12 +20,12 @@ open class TinkoffTransactionStepProcessor(
 ) : AbstractTransactionStepProcessor<TinkoffRecord>(Bank.TINKOFF, draftTransactionRepository, categoryMatchingRepository) {
 
     override fun postProcess(item: TinkoffRecord, entity: TransactionMatching): TransactionMatching {
-        if (item.brandName != null && entity.name != item.brandName) {
-            entity.description += " ${item.brandName}"
-            entity.description = entity.description.trim()
+        item.brandName?.takeIf { it !in entity.name }?.let {
+            entity.description = "${entity.description} $it".trim()
         }
-        if (item.message != null) {
-            entity.description = item.message
+        item.message?.let { entity.description = it }
+        item.nomination?.let {
+            entity.description += if (entity.description.isEmpty()) it else "; $it"
         }
         return entity
     }

@@ -26,4 +26,5 @@ fun JsonNode.getDoubleValue(fieldPath: String) = getField(fieldPath, 0.0) { it.d
 fun JsonNode.getIntValue(fieldPath: String) = getField(fieldPath, 0) { it.intValue() }
 fun JsonNode.getLongValue(fieldPath: String) = getField(fieldPath, 0L) { it.longValue() }
 fun JsonNode.getTextValue(fieldPath: String) = getField(fieldPath, "") { it.textValue() }
+fun JsonNode.getNullableTextValue(fieldPath: String) = getField(fieldPath, null) { it.textValue() }
 fun JsonNode.getBooleanValue(fieldPath: String) = getField(fieldPath, false) { it.booleanValue() }

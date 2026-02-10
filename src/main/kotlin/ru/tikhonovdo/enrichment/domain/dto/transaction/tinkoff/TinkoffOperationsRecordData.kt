@@ -37,9 +37,10 @@ class TinkoffOperationsRecord(
         var brandName: String?,             // Название бренда
         var senderDetails: String?,
         var hasReceipt: Boolean,
-        var receipt: Any?
+        var receipt: Any?,
+        var nomination: String?
 ) {
     constructor() : this("", null, 0L, null, "","", "", Double.NaN,
             "", "","", null, Double.NaN, "", Double.NaN, "",
-            "", null, null, null, false, null)
+            "", null, null, null, false, null, null)
 }

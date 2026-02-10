@@ -42,6 +42,7 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
                 data->>'totalBonuses' as total_bonuses,
                 data->>'message' as message,
                 data->>'brandName' as brand_name,
+                data->>'nomination' as nomination,
                 case
                     when data->>'type' is not null then upper(data ->>'type')
                 else
@@ -79,6 +80,7 @@ class TinkoffRecordReader(dataSource: DataSource): JdbcCursorItemReader<TinkoffR
                 totalBonuses = rs.getDouble("total_bonuses"),
                 message = rs.getNullable { it.getString("message") },
                 brandName = rs.getNullable { it.getString("brand_name") },
+                nomination = rs.getNullable { it.getString("nomination") },
                 type = TinkoffRecord.Type.valueOf(rs.getString("type"))
             )
         }
